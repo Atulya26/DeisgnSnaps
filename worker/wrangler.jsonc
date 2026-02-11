@@ -1,0 +1,11 @@
+{
+  "name": "portfolio-r2-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-02-08",
+  "r2_buckets": [
+    {
+      "binding": "BUCKET",
+      "bucket_name": "portfolio-assets"
+    }
+  ]
+}

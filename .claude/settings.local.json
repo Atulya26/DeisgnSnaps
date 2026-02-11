@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx vite build:*)",
+      "Bash(/Users/atulya/Desktop/Cnvasportfolio/node_modules/.bin/tsc:*)",
+      "Bash(npm install:*)",
+      "Bash(/Users/atulya/Desktop/Cnvasportfolio/node_modules/.bin/vite build:*)"
+    ]
+  }
+}
