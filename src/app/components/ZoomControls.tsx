@@ -1,6 +1,5 @@
 import { motion } from "motion/react";
-import { Plus, Minus, Maximize2 } from "lucide-react";
-import { springs } from "./animationConfig";
+import { Plus, Minus, Fullscreen } from "geist-icons";
 import { useTheme } from "./ThemeContext";
 
 interface ZoomControlsProps {
@@ -21,41 +20,44 @@ export function ZoomControls({
   maxZoom,
 }: ZoomControlsProps) {
   const percentage = Math.round(zoom * 100);
-  const { colors } = useTheme();
+  const { colors, theme } = useTheme();
 
   return (
     <motion.div
-      className="fixed bottom-6 right-6 z-40 flex items-center gap-1 rounded-full px-1 py-1"
+      className="fixed bottom-6 right-6 z-40 flex items-center gap-0.5 rounded-full px-1 py-1"
       style={{
         backgroundColor: colors.surface,
-        backdropFilter: "blur(20px)",
-        boxShadow: colors.cardShadow,
+        backdropFilter: "blur(24px) saturate(1.4)",
+        WebkitBackdropFilter: "blur(24px) saturate(1.4)",
+        boxShadow: theme === "light"
+          ? "0 2px 12px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04)"
+          : "0 2px 12px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.05)",
       }}
-      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+      initial={{ opacity: 0, y: 16, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ ...springs.smooth, delay: 0.8 }}
+      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], delay: 0.9 }}
     >
-      {/* Zoom out */}
       <button
         onClick={onZoomOut}
         disabled={zoom <= minZoom}
-        className="flex items-center justify-center rounded-full transition-all hover:opacity-70 active:scale-95 disabled:opacity-30"
-        style={{ width: 32, height: 32 }}
+        className="flex items-center justify-center rounded-full transition-all hover:opacity-70 active:scale-95 disabled:opacity-25"
+        style={{ width: 30, height: 30 }}
         aria-label="Zoom out"
       >
-        <Minus size={14} color={colors.text} />
+        <Minus size={13} color={colors.textSecondary} />
       </button>
 
-      {/* Percentage - click to reset */}
       <button
         onClick={onReset}
-        className="flex items-center justify-center rounded-full px-2 transition-all hover:opacity-70 active:scale-95"
+        className="flex items-center justify-center rounded-full px-1 transition-all hover:opacity-70 active:scale-95"
         style={{
-          height: 32,
-          minWidth: 48,
-          fontSize: 12,
-          color: colors.textSecondary,
-          letterSpacing: "-0.01em",
+          height: 30,
+          minWidth: 44,
+          fontSize: 11,
+          color: colors.textMuted,
+          letterSpacing: "0.02em",
+          fontFamily: "'Geist Mono', monospace",
+          fontWeight: 400,
         }}
         aria-label="Reset zoom"
         title="Reset zoom"
@@ -63,36 +65,33 @@ export function ZoomControls({
         {percentage}%
       </button>
 
-      {/* Zoom in */}
       <button
         onClick={onZoomIn}
         disabled={zoom >= maxZoom}
-        className="flex items-center justify-center rounded-full transition-all hover:opacity-70 active:scale-95 disabled:opacity-30"
-        style={{ width: 32, height: 32 }}
+        className="flex items-center justify-center rounded-full transition-all hover:opacity-70 active:scale-95 disabled:opacity-25"
+        style={{ width: 30, height: 30 }}
         aria-label="Zoom in"
       >
-        <Plus size={14} color={colors.text} />
+        <Plus size={13} color={colors.textSecondary} />
       </button>
 
-      {/* Divider */}
       <div
         style={{
           width: 1,
-          height: 16,
+          height: 14,
           backgroundColor: colors.borderLight,
           margin: "0 2px",
         }}
       />
 
-      {/* Fit to view */}
       <button
         onClick={onReset}
         className="flex items-center justify-center rounded-full transition-all hover:opacity-70 active:scale-95"
-        style={{ width: 32, height: 32 }}
+        style={{ width: 30, height: 30 }}
         aria-label="Fit to view"
         title="Fit to view"
       >
-        <Maximize2 size={13} color={colors.textSecondary} />
+        <Fullscreen size={12} color={colors.textMuted} />
       </button>
     </motion.div>
   );

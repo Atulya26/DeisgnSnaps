@@ -1,15 +1,19 @@
 "use client";
 import React, { useRef, useEffect, useCallback, useMemo } from "react";
 import { gsap } from "gsap";
+import { InertiaPlugin } from "gsap/InertiaPlugin";
 import { useTheme } from "./ThemeContext";
+
+gsap.registerPlugin(InertiaPlugin);
 
 /**
  * Infinite-canvas dot grid with proximity glow and physics push.
  *
+ * Uses GSAP InertiaPlugin for natural throw-and-decelerate physics.
  * Dots fill the viewport and tile infinitely with the camera.
  * - Mouse proximity: dots near cursor change color (base → active gradient)
- * - Fast mouse movement: nearby dots get pushed away and spring back
- * - Click: shockwave pushes dots outward
+ * - Fast mouse movement: nearby dots get pushed via InertiaPlugin
+ * - Click: shockwave pushes dots outward via InertiaPlugin
  * - All rendered on canvas, zero DOM overhead
  */
 
@@ -21,6 +25,12 @@ function hexToRgb(hex: string) {
     g: parseInt(m[2], 16),
     b: parseInt(m[3], 16),
   };
+}
+
+interface PushedDot {
+  xOffset: number;
+  yOffset: number;
+  _inertiaApplied: boolean;
 }
 
 export const BackgroundRippleEffect = React.memo(
@@ -47,6 +57,7 @@ export const BackgroundRippleEffect = React.memo(
       shockRadius: SHOCK_RADIUS,
       shockStrength: SHOCK_STRENGTH,
       maxSpeed: MAX_SPEED,
+      resistance: RESISTANCE,
       returnDuration: RETURN_DURATION,
     } = dotGridConfig;
 
@@ -67,7 +78,7 @@ export const BackgroundRippleEffect = React.memo(
     });
 
     // Dots that have been pushed (sparse — only dots currently animating)
-    const pushedDots = useRef(new Map<string, { xOffset: number; yOffset: number; _animating: boolean }>());
+    const pushedDots = useRef(new Map<string, PushedDot>());
 
     // Pre-compute circle path (rebuild when dotSize changes)
     const circlePath = useMemo(() => {
@@ -95,16 +106,18 @@ export const BackgroundRippleEffect = React.memo(
 
     const configRef = useRef({
       DOT_SIZE, GAP, PROXIMITY, SPEED_TRIGGER, SHOCK_RADIUS,
-      SHOCK_STRENGTH, MAX_SPEED, RETURN_DURATION, dotGap,
+      SHOCK_STRENGTH, MAX_SPEED, RESISTANCE, RETURN_DURATION, dotGap,
     });
     configRef.current = {
       DOT_SIZE, GAP, PROXIMITY, SPEED_TRIGGER, SHOCK_RADIUS,
-      SHOCK_STRENGTH, MAX_SPEED, RETURN_DURATION, dotGap,
+      SHOCK_STRENGTH, MAX_SPEED, RESISTANCE, RETURN_DURATION, dotGap,
     };
 
     // Animation
     const rafId = useRef(0);
     const running = useRef(false);
+    // Track last-drawn camera state so we can skip redraws when nothing changed
+    const lastDrawnCamera = useRef({ x: -9999, y: -9999, z: -1 });
 
     const draw = useCallback(() => {
       const canvas = canvasRef.current;
@@ -189,20 +202,37 @@ export const BackgroundRippleEffect = React.memo(
       }
     }, [cameraRef, zoomRef, circlePath]);
 
-    // Main loop
+    // Main loop — only redraws when camera moved or pushed dots are animating
     const tick = useCallback(() => {
-      draw();
+      const cam = cameraRef.current;
+      const z = zoomRef.current;
+      const last = lastDrawnCamera.current;
+      const pushed = pushedDots.current;
+      const hasPushed = pushed.size > 0;
+      const ptr = pointerRef.current;
+
+      // Skip draw if camera hasn't moved, no pushed dots, and pointer isn't near canvas
+      const cameraMoved =
+        Math.abs(cam.x - last.x) > 0.01 ||
+        Math.abs(cam.y - last.y) > 0.01 ||
+        Math.abs(z - last.z) > 0.0001;
+
+      if (cameraMoved || hasPushed || ptr.inCanvas) {
+        draw();
+        last.x = cam.x;
+        last.y = cam.y;
+        last.z = z;
+      }
 
       // Clean up finished push animations
-      const pushed = pushedDots.current;
       for (const [key, data] of pushed) {
-        if (!data._animating && Math.abs(data.xOffset) < 0.01 && Math.abs(data.yOffset) < 0.01) {
+        if (!data._inertiaApplied && Math.abs(data.xOffset) < 0.01 && Math.abs(data.yOffset) < 0.01) {
           pushed.delete(key);
         }
       }
 
       rafId.current = requestAnimationFrame(tick);
-    }, [draw]);
+    }, [draw, cameraRef, zoomRef]);
 
     // Lifecycle
     useEffect(() => {
@@ -227,7 +257,7 @@ export const BackgroundRippleEffect = React.memo(
       return () => window.removeEventListener("resize", handleResize);
     }, [draw]);
 
-    // ── Mouse tracking + physics push ──
+    // ── Mouse tracking + InertiaPlugin physics push ──
     useEffect(() => {
       const canvas = canvasRef.current;
       if (!canvas) return;
@@ -264,7 +294,7 @@ export const BackgroundRippleEffect = React.memo(
         pr.y = e.clientY - rect.top;
         pr.inCanvas = true;
 
-        // Push dots on fast movement
+        // Push dots on fast movement using InertiaPlugin
         if (speed > cfg.SPEED_TRIGGER) {
           const cam = cameraRef.current;
           const z = zoomRef.current;
@@ -288,37 +318,38 @@ export const BackgroundRippleEffect = React.memo(
               const worldRow = startRow + rowIdx;
               const dist = Math.hypot(sx - pr.x, sy - pr.y);
 
-              if (dist < cfg.PROXIMITY) {
+              if (dist < cfg.PROXIMITY && !pushed.get(`${worldCol},${worldRow}`)?._inertiaApplied) {
                 const key = `${worldCol},${worldRow}`;
                 let data = pushed.get(key);
 
-                if (!data || !data._animating) {
-                  if (!data) {
-                    data = { xOffset: 0, yOffset: 0, _animating: false };
-                    pushed.set(key, data);
-                  }
+                if (!data) {
+                  data = { xOffset: 0, yOffset: 0, _inertiaApplied: false };
+                  pushed.set(key, data);
+                }
 
-                  data._animating = true;
-                  const pushX = ((sx - pr.x) / (dist || 1)) * cfg.SHOCK_STRENGTH + vx * 0.003;
-                  const pushY = ((sy - pr.y) / (dist || 1)) * cfg.SHOCK_STRENGTH + vy * 0.003;
+                data._inertiaApplied = true;
+                gsap.killTweensOf(data);
 
-                  gsap.killTweensOf(data);
-                  gsap.to(data, {
+                // Exact React Bits formula: raw displacement + tiny velocity influence
+                const pushX = (sx - pr.x) + vx * 0.005;
+                const pushY = (sy - pr.y) + vy * 0.005;
+
+                gsap.to(data, {
+                  inertia: {
                     xOffset: pushX,
                     yOffset: pushY,
-                    duration: 0.15,
-                    ease: "power2.out",
-                    onComplete: () => {
-                      gsap.to(data!, {
-                        xOffset: 0,
-                        yOffset: 0,
-                        duration: configRef.current.RETURN_DURATION,
-                        ease: "elastic.out(1,0.75)",
-                        onComplete: () => { data!._animating = false; },
-                      });
-                    },
-                  });
-                }
+                    resistance: cfg.RESISTANCE,
+                  },
+                  onComplete: () => {
+                    gsap.to(data!, {
+                      xOffset: 0,
+                      yOffset: 0,
+                      duration: configRef.current.RETURN_DURATION,
+                      ease: "elastic.out(1,0.75)",
+                    });
+                    data!._inertiaApplied = false;
+                  },
+                });
               }
               rowIdx++;
             }
@@ -355,38 +386,39 @@ export const BackgroundRippleEffect = React.memo(
             const worldRow = startRow + rowIdx;
             const dist = Math.hypot(sx - cx, sy - cy);
 
-            if (dist < cfg.SHOCK_RADIUS) {
+            if (dist < cfg.SHOCK_RADIUS && !pushed.get(`${worldCol},${worldRow}`)?._inertiaApplied) {
               const key = `${worldCol},${worldRow}`;
               let data = pushed.get(key);
 
-              if (!data || !data._animating) {
-                if (!data) {
-                  data = { xOffset: 0, yOffset: 0, _animating: false };
-                  pushed.set(key, data);
-                }
+              if (!data) {
+                data = { xOffset: 0, yOffset: 0, _inertiaApplied: false };
+                pushed.set(key, data);
+              }
 
-                data._animating = true;
-                const falloff = Math.max(0, 1 - dist / cfg.SHOCK_RADIUS);
-                const pushX = ((sx - cx) / (dist || 1)) * cfg.SHOCK_STRENGTH * falloff * 3;
-                const pushY = ((sy - cy) / (dist || 1)) * cfg.SHOCK_STRENGTH * falloff * 3;
+              data._inertiaApplied = true;
+              gsap.killTweensOf(data);
 
-                gsap.killTweensOf(data);
-                gsap.to(data, {
+              // Exact React Bits formula: raw displacement * shockStrength * falloff
+              const falloff = Math.max(0, 1 - dist / cfg.SHOCK_RADIUS);
+              const pushX = (sx - cx) * cfg.SHOCK_STRENGTH * falloff;
+              const pushY = (sy - cy) * cfg.SHOCK_STRENGTH * falloff;
+
+              gsap.to(data, {
+                inertia: {
                   xOffset: pushX,
                   yOffset: pushY,
-                  duration: 0.15,
-                  ease: "power2.out",
-                  onComplete: () => {
-                    gsap.to(data!, {
-                      xOffset: 0,
-                      yOffset: 0,
-                      duration: configRef.current.RETURN_DURATION,
-                      ease: "elastic.out(1,0.75)",
-                      onComplete: () => { data!._animating = false; },
-                    });
-                  },
-                });
-              }
+                  resistance: cfg.RESISTANCE,
+                },
+                onComplete: () => {
+                  gsap.to(data!, {
+                    xOffset: 0,
+                    yOffset: 0,
+                    duration: configRef.current.RETURN_DURATION,
+                    ease: "elastic.out(1,0.75)",
+                  });
+                  data!._inertiaApplied = false;
+                },
+              });
             }
             rowIdx++;
           }

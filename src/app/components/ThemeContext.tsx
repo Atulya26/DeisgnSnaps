@@ -31,6 +31,7 @@ export interface DotGridConfig {
   shockRadius: number;
   shockStrength: number;
   maxSpeed: number;
+  resistance: number;
   returnDuration: number;
   /** Dot base color per theme */
   lightBaseColor: string;
@@ -47,6 +48,7 @@ export const defaultDotGridConfig: DotGridConfig = {
   shockRadius: 100,
   shockStrength: 7,
   maxSpeed: 5000,
+  resistance: 1200,
   returnDuration: 2,
   lightBaseColor: "#c8c8c8",
   lightActiveColor: "#1a51f4",
@@ -55,41 +57,41 @@ export const defaultDotGridConfig: DotGridConfig = {
 };
 
 export const defaultLightColors: ThemeColors = {
-  bg: "#F7F6F3",
-  bgAlpha: "rgba(247, 246, 243, 0.82)",
-  surface: "rgba(255,255,255,0.92)",
-  surfaceAlpha: "rgba(255,255,255,0.9)",
-  text: "#1A1A1A",
-  textSecondary: "#6B6B6B",
-  textMuted: "#9B9B9B",
-  border: "rgba(0,0,0,0.04)",
-  borderLight: "rgba(0,0,0,0.08)",
-  cardBg: "#FFFFFF",
-  cardShadow: "0 1px 3px rgba(0,0,0,0.04), 0 0 0 1px rgba(0,0,0,0.04)",
-  cardShadowHover: "0 16px 40px rgba(0,0,0,0.10), 0 0 0 1px rgba(0,0,0,0.06)",
-  shimmer: "#E0DDD7",
-  imageBg: "#E8E6E1",
-  gridLine: "rgba(0,0,0,0.035)",
-  rippleColor: { r: 80, g: 80, b: 80 },
+  bg: "#F5F3EF",
+  bgAlpha: "rgba(245, 243, 239, 0.85)",
+  surface: "rgba(255,255,255,0.94)",
+  surfaceAlpha: "rgba(255,255,255,0.92)",
+  text: "#171717",
+  textSecondary: "#636363",
+  textMuted: "#999590",
+  border: "rgba(0,0,0,0.05)",
+  borderLight: "rgba(0,0,0,0.07)",
+  cardBg: "#FEFEFE",
+  cardShadow: "0 1px 2px rgba(0,0,0,0.03), 0 4px 12px rgba(0,0,0,0.04)",
+  cardShadowHover: "0 8px 30px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04)",
+  shimmer: "#E8E4DD",
+  imageBg: "#EDEBE6",
+  gridLine: "rgba(0,0,0,0.03)",
+  rippleColor: { r: 100, g: 95, b: 88 },
 };
 
 export const defaultDarkColors: ThemeColors = {
-  bg: "#1A1A1A",
-  bgAlpha: "rgba(26, 26, 26, 0.82)",
-  surface: "rgba(40,40,40,0.92)",
-  surfaceAlpha: "rgba(40,40,40,0.9)",
-  text: "#F0F0F0",
-  textSecondary: "#A0A0A0",
-  textMuted: "#6B6B6B",
-  border: "rgba(255,255,255,0.06)",
-  borderLight: "rgba(255,255,255,0.08)",
-  cardBg: "#252525",
-  cardShadow: "0 1px 3px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.04)",
-  cardShadowHover: "0 16px 40px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.08)",
-  shimmer: "#333333",
-  imageBg: "#2A2A2A",
-  gridLine: "rgba(255,255,255,0.04)",
-  rippleColor: { r: 220, g: 220, b: 220 },
+  bg: "#161616",
+  bgAlpha: "rgba(22, 22, 22, 0.88)",
+  surface: "rgba(32,32,32,0.94)",
+  surfaceAlpha: "rgba(32,32,32,0.92)",
+  text: "#ECECEC",
+  textSecondary: "#8E8E8E",
+  textMuted: "#5C5C5C",
+  border: "rgba(255,255,255,0.05)",
+  borderLight: "rgba(255,255,255,0.07)",
+  cardBg: "#1E1E1E",
+  cardShadow: "0 1px 2px rgba(0,0,0,0.3), 0 4px 16px rgba(0,0,0,0.2)",
+  cardShadowHover: "0 12px 40px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.2)",
+  shimmer: "#2A2A2A",
+  imageBg: "#242424",
+  gridLine: "rgba(255,255,255,0.035)",
+  rippleColor: { r: 180, g: 180, b: 175 },
 };
 
 /** Helper: create bgAlpha from a hex bg color */

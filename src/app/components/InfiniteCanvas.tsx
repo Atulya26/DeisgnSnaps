@@ -6,10 +6,10 @@ import {
   useMemo,
 } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
+import { ArrowMove } from "geist-icons";
 import type { Project } from "./types";
 import { PortfolioCard } from "./PortfolioCard";
 import { ZoomControls } from "./ZoomControls";
-import { springs } from "./animationConfig";
 import { useTheme } from "./ThemeContext";
 import { BackgroundRippleEffect } from "./BackgroundRippleEffect";
 
@@ -24,19 +24,42 @@ const DEFAULT_ZOOM = 0.60;
 const ZOOM_STEP = 0.08;
 const TILE_PADDING = 30;
 
-// ── Physics tuning ──
-const MOMENTUM_FRICTION = 0.96;        // Per-frame friction at 60fps baseline (smoother deceleration)
-const MOMENTUM_MIN_VELOCITY = 0.005;   // Stop threshold (px/ms) — longer coast
-const WHEEL_LERP_MOUSE = 0.08;        // Smoother interpolation for discrete mouse wheel (Lenis-like)
-const WHEEL_LERP_TRACKPAD = 0.45;     // Light smoothing for trackpad
-const ZOOM_LERP = 0.10;               // Smoothing for animated zoom
-const SETTLE_THRESHOLD = 0.1;         // Camera settle threshold (px)
-const ZOOM_SETTLE_THRESHOLD = 0.0005; // Zoom settle threshold
-const ZOOM_DISPLAY_THROTTLE = 80;     // ms between zoom UI updates
+// ── Physics tuning (Lenis-inspired smooth feel) ──
+const MOMENTUM_FRICTION = 0.985;       // Gentler friction → longer, smoother coast (was 0.96)
+const MOMENTUM_MIN_VELOCITY = 0.003;   // Lower stop threshold → momentum carries further
+const WHEEL_LERP_MOUSE = 0.12;        // Smoother catch-up for discrete mouse wheel (was 0.08)
+const WHEEL_LERP_TRACKPAD = 0.55;     // Light smoothing for trackpad (was 0.45)
+const ZOOM_LERP = 0.12;               // Slightly faster zoom response (was 0.10)
+const SETTLE_THRESHOLD = 0.05;        // Tighter settle → less visible snap at end
+const ZOOM_SETTLE_THRESHOLD = 0.0003; // Tighter zoom settle
+const ZOOM_DISPLAY_THROTTLE = 60;     // More responsive zoom display (was 80)
 const BASELINE_DT = 16.667;           // 60fps reference frame time
 
 // ── Grid cell size (shared with BackgroundRippleEffect) ──
 const GRID_CELL = 40;
+
+function normalizeWheelDelta(e: WheelEvent): { x: number; y: number } {
+  // deltaMode: 0=pixel, 1=line, 2=page
+  const scale =
+    e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? window.innerHeight : 1;
+  return {
+    x: e.deltaX * scale,
+    y: e.deltaY * scale,
+  };
+}
+
+function detectTrackpad(e: WheelEvent): boolean {
+  // High-frequency, small deltas in pixel mode are usually trackpads.
+  if (e.deltaMode !== 0) return false;
+  const ax = Math.abs(e.deltaX);
+  const ay = Math.abs(e.deltaY);
+  if (ax === 0 && ay === 0) return false;
+  return (
+    (ay > 0 && ay < 40) ||
+    (ax > 0 && ax < 40) ||
+    (!Number.isInteger(e.deltaX) || !Number.isInteger(e.deltaY))
+  );
+}
 
 export function InfiniteCanvas({
   projects,
@@ -94,6 +117,7 @@ export function InfiniteCanvas({
 
   const [showHint, setShowHint] = useState(true);
   const [hasInteracted, setHasInteracted] = useState(false);
+  // isDragging cursor is handled via direct DOM manipulation (no React re-render)
   const prefersReduced = useReducedMotion();
 
   // ── Tile dimensions ──
@@ -260,6 +284,12 @@ export function InfiniteCanvas({
 
       // ── 5. Apply to DOM ──
       applyTransform();
+
+      // Consume deferred tile sync (from drag mousemove) inside the rAF frame
+      if (tileSyncPending.current) {
+        tileSyncPending.current = false;
+        needsNextFrame = true; // Keep loop alive during drag
+      }
       syncTiles();
 
       // ── 6. Continue or stop ──
@@ -298,6 +328,15 @@ export function InfiniteCanvas({
     targetCamera.current.y = camera.current.y;
   }, []);
 
+  // ── Drag visual state — direct DOM manipulation, zero React renders ──
+  const setDragVisuals = useCallback((dragging: boolean) => {
+    const el = containerRef.current;
+    if (el) el.style.cursor = dragging ? "grabbing" : "grab";
+    // Disable pointer-events on cards while dragging to avoid hover compositing
+    const tg = transformGroupRef.current;
+    if (tg) tg.style.pointerEvents = dragging ? "none" : "";
+  }, []);
+
   // ── Dismiss hint ──
   const markInteracted = useCallback(() => {
     if (!hasInteracted) {
@@ -307,24 +346,30 @@ export function InfiniteCanvas({
   }, [hasInteracted]);
 
   // ──────────── Mouse Drag ────────────
-  const handleMouseDown = useCallback(
-    (e: React.MouseEvent) => {
+  const handlePointerDown = useCallback(
+    (e: React.PointerEvent) => {
       if (e.button !== 0) return;
       cancelMomentum();
       cancelWheelSmoothing();
       isDragging.current = true;
+      setDragVisuals(true);
       hasDragged.current = false;
       dragStart.current = { x: e.clientX, y: e.clientY };
       cameraStart.current = { ...camera.current };
       lastMoveTime.current = performance.now();
       lastMovePos.current = { x: e.clientX, y: e.clientY };
+      // Capture pointer to prevent missed moves (especially near edges/iframes)
+      (e.target as HTMLElement).setPointerCapture(e.pointerId);
       e.preventDefault();
     },
-    [cancelMomentum, cancelWheelSmoothing]
+    [cancelMomentum, cancelWheelSmoothing, setDragVisuals]
   );
 
+  // Track whether tile sync is needed (set during drag, consumed by rAF)
+  const tileSyncPending = useRef(false);
+
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
+    const handlePointerMove = (e: PointerEvent) => {
       if (!isDragging.current) return;
       const z = zoom.current;
       const dx = (e.clientX - dragStart.current.x) / z;
@@ -340,20 +385,24 @@ export function InfiniteCanvas({
       targetCamera.current.x = camera.current.x;
       targetCamera.current.y = camera.current.y;
 
-      // Apply directly to DOM for immediate feedback
+      // Apply transform directly (compositor-only, no React)
       applyTransform();
-      syncTiles();
 
-      // Track velocity for momentum
+      // DEFERRED tile sync: mark pending instead of calling immediately.
+      // This avoids React re-renders mid-drag which cause jitter.
+      // The render loop (or next rAF) will pick this up.
+      tileSyncPending.current = true;
+      ensureLoop(); // Ensure the render loop runs to consume the pending sync
+
+      // Track velocity for momentum (smoothed to avoid spikes)
       const now = performance.now();
       const dt = now - lastMoveTime.current;
       if (dt > 0) {
-        // Velocity in world-space px/ms
         const vx = -(e.clientX - lastMovePos.current.x) / (dt * z);
         const vy = -(e.clientY - lastMovePos.current.y) / (dt * z);
-        // Smooth velocity tracking to avoid spikes
-        velocity.current.x = velocity.current.x * 0.5 + vx * 0.5;
-        velocity.current.y = velocity.current.y * 0.5 + vy * 0.5;
+        // Exponential smoothing — reduces velocity spikes from high-DPI mice
+        velocity.current.x = velocity.current.x * 0.6 + vx * 0.4;
+        velocity.current.y = velocity.current.y * 0.6 + vy * 0.4;
       }
       lastMoveTime.current = now;
       lastMovePos.current = { x: e.clientX, y: e.clientY };
@@ -361,13 +410,20 @@ export function InfiniteCanvas({
       markInteracted();
     };
 
-    const handleMouseUp = () => {
+    const handlePointerUp = () => {
       if (!isDragging.current) return;
       isDragging.current = false;
+      setDragVisuals(false);
+
+      // Flush any pending tile sync now that drag is over
+      if (tileSyncPending.current) {
+        tileSyncPending.current = false;
+        syncTiles();
+      }
 
       // Start momentum if velocity is meaningful
       const vel = velocity.current;
-      if (Math.abs(vel.x) > 0.02 || Math.abs(vel.y) > 0.02) {
+      if (Math.abs(vel.x) > 0.015 || Math.abs(vel.y) > 0.015) {
         hasMomentum.current = true;
         ensureLoop();
       }
@@ -377,13 +433,13 @@ export function InfiniteCanvas({
       }, 10);
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerUp);
     return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
     };
-  }, [markInteracted, ensureLoop, applyTransform, syncTiles]);
+  }, [markInteracted, ensureLoop, applyTransform, syncTiles, setDragVisuals]);
 
   // ──────────── Wheel: Scroll = Pan, Ctrl/Cmd+Scroll = Zoom ────────────
   useEffect(() => {
@@ -397,8 +453,8 @@ export function InfiniteCanvas({
 
       const z = zoom.current;
 
-      // Detect trackpad vs mouse wheel: trackpad sends small fractional deltas
-      const isTrackpad = Math.abs(e.deltaY) < 50 && !Number.isInteger(e.deltaY);
+      const isTrackpad = detectTrackpad(e);
+      const { x: deltaX, y: deltaY } = normalizeWheelDelta(e);
       wheelLerp.current = isTrackpad ? WHEEL_LERP_TRACKPAD : WHEEL_LERP_MOUSE;
 
       if (e.ctrlKey || e.metaKey) {
@@ -412,7 +468,7 @@ export function InfiniteCanvas({
         const worldX = cam.x + cursorX / z;
         const worldY = cam.y + cursorY / z;
 
-        const delta = -e.deltaY * 0.005;
+        const delta = -deltaY * 0.0026;
         const newZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, z + delta));
 
         // Set targets — render loop will smoothly interpolate
@@ -420,27 +476,30 @@ export function InfiniteCanvas({
         targetCamera.current.x = worldX - cursorX / newZoom;
         targetCamera.current.y = worldY - cursorY / newZoom;
 
-        // For trackpad pinch, apply more directly for responsiveness
+        // For trackpad pinch, apply directly for immediate response.
         if (isTrackpad) {
           zoom.current = newZoom;
           camera.current.x = targetCamera.current.x;
           camera.current.y = targetCamera.current.y;
+          applyTransform();
+          tileSyncPending.current = true;
         }
       } else {
         // ── Pan ──
         const panSpeed = 1 / z;
-        targetCamera.current.x += e.deltaX * panSpeed;
-        targetCamera.current.y += e.deltaY * panSpeed;
+        targetCamera.current.x += deltaX * panSpeed;
+        targetCamera.current.y += deltaY * panSpeed;
 
-        // Trackpad: apply directly for low latency
+        // Trackpad: direct 1:1 movement for best latency.
         if (isTrackpad) {
           camera.current.x = targetCamera.current.x;
           camera.current.y = targetCamera.current.y;
           applyTransform();
-          syncTiles();
+          tileSyncPending.current = true;
         }
       }
 
+      // Keep smoothing for mouse wheel only; trackpad stays immediate.
       isWheelSmoothing.current = !isTrackpad;
       ensureLoop();
     };
@@ -460,6 +519,7 @@ export function InfiniteCanvas({
       markInteracted();
       if (e.touches.length === 1) {
         isDragging.current = true;
+        setDragVisuals(true);
         hasDragged.current = false;
         dragStart.current = {
           x: e.touches[0].clientX,
@@ -502,16 +562,18 @@ export function InfiniteCanvas({
         targetCamera.current.y = camera.current.y;
 
         applyTransform();
-        syncTiles();
+        // Defer tile sync to rAF (same as mouse drag)
+        tileSyncPending.current = true;
+        ensureLoop();
 
-        // Track velocity
+        // Track velocity (smoothed)
         const now = performance.now();
         const dt = now - lastMoveTime.current;
         if (dt > 0) {
           const vx = -(e.touches[0].clientX - lastMovePos.current.x) / (dt * z);
           const vy = -(e.touches[0].clientY - lastMovePos.current.y) / (dt * z);
-          velocity.current.x = velocity.current.x * 0.5 + vx * 0.5;
-          velocity.current.y = velocity.current.y * 0.5 + vy * 0.5;
+          velocity.current.x = velocity.current.x * 0.6 + vx * 0.4;
+          velocity.current.y = velocity.current.y * 0.6 + vy * 0.4;
         }
         lastMoveTime.current = now;
         lastMovePos.current = {
@@ -557,8 +619,16 @@ export function InfiniteCanvas({
     const handleTouchEnd = () => {
       if (isDragging.current) {
         isDragging.current = false;
+        setDragVisuals(false);
+
+        // Flush pending tile sync
+        if (tileSyncPending.current) {
+          tileSyncPending.current = false;
+          syncTiles();
+        }
+
         const vel = velocity.current;
-        if (Math.abs(vel.x) > 0.02 || Math.abs(vel.y) > 0.02) {
+        if (Math.abs(vel.x) > 0.015 || Math.abs(vel.y) > 0.015) {
           hasMomentum.current = true;
           ensureLoop();
         }
@@ -575,7 +645,7 @@ export function InfiniteCanvas({
       el.removeEventListener("touchmove", handleTouchMove);
       el.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [markInteracted, cancelMomentum, cancelWheelSmoothing, ensureLoop, applyTransform, syncTiles]);
+  }, [markInteracted, cancelMomentum, cancelWheelSmoothing, ensureLoop, applyTransform, syncTiles, setDragVisuals]);
 
   // ──────────── Animated zoom (for buttons) ────────────
   const animateZoom = useCallback(
@@ -693,8 +763,9 @@ export function InfiniteCanvas({
         backgroundColor: colors.bg,
         touchAction: "none",
         transition: "background-color 0.35s ease",
+        cursor: "grab",
       }}
-      onMouseDown={handleMouseDown}
+      onPointerDown={handlePointerDown}
     >
       {/* Background grid with mouse hover trail */}
       <BackgroundRippleEffect
@@ -711,6 +782,7 @@ export function InfiniteCanvas({
           transform: `scale(${DEFAULT_ZOOM}) translate3d(${60}px, ${40}px, 0)`,
           transformOrigin: "0 0",
           willChange: "transform",
+          contain: "layout style",
         }}
       >
         {visibleTiles.map((tile) => {
@@ -724,7 +796,7 @@ export function InfiniteCanvas({
                 top: tile.row * tileH,
                 width: tileW,
                 height: tileH,
-                contain: "layout style",
+                contain: "strict",
               }}
             >
               {projects.map((project, i) => (
@@ -751,43 +823,38 @@ export function InfiniteCanvas({
         maxZoom={MAX_ZOOM}
       />
 
-      {/* Hint overlay */}
+      {/* Hint overlay — refined editorial style */}
       <AnimatePresence>
         {showHint && (
           <motion.div
-            className="fixed bottom-6 left-1/2 z-30 flex -translate-x-1/2 items-center gap-3 rounded-full px-5 py-2.5"
+            className="fixed bottom-7 left-1/2 z-30 flex -translate-x-1/2 items-center gap-3 rounded-full px-5 py-2.5"
             style={{
-              backgroundColor: "rgba(26,26,26,0.85)",
-              backdropFilter: "blur(20px)",
+              backgroundColor: "rgba(18,18,18,0.88)",
+              backdropFilter: "blur(24px) saturate(1.5)",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
             }}
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            transition={{ ...springs.smooth, delay: 1.2 }}
+            exit={{ opacity: 0, y: 12 }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 1.2 }}
           >
             <motion.div
-              animate={prefersReduced ? undefined : { x: [0, 5, 0, -5, 0], y: [0, -3, 0, 3, 0] }}
+              animate={prefersReduced ? undefined : { x: [0, 4, 0, -4, 0], y: [0, -2, 0, 2, 0] }}
               transition={prefersReduced ? undefined : {
-                duration: 2.5,
+                duration: 3,
                 repeat: Infinity,
                 ease: "easeInOut",
               }}
             >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path
-                  d="M8 2V14M8 2L5 5M8 2L11 5M8 14L5 11M8 14L11 11M2 8H14M2 8L5 5M2 8L5 11M14 8L11 5M14 8L11 11"
-                  stroke="white"
-                  strokeWidth="1.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              <ArrowMove size={14} color="rgba(255,255,255,0.7)" />
             </motion.div>
             <span
               style={{
-                fontSize: 13,
-                color: "rgba(255,255,255,0.9)",
+                fontSize: 12,
+                fontWeight: 400,
+                color: "rgba(255,255,255,0.85)",
                 whiteSpace: "nowrap",
+                letterSpacing: "0.01em",
               }}
             >
               Drag to explore
@@ -795,18 +862,21 @@ export function InfiniteCanvas({
             <div
               style={{
                 width: 1,
-                height: 12,
-                backgroundColor: "rgba(255,255,255,0.2)",
+                height: 10,
+                backgroundColor: "rgba(255,255,255,0.15)",
               }}
             />
             <span
               style={{
-                fontSize: 13,
-                color: "rgba(255,255,255,0.6)",
+                fontSize: 12,
+                fontWeight: 400,
+                color: "rgba(255,255,255,0.45)",
                 whiteSpace: "nowrap",
+                fontFamily: "'Geist Mono', monospace",
+                letterSpacing: "0.01em",
               }}
             >
-              &#8984;+Scroll to zoom
+              Scroll to pan
             </span>
           </motion.div>
         )}

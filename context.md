@@ -7,10 +7,10 @@ This file documents ideation, design decisions, and iterations so the next conte
 ## Project overview
 
 - **App:** Infinite canvas portfolio (Studio Portfolio) — drag to pan, scroll to zoom, project cards in a masonry-style layout.
-- **Admin:** Private admin panel (`/admin`) for managing projects, uploading images to R2, and writing content.
+- **Admin:** Private admin panel (`/admin`) for managing projects, uploading images, and writing content.
 - **Stack:** React, Vite, Tailwind v4, `motion/react` (Framer Motion), GSAP, Lenis, Radix/shadcn-style UI.
-- **Backend:** Cloudflare R2 (storage) + Cloudflare Worker (API for listing/uploading).
-- **Key paths:** `src/app/`, `src/admin/`, `worker/`.
+- **Backend:** Firebase (Storage for images, Firestore for project data).
+- **Key paths:** `src/app/`, `src/admin/`.
 
 ---
 
@@ -106,12 +106,12 @@ This file documents ideation, design decisions, and iterations so the next conte
 **Goal:** Create an admin interface to manage projects, upload images, and write content without touching code.
 
 **Decisions:**
-- **Architecture:** `src/admin/` folder with separate routes (`/admin/*`). Uses **Cloudflare R2** for storage and a **Cloudflare Worker** (`worker/`) as the API (list/upload/delete).
+- **Architecture:** `src/admin/` folder with separate routes (`/admin/*`). Uses **Firebase Storage** for images and **Firestore** for project data.
 - **Auto-layout System:** Removed manual X/Y positioning. Added `autoLayoutProjects` utility that arranges projects in a deterministic masonry grid (7 columns, varied aspect ratios).
-- **Dribbble-style Editor:** Two-column layout. Left: Title only (syncs to R2 folder name) + delete button. Right: **Content Blocks** (stack of images and rich text blocks).
-- **Direct Upload:** "Upload Image" button in admin creates a folder in R2 (based on project title) and PUTs the file via the worker.
+- **Dribbble-style Editor:** Two-column layout. Left: Title + delete button. Right: **Content Blocks** (stack of images and rich text blocks).
+- **Direct Upload:** "Upload Image" button in admin uploads to Firebase Storage under `projects/{id}/`.
 - **Settings Lock:** Settings page protected by a session-based PIN (`2612`).
-- **Project Merging:** `App.tsx` merges hardcoded projects with admin-published projects (stored in localStorage/R2).
+- **Project Merging:** `App.tsx` reads published projects from Firestore, merges with hardcoded projects.
 
 **Outcome:** Full CMS capability. Projects can be created, images uploaded, and layout is automatic.
 
@@ -156,8 +156,8 @@ This file documents ideation, design decisions, and iterations so the next conte
 | **Background** | Canvas-drawn dot grid with proximity glow + GSAP physics push. Configurable via Theme Editor. |
 | **Layout** | **Auto-layout** (Masonry, 7 cols, `GAP_X=90`, `GAP_Y=90`); no manual X/Y needed. |
 | **Theme** | Light/dark with circle wipe transition. Real-time Theme Editor panel for all colors + dot grid props. |
-| **Admin** | Protected settings (PIN 2612); R2 integration (upload/list); Dribbble-style block editor. |
-| **Backend** | Cloudflare Worker (`/folders`, `/upload`, `/file`) + R2 Bucket `portfolio-assets`. |
+| **Admin** | Protected settings (PIN 2612); Firebase integration (upload/list); Dribbble-style block editor. |
+| **Backend** | Firebase Storage (images) + Firestore (project metadata). |
 | **Detail View** | Vertical stack of full-width images and rich text blocks; Lenis smooth scroll; line texture background. |
 
 ---
@@ -175,8 +175,7 @@ This file documents ideation, design decisions, and iterations so the next conte
 - **ProjectDetail.tsx:** Content blocks stack, Lenis scroll, line texture background, padded margins.
 - **ProjectEditorPage.tsx:** Admin editor with block reordering and R2 upload.
 - **CustomCursor.tsx:** Trailing circle ring cursor.
-- **worker/src/index.ts:** Cloudflare Worker API (GET/PUT/DELETE) for R2.
-- **r2.ts:** Frontend service for communicating with the Worker.
+- **firebase.ts:** Firebase service layer (Storage upload/list/delete, Firestore CRUD for projects).
 
 ---
 
@@ -184,10 +183,11 @@ This file documents ideation, design decisions, and iterations so the next conte
 
 - **UI skill** (if used): Tailwind defaults, `motion/react` for JS animation, GSAP for spring physics, `cn` for class logic.
 - **Performance:** No React state updates on the pan/zoom hot path. Dot grid uses canvas + sparse Map for pushed dots.
-- **R2:** Always use the Worker for R2 operations (no direct S3 SDK in frontend).
-- **Images:** Uploads go to `project-name/` folders in R2.
+- **Firebase:** All storage/Firestore operations go through `src/admin/services/firebase.ts`.
+- **Images:** Uploads go to `projects/{id}/` paths in Firebase Storage.
 - **Theme Editor:** All dot grid config and color overrides stored in ThemeContext; read via refs in animation loops for freshness.
 
 ---
 
 *Last updated: Dot grid background with GSAP physics, real-time Theme Editor panel, dark mode with circle wipe transition.*
+C

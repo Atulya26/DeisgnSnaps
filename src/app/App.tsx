@@ -1,52 +1,68 @@
-import { useState, useCallback, useRef, useMemo } from "react";
+import { useState, useCallback, useRef, useMemo, useEffect } from "react";
 import type { Project } from "./components/types";
 import { projects as hardcodedProjects } from "./components/data";
 import { Toolbar } from "./components/Toolbar";
 import { InfiniteCanvas } from "./components/InfiniteCanvas";
 import { ProjectDetail } from "./components/ProjectDetail";
 import { CustomCursor } from "./components/CustomCursor";
+import { BootSequence } from "./components/BootSequence";
 import { autoLayoutProjects } from "./components/autoLayout";
 import { ThemeProvider, useTheme } from "./components/ThemeContext";
 import { ThemeTransition } from "./components/ThemeTransition";
 import type { AdminProject } from "../admin/types";
+import { getPublishedProjects } from "../admin/services/firebase";
 
-/** Read published admin projects from localStorage */
-function getPublishedAdminProjects(): {
-  project: Omit<Project, "x" | "y" | "width" | "height">;
-}[] {
-  try {
-    const raw = localStorage.getItem("portfolio_admin_projects");
-    if (!raw) return [];
-    const adminProjects: AdminProject[] = JSON.parse(raw);
-    return adminProjects
-      .filter((p) => p.status === "published" && p.title && p.coverImageKey)
-      .map((p) => ({
-        project: {
-          id: `admin-${p.id}`,
-          title: p.title,
-          category: p.category,
-          year: p.year,
-          imageUrl: p.coverImageKey,
-          description: p.description,
-          tags: p.tags,
-          galleryImages: p.images?.map((img) => img.url).filter(Boolean) ?? [],
-          contentBlocks: p.contentBlocks ?? [],
-        },
-      }));
-  } catch {
-    return [];
-  }
+/** Convert AdminProject[] to the shape expected by the portfolio */
+function mapAdminToPortfolio(
+  adminProjects: AdminProject[]
+): { project: Omit<Project, "x" | "y" | "width" | "height"> }[] {
+  return adminProjects
+    .filter((p) => p.status === "published" && p.title && p.coverImageKey)
+    .map((p) => ({
+      project: {
+        id: `admin-${p.id}`,
+        title: p.title,
+        category: p.category,
+        year: p.year,
+        imageUrl: p.coverImageKey,
+        description: p.description,
+        tags: p.tags,
+        galleryImages: p.images?.map((img) => img.url).filter(Boolean) ?? [],
+        contentBlocks: p.contentBlocks ?? [],
+      },
+    }));
 }
 
 function AppContent() {
   const { colors } = useTheme();
+  const [isBooting, setIsBooting] = useState(true);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [originRect, setOriginRect] = useState<DOMRect | null>(null);
   const originRectRef = useRef<DOMRect | null>(null);
+  const [adminEntries, setAdminEntries] = useState<
+    { project: Omit<Project, "x" | "y" | "width" | "height"> }[]
+  >([]);
+  const [firestoreLoaded, setFirestoreLoaded] = useState(false);
+
+  // Load published projects from Firestore on mount — BEFORE boot starts
+  useEffect(() => {
+    async function loadFromFirestore() {
+      try {
+        const published = await getPublishedProjects();
+        if (published.length > 0) {
+          setAdminEntries(mapAdminToPortfolio(published));
+        }
+      } catch (err) {
+        console.error("Failed to load published projects from Firestore:", err);
+      } finally {
+        setFirestoreLoaded(true);
+      }
+    }
+    loadFromFirestore();
+  }, []);
 
   // Merge hardcoded + published admin projects, then auto-layout everything
   const projects = useMemo(() => {
-    const adminEntries = getPublishedAdminProjects();
     const adminTitles = new Set(
       adminEntries.map((e) => e.project.title.toLowerCase())
     );
@@ -63,7 +79,7 @@ function AppContent() {
 
     // Auto-layout computes x, y, width, height for every project
     return autoLayoutProjects(allProjects);
-  }, []);
+  }, [adminEntries]);
 
   const handleOpenProject = useCallback((project: Project, rect: DOMRect) => {
     originRectRef.current = rect;
@@ -84,6 +100,10 @@ function AppContent() {
     setOriginRect(null);
   }, []);
 
+  const handleBootComplete = useCallback(() => {
+    setIsBooting(false);
+  }, []);
+
   return (
     <div
       className="h-dvh w-dvw overflow-hidden"
@@ -95,6 +115,12 @@ function AppContent() {
     >
       <CustomCursor />
       <ThemeTransition />
+
+      {/* Boot sequence overlay — waits for Firestore so it only runs once */}
+      {isBooting && firestoreLoaded && (
+        <BootSequence projects={projects} onComplete={handleBootComplete} />
+      )}
+
       <Toolbar projectCount={projects.length} />
 
       <div className="h-full" style={{ paddingTop: 70 }}>

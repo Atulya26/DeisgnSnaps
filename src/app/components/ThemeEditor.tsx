@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { CrossSmall } from "geist-icons";
 import {
   useTheme,
   defaultDotGridConfig,
@@ -188,14 +189,7 @@ export function ThemeEditor({ open, onClose }: { open: boolean; onClose: () => v
                     backgroundColor: colors.border,
                   }}
                 >
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                    <path
-                      d="M2 2l8 8M10 2l-8 8"
-                      stroke={colors.textSecondary}
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                    />
-                  </svg>
+                  <CrossSmall size={14} color={colors.textSecondary} />
                 </button>
               </div>
             </div>
@@ -276,6 +270,14 @@ export function ThemeEditor({ open, onClose }: { open: boolean; onClose: () => v
                     min={1}
                     max={20}
                     onChange={(v) => setDotGridConfig({ shockStrength: v })}
+                  />
+                  <SliderRow
+                    label="Resistance"
+                    value={dotGridConfig.resistance}
+                    min={100}
+                    max={3000}
+                    step={50}
+                    onChange={(v) => setDotGridConfig({ resistance: v })}
                   />
                   <SliderRow
                     label="Return Duration"

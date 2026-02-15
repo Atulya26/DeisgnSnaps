@@ -1,0 +1,4 @@
+SESSION_SECRET=replace-with-a-long-random-string
+ADMIN_PASSWORD=replace-with-strong-password
+ADMIN_EMAIL=you@example.com
+PUBLIC_ASSET_BASE_URL=http://127.0.0.1:8787/assets

@@ -1,26 +1,26 @@
 // ── Admin data types ──
 
-export interface R2Config {
-  accountId: string;
-  bucketName: string;
-  accessKeyId: string;
-  secretAccessKey: string;
-  publicDomain: string; // e.g. "assets.yourdomain.com" or R2.dev URL
-  workerUrl: string; // e.g. "https://portfolio-r2-api.yourname.workers.dev"
+export interface FirebaseConfig {
+  apiKey: string;
+  authDomain: string;
+  projectId: string;
+  storageBucket: string;
+  messagingSenderId: string;
+  appId: string;
 }
 
-/** A folder in R2 that represents a project's asset directory */
-export interface R2Folder {
+/** A folder in Storage that represents a project's asset directory */
+export interface StorageFolder {
   name: string;
-  path: string; // full prefix, e.g. "project-lumina/"
+  path: string; // full prefix, e.g. "projects/abc123/"
   imageCount: number;
-  images: R2Image[];
+  images: StorageImage[];
 }
 
-export interface R2Image {
-  key: string; // full object key in R2
+export interface StorageImage {
+  key: string; // full storage path
   name: string; // filename
-  url: string; // public URL
+  url: string; // public download URL
   size: number;
   lastModified: Date;
 }
@@ -31,7 +31,7 @@ export interface ImageBlock {
   type: "image";
   id: string;
   url: string; // the image URL
-  key?: string; // R2 object key, if from R2
+  key?: string; // storage path, if from Firebase Storage
   caption?: string;
 }
 
@@ -43,10 +43,10 @@ export interface TextBlock {
 
 export type ContentBlock = ImageBlock | TextBlock;
 
-/** Admin project — what gets saved to localStorage / R2 */
+/** Admin project — what gets saved to Firestore */
 export interface AdminProject {
   id: string;
-  r2Folder: string; // the R2 folder prefix this project maps to
+  storagePath: string; // Firebase Storage path prefix for this project's images
   title: string;
   category: string;
   year: string;
@@ -55,7 +55,7 @@ export interface AdminProject {
   /** @deprecated — use contentBlocks instead */
   richContent: string;
   coverImageKey: string; // which image is the cover on the canvas card
-  images: R2Image[]; // all images from the R2 folder
+  images: StorageImage[]; // all images from Storage
   /** Ordered content blocks — the Dribbble-style post layout */
   contentBlocks: ContentBlock[];
   // Canvas layout (auto-computed, kept for compat)

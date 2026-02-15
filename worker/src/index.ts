@@ -1,21 +1,67 @@
-/**
- * Portfolio R2 API Worker
- *
- * Endpoints:
- *   GET    /folders          — list all top-level folders in the bucket
- *   GET    /folders/:name    — list all images inside a specific folder
- *   GET    /file/:key+       — proxy-serve a file from R2
- *   PUT    /upload/:key+     — upload a file to R2
- *   DELETE /file/:key+       — delete a file from R2
- *
- * The worker is bound to the "portfolio-assets" R2 bucket via wrangler.jsonc.
- */
-
 interface Env {
-  BUCKET: R2Bucket;
+  CONTENT_BUCKET: R2Bucket;
+  SESSION_SECRET: string;
+  ADMIN_PASSWORD: string;
+  ADMIN_EMAIL?: string;
+  PUBLIC_ASSET_BASE_URL?: string;
 }
 
-// Image extensions we care about
+type ProjectStatus = "draft" | "published";
+
+interface StorageImage {
+  key: string;
+  name: string;
+  url: string;
+  size: number;
+  lastModified: string;
+}
+
+interface ImageBlock {
+  type: "image";
+  id: string;
+  url: string;
+  key?: string;
+  caption?: string;
+}
+
+interface TextBlock {
+  type: "text";
+  id: string;
+  content: string;
+}
+
+type ContentBlock = ImageBlock | TextBlock;
+
+interface AdminProject {
+  id: string;
+  storagePath: string;
+  title: string;
+  category: string;
+  year: string;
+  description: string;
+  tags: string[];
+  richContent: string;
+  coverImageKey: string;
+  images: StorageImage[];
+  contentBlocks: ContentBlock[];
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  status: ProjectStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface SessionPayload {
+  email: string;
+  exp: number;
+}
+
+const PROJECTS_OBJECT_KEY = "content/projects.json";
+const SESSION_COOKIE = "admin_session";
+const MAX_SESSION_AGE_SECONDS = 60 * 60 * 24 * 14; // 14 days
+
 const IMAGE_EXTENSIONS = new Set([
   "jpg",
   "jpeg",
@@ -28,222 +74,378 @@ const IMAGE_EXTENSIONS = new Set([
   "ico",
 ]);
 
-function isImageKey(key: string): boolean {
-  const ext = key.split(".").pop()?.toLowerCase() ?? "";
-  return IMAGE_EXTENSIONS.has(ext);
+function json(data: unknown, init: ResponseInit = {}): Response {
+  const headers = new Headers(init.headers);
+  headers.set("content-type", "application/json; charset=utf-8");
+  return new Response(JSON.stringify(data), { ...init, headers });
 }
 
-function corsHeaders(origin: string | null): Record<string, string> {
+function getPathname(request: Request): string {
+  return new URL(request.url).pathname;
+}
+
+function normaliseProject(project: AdminProject): AdminProject {
+  const now = new Date().toISOString();
   return {
-    "Access-Control-Allow-Origin": origin ?? "*",
-    "Access-Control-Allow-Methods": "GET, PUT, DELETE, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, X-Filename",
-    "Access-Control-Max-Age": "86400",
+    ...project,
+    title: project.title ?? "",
+    category: project.category ?? "",
+    year: project.year ?? "",
+    description: project.description ?? "",
+    tags: Array.isArray(project.tags) ? project.tags : [],
+    richContent: project.richContent ?? "",
+    coverImageKey: project.coverImageKey ?? "",
+    images: Array.isArray(project.images) ? project.images : [],
+    contentBlocks: Array.isArray(project.contentBlocks) ? project.contentBlocks : [],
+    status: project.status === "published" ? "published" : "draft",
+    createdAt: project.createdAt ?? now,
+    updatedAt: now,
   };
 }
 
-function jsonResponse(data: unknown, origin: string | null, status = 200): Response {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: {
-      "Content-Type": "application/json",
-      ...corsHeaders(origin),
+async function readProjects(env: Env): Promise<AdminProject[]> {
+  const object = await env.CONTENT_BUCKET.get(PROJECTS_OBJECT_KEY);
+  if (!object) return [];
+  const parsed = (await object.json()) as unknown;
+  if (!Array.isArray(parsed)) return [];
+  return parsed.filter((item): item is AdminProject => !!item && typeof item === "object");
+}
+
+async function writeProjects(env: Env, projects: AdminProject[]): Promise<void> {
+  await env.CONTENT_BUCKET.put(PROJECTS_OBJECT_KEY, JSON.stringify(projects), {
+    httpMetadata: {
+      contentType: "application/json; charset=utf-8",
+      cacheControl: "no-store",
     },
   });
+}
+
+function parseCookies(header: string | null): Map<string, string> {
+  const cookies = new Map<string, string>();
+  if (!header) return cookies;
+  for (const part of header.split(";")) {
+    const [rawName, ...rest] = part.trim().split("=");
+    if (!rawName) continue;
+    cookies.set(rawName, rest.join("="));
+  }
+  return cookies;
+}
+
+function base64UrlEncode(bytes: Uint8Array): string {
+  let binary = "";
+  for (const b of bytes) binary += String.fromCharCode(b);
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
+
+function base64UrlDecode(value: string): Uint8Array {
+  const padded = value.replace(/-/g, "+").replace(/_/g, "/") + "=".repeat((4 - (value.length % 4 || 4)) % 4);
+  const binary = atob(padded);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
+}
+
+async function hmacSha256(input: string, secret: string): Promise<string> {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw",
+    enc.encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+  const signature = await crypto.subtle.sign("HMAC", key, enc.encode(input));
+  return base64UrlEncode(new Uint8Array(signature));
+}
+
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let mismatch = 0;
+  for (let i = 0; i < a.length; i += 1) {
+    mismatch |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return mismatch === 0;
+}
+
+async function createSessionToken(email: string, env: Env): Promise<string> {
+  const payload: SessionPayload = {
+    email,
+    exp: Math.floor(Date.now() / 1000) + MAX_SESSION_AGE_SECONDS,
+  };
+  const payloadEncoded = base64UrlEncode(new TextEncoder().encode(JSON.stringify(payload)));
+  const signature = await hmacSha256(payloadEncoded, env.SESSION_SECRET);
+  return `${payloadEncoded}.${signature}`;
+}
+
+async function verifySessionToken(token: string, env: Env): Promise<SessionPayload | null> {
+  const [payloadEncoded, signature] = token.split(".");
+  if (!payloadEncoded || !signature) return null;
+  const expected = await hmacSha256(payloadEncoded, env.SESSION_SECRET);
+  if (!timingSafeEqual(signature, expected)) return null;
+  try {
+    const payloadRaw = new TextDecoder().decode(base64UrlDecode(payloadEncoded));
+    const payload = JSON.parse(payloadRaw) as SessionPayload;
+    if (!payload.email || !payload.exp) return null;
+    if (payload.exp <= Math.floor(Date.now() / 1000)) return null;
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
+function buildSessionCookie(value: string, secure: boolean): string {
+  const parts = [
+    `${SESSION_COOKIE}=${value}`,
+    "Path=/",
+    `Max-Age=${MAX_SESSION_AGE_SECONDS}`,
+    "HttpOnly",
+    "SameSite=Lax",
+  ];
+  if (secure) parts.push("Secure");
+  return parts.join("; ");
+}
+
+function clearSessionCookie(secure: boolean): string {
+  const parts = [
+    `${SESSION_COOKIE}=`,
+    "Path=/",
+    "Max-Age=0",
+    "HttpOnly",
+    "SameSite=Lax",
+  ];
+  if (secure) parts.push("Secure");
+  return parts.join("; ");
+}
+
+async function requireAuth(request: Request, env: Env): Promise<SessionPayload | null> {
+  const cookieMap = parseCookies(request.headers.get("cookie"));
+  const token = cookieMap.get(SESSION_COOKIE);
+  if (!token) return null;
+  return verifySessionToken(token, env);
+}
+
+function imageNameFromKey(key: string): string {
+  const parts = key.split("/");
+  return parts[parts.length - 1] || key;
+}
+
+function buildAssetUrl(key: string, env: Env, requestOrigin: string): string {
+  const base = env.PUBLIC_ASSET_BASE_URL?.replace(/\/$/, "") || `${requestOrigin}/assets`;
+  return `${base}/${key}`;
+}
+
+async function listImagesByPrefix(
+  env: Env,
+  prefix: string,
+  requestOrigin: string
+): Promise<StorageImage[]> {
+  const images: StorageImage[] = [];
+  let cursor: string | undefined = undefined;
+
+  while (true) {
+    const listed = await env.CONTENT_BUCKET.list({ prefix, cursor, limit: 1000 });
+    for (const object of listed.objects) {
+      const ext = object.key.split(".").pop()?.toLowerCase() ?? "";
+      if (!IMAGE_EXTENSIONS.has(ext)) continue;
+      images.push({
+        key: object.key,
+        name: imageNameFromKey(object.key),
+        url: buildAssetUrl(object.key, env, requestOrigin),
+        size: object.size,
+        lastModified: object.uploaded.toISOString(),
+      });
+    }
+    if (!listed.truncated || !listed.cursor) break;
+    cursor = listed.cursor;
+  }
+
+  return images.sort((a, b) => +new Date(b.lastModified) - +new Date(a.lastModified));
+}
+
+async function deleteByPrefix(env: Env, prefix: string): Promise<void> {
+  let cursor: string | undefined = undefined;
+  while (true) {
+    const listed = await env.CONTENT_BUCKET.list({ prefix, cursor, limit: 1000 });
+    await Promise.all(listed.objects.map((obj) => env.CONTENT_BUCKET.delete(obj.key)));
+    if (!listed.truncated || !listed.cursor) break;
+    cursor = listed.cursor;
+  }
+}
+
+function badRequest(message: string): Response {
+  return json({ error: message }, { status: 400 });
+}
+
+function unauthorized(): Response {
+  return json({ error: "Unauthorized" }, { status: 401 });
+}
+
+function notFound(): Response {
+  return json({ error: "Not found" }, { status: 404 });
 }
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
-    const origin = request.headers.get("Origin");
-
-    // Handle CORS preflight
-    if (request.method === "OPTIONS") {
-      return new Response(null, {
-        status: 204,
-        headers: corsHeaders(origin),
-      });
-    }
-
-    const path = url.pathname;
+    const pathname = getPathname(request);
+    const secureCookie = url.protocol === "https:";
 
     try {
-      // ═══════════════════════════════════════════
-      // GET endpoints
-      // ═══════════════════════════════════════════
-
-      if (request.method === "GET") {
-        // ── GET /folders — list all top-level folders ──
-        if (path === "/folders") {
-          const folders = await listFolders(env.BUCKET);
-          return jsonResponse({ folders }, origin);
-        }
-
-        // ── GET /folders/:name — list images inside a folder ──
-        const folderMatch = path.match(/^\/folders\/(.+)$/);
-        if (folderMatch) {
-          const folderName = decodeURIComponent(folderMatch[1]);
-          const prefix = folderName.endsWith("/") ? folderName : folderName + "/";
-          const images = await listFolderImages(env.BUCKET, prefix, url.origin);
-          return jsonResponse({ folder: folderName, images }, origin);
-        }
-
-        // ── GET /file/:key — proxy-serve a file from R2 ──
-        const fileMatch = path.match(/^\/file\/(.+)$/);
-        if (fileMatch) {
-          const key = decodeURIComponent(fileMatch[1]);
-          const object = await env.BUCKET.get(key);
-          if (!object) {
-            return jsonResponse({ error: "File not found" }, origin, 404);
-          }
-
-          const headers = new Headers(corsHeaders(origin));
-          object.writeHttpMetadata(headers);
-          headers.set("etag", object.httpEtag);
-          headers.set("Cache-Control", "public, max-age=31536000, immutable");
-
-          return new Response(object.body, { headers });
-        }
+      // Serve media files from the same worker if no separate media domain exists.
+      if (request.method === "GET" && pathname.startsWith("/assets/")) {
+        const key = decodeURIComponent(pathname.replace(/^\/assets\//, ""));
+        if (!key) return notFound();
+        const object = await env.CONTENT_BUCKET.get(key);
+        if (!object) return notFound();
+        const headers = new Headers();
+        object.writeHttpMetadata(headers);
+        headers.set("etag", object.httpEtag);
+        headers.set("cache-control", "public, max-age=31536000, immutable");
+        return new Response(object.body, { headers });
       }
 
-      // ═══════════════════════════════════════════
-      // PUT /upload/:key — upload a file to R2
-      // ═══════════════════════════════════════════
-
-      if (request.method === "PUT") {
-        const uploadMatch = path.match(/^\/upload\/(.+)$/);
-        if (uploadMatch) {
-          const key = decodeURIComponent(uploadMatch[1]);
-
-          if (!request.body) {
-            return jsonResponse({ error: "No body provided" }, origin, 400);
-          }
-
-          // Get content type from request or infer from extension
-          const contentType =
-            request.headers.get("Content-Type") ||
-            inferContentType(key);
-
-          await env.BUCKET.put(key, request.body, {
-            httpMetadata: {
-              contentType,
+      // Public: published projects for homepage.
+      if (request.method === "GET" && pathname === "/api/public/projects") {
+        const projects = await readProjects(env);
+        const published = projects.filter(
+          (project) =>
+            project.status === "published" &&
+            project.title.trim().length > 0 &&
+            project.coverImageKey.trim().length > 0
+        );
+        return json(
+          { projects: published },
+          {
+            headers: {
+              "cache-control": "public, max-age=60, s-maxage=300, stale-while-revalidate=86400",
             },
-          });
+          }
+        );
+      }
 
-          return jsonResponse(
-            {
-              ok: true,
-              key,
-              url: `${url.origin}/file/${encodeURIComponent(key)}`,
-            },
-            origin,
-            201
-          );
+      // Auth endpoints.
+      if (request.method === "POST" && pathname === "/api/admin/login") {
+        const body = (await request.json()) as { email?: string; password?: string };
+        const email = (body.email ?? "").trim().toLowerCase();
+        const password = body.password ?? "";
+        if (!password) return badRequest("Password is required");
+        if (password !== env.ADMIN_PASSWORD) return unauthorized();
+        if (env.ADMIN_EMAIL && email !== env.ADMIN_EMAIL.trim().toLowerCase()) {
+          return unauthorized();
+        }
+
+        const sessionEmail = env.ADMIN_EMAIL?.trim().toLowerCase() || email || "admin";
+        const token = await createSessionToken(sessionEmail, env);
+        const response = json({ ok: true, user: { email: sessionEmail } });
+        response.headers.set("set-cookie", buildSessionCookie(token, secureCookie));
+        return response;
+      }
+
+      if (request.method === "POST" && pathname === "/api/admin/logout") {
+        const response = json({ ok: true });
+        response.headers.set("set-cookie", clearSessionCookie(secureCookie));
+        return response;
+      }
+
+      if (request.method === "GET" && pathname === "/api/admin/session") {
+        const session = await requireAuth(request, env);
+        if (!session) return json({ authenticated: false });
+        return json({ authenticated: true, user: { email: session.email } });
+      }
+
+      if (!pathname.startsWith("/api/admin/")) {
+        return notFound();
+      }
+
+      const session = await requireAuth(request, env);
+      if (!session) return unauthorized();
+
+      if (request.method === "GET" && pathname === "/api/admin/health") {
+        const projects = await readProjects(env);
+        return json({ ok: true, projectCount: projects.length });
+      }
+
+      if (request.method === "GET" && pathname === "/api/admin/projects") {
+        const projects = await readProjects(env);
+        return json({ projects });
+      }
+
+      if (request.method === "POST" && pathname === "/api/admin/upload") {
+        const form = await request.formData();
+        const key = String(form.get("key") ?? "").trim();
+        const file = form.get("file");
+
+        if (!key) return badRequest("Missing key");
+        if (!key.startsWith("projects/")) return badRequest("Invalid key path");
+        if (!(file instanceof File)) return badRequest("Missing file");
+
+        await env.CONTENT_BUCKET.put(key, await file.arrayBuffer(), {
+          httpMetadata: {
+            contentType: file.type || "application/octet-stream",
+          },
+        });
+
+        return json({
+          key,
+          url: buildAssetUrl(key, env, url.origin),
+        });
+      }
+
+      if (pathname === "/api/admin/assets") {
+        const prefix = url.searchParams.get("prefix")?.trim() ?? "";
+        if (!prefix) return badRequest("Missing prefix");
+        if (!prefix.startsWith("projects/")) return badRequest("Invalid prefix");
+
+        if (request.method === "GET") {
+          const images = await listImagesByPrefix(env, prefix, url.origin);
+          return json({ images });
+        }
+
+        if (request.method === "DELETE") {
+          await deleteByPrefix(env, prefix);
+          return json({ ok: true });
         }
       }
 
-      // ═══════════════════════════════════════════
-      // DELETE /file/:key — delete a file from R2
-      // ═══════════════════════════════════════════
+      const projectMatch = pathname.match(/^\/api\/admin\/projects\/([^/]+)$/);
+      if (projectMatch) {
+        const projectId = decodeURIComponent(projectMatch[1]);
+        const projects = await readProjects(env);
+        const index = projects.findIndex((project) => project.id === projectId);
 
-      if (request.method === "DELETE") {
-        const deleteMatch = path.match(/^\/file\/(.+)$/);
-        if (deleteMatch) {
-          const key = decodeURIComponent(deleteMatch[1]);
-          await env.BUCKET.delete(key);
-          return jsonResponse({ ok: true, key }, origin);
+        if (request.method === "GET") {
+          if (index === -1) return notFound();
+          return json({ project: projects[index] });
+        }
+
+        if (request.method === "PUT") {
+          const body = (await request.json()) as { project?: AdminProject } | AdminProject;
+          const incoming = "project" in body ? body.project : body;
+          if (!incoming || typeof incoming !== "object") return badRequest("Missing project payload");
+          if (incoming.id !== projectId) return badRequest("Project ID mismatch");
+
+          const nextProject = normaliseProject(incoming);
+          const nextProjects = [...projects];
+          if (index === -1) nextProjects.push(nextProject);
+          else nextProjects[index] = nextProject;
+          await writeProjects(env, nextProjects);
+          return json({ project: nextProject });
+        }
+
+        if (request.method === "DELETE") {
+          if (index === -1) return json({ ok: true });
+          const nextProjects = projects.filter((project) => project.id !== projectId);
+          await writeProjects(env, nextProjects);
+          return json({ ok: true });
         }
       }
 
-      // ── Fallback ──
-      return jsonResponse(
-        {
-          api: "Portfolio R2 API",
-          endpoints: [
-            "GET  /folders",
-            "GET  /folders/:name",
-            "GET  /file/:key",
-            "PUT  /upload/:key",
-            "DELETE /file/:key",
-          ],
-        },
-        origin
-      );
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Internal server error";
-      return jsonResponse({ error: message }, origin, 500);
+      return notFound();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unexpected server error";
+      return json({ error: message }, { status: 500 });
     }
   },
-} satisfies ExportedHandler<Env>;
-
-// ── Helpers ──
-
-function inferContentType(key: string): string {
-  const ext = key.split(".").pop()?.toLowerCase() ?? "";
-  const types: Record<string, string> = {
-    jpg: "image/jpeg",
-    jpeg: "image/jpeg",
-    png: "image/png",
-    gif: "image/gif",
-    webp: "image/webp",
-    avif: "image/avif",
-    svg: "image/svg+xml",
-    bmp: "image/bmp",
-    ico: "image/x-icon",
-  };
-  return types[ext] || "application/octet-stream";
-}
-
-async function listFolders(bucket: R2Bucket): Promise<
-  {
-    name: string;
-    path: string;
-    imageCount: number;
-  }[]
-> {
-  const listed = await bucket.list({ delimiter: "/" });
-  const folderPrefixes = listed.delimitedPrefixes ?? [];
-
-  const folders = await Promise.all(
-    folderPrefixes.map(async (prefix) => {
-      const contents = await bucket.list({ prefix, limit: 100 });
-      const imageCount = contents.objects.filter((obj) =>
-        isImageKey(obj.key)
-      ).length;
-
-      return {
-        name: prefix.replace(/\/$/, ""),
-        path: prefix,
-        imageCount,
-      };
-    })
-  );
-
-  return folders;
-}
-
-async function listFolderImages(
-  bucket: R2Bucket,
-  prefix: string,
-  workerOrigin: string
-): Promise<
-  {
-    key: string;
-    name: string;
-    url: string;
-    size: number;
-    lastModified: string;
-  }[]
-> {
-  const listed = await bucket.list({ prefix, limit: 500 });
-
-  return listed.objects
-    .filter((obj) => isImageKey(obj.key))
-    .map((obj) => ({
-      key: obj.key,
-      name: obj.key.split("/").pop() ?? obj.key,
-      url: `${workerOrigin}/file/${encodeURIComponent(obj.key)}`,
-      size: obj.size,
-      lastModified: obj.uploaded.toISOString(),
-    }));
-}
+};

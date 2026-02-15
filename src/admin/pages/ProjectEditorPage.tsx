@@ -2,102 +2,145 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
-  Save,
-  ImageIcon,
+  FloppyDisk,
+  Image,
   Plus,
   FolderOpen,
-  RefreshCw,
-  Loader2,
-  Type,
-  Trash2,
-  Upload,
+  RefreshClockwise,
+  LoaderCircle,
+  TextFormat,
+  Trash,
+  CloudUpload,
   ChevronDown,
   ChevronUp,
   Star,
-} from "lucide-react";
+} from "geist-icons";
 import { SidebarTrigger } from "../../app/components/ui/sidebar";
 import { Separator } from "../../app/components/ui/separator";
 import { Button } from "../../app/components/ui/button";
 import { Input } from "../../app/components/ui/input";
 import { Badge } from "../../app/components/ui/badge";
 import { RichTextEditor } from "../components/RichTextEditor";
-import type { AdminProject, R2Image, ContentBlock, ImageBlock, TextBlock } from "../types";
-import { getR2Config, listFolderImages, uploadFile } from "../services/r2";
-
-const STORAGE_KEY = "portfolio_admin_projects";
+import type { AdminProject, StorageImage, ContentBlock, ImageBlock, TextBlock } from "../types";
+import {
+  loadProjectFromFirestore,
+  saveProjectToFirestore,
+  deleteProjectFromFirestore,
+  deleteStorageFolder,
+  uploadFile,
+  listFolderImages,
+  saveLocalProjects,
+  getLocalProjects,
+} from "../services/firebase";
 
 function loadProjects(): AdminProject[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
+  return getLocalProjects();
 }
 
 function saveProjects(projects: AdminProject[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+  saveLocalProjects(projects);
 }
 
 export function ProjectEditorPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [project, setProject] = useState<AdminProject | null>(null);
-  const [folderImages, setFolderImages] = useState<R2Image[]>([]);
+  const [folderImages, setFolderImages] = useState<StorageImage[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Load project
+  // Load project — try Firestore first, fall back to localStorage
   useEffect(() => {
-    const projects = loadProjects();
-    const found = projects.find((p) => p.id === id);
-    if (found) {
-      // Migrate old projects that don't have contentBlocks
-      if (!found.contentBlocks) {
-        found.contentBlocks = [];
-        // Auto-populate from images if present
-        if (found.images?.length) {
-          found.contentBlocks = found.images.map((img) => ({
-            type: "image" as const,
-            id: crypto.randomUUID(),
-            url: img.url,
-            key: img.key,
-          }));
+    async function load() {
+      if (id) {
+        try {
+          const fromFirestore = await loadProjectFromFirestore(id);
+          if (fromFirestore) {
+            // Migrate old projects that don't have contentBlocks
+            if (!fromFirestore.contentBlocks) {
+              fromFirestore.contentBlocks = [];
+              if (fromFirestore.images?.length) {
+                fromFirestore.contentBlocks = fromFirestore.images.map((img) => ({
+                  type: "image" as const,
+                  id: crypto.randomUUID(),
+                  url: img.url,
+                  key: img.key,
+                }));
+              }
+            }
+            setProject(fromFirestore);
+            setFolderImages(fromFirestore.images ?? []);
+            return;
+          }
+        } catch (err) {
+          console.error("Failed to load from Firestore:", err);
         }
       }
-      setProject(found);
-      setFolderImages(found.images ?? []);
-    } else {
-      navigate("/admin");
+
+      // Fallback to localStorage
+      const projects = loadProjects();
+      const found = projects.find((p) => p.id === id);
+      if (found) {
+        if (!found.contentBlocks) {
+          found.contentBlocks = [];
+          if (found.images?.length) {
+            found.contentBlocks = found.images.map((img) => ({
+              type: "image" as const,
+              id: crypto.randomUUID(),
+              url: img.url,
+              key: img.key,
+            }));
+          }
+        }
+        setProject(found);
+        setFolderImages(found.images ?? []);
+      } else {
+        navigate("/admin");
+      }
     }
+    load();
   }, [id, navigate]);
 
-  // Load images from R2 folder
+  // Load images from Firebase Storage folder
   useEffect(() => {
-    if (!project?.r2Folder) return;
-    const config = getR2Config();
-    if (!config) return;
+    if (!project?.storagePath) return;
 
-    listFolderImages(config, project.r2Folder).then((images) => {
+    listFolderImages(project.storagePath).then((images) => {
       if (images.length > 0) {
         setFolderImages(images);
         setProject((prev) => (prev ? { ...prev, images } : prev));
       }
     });
-  }, [project?.r2Folder]);
+  }, [project?.storagePath]);
 
-  // Auto-save
-  const save = useCallback(() => {
+  // Save — to Firestore + localStorage
+  const save = useCallback(async () => {
     if (!project) return;
     setIsSaving(true);
+
+    const updatedProject = { ...project, updatedAt: new Date().toISOString() };
+
+    // Save to localStorage
     const projects = loadProjects();
     const updated = projects.map((p) =>
-      p.id === project.id ? { ...project, updatedAt: new Date().toISOString() } : p
+      p.id === project.id ? updatedProject : p
     );
+    // If not in localStorage yet, add it
+    if (!projects.some((p) => p.id === project.id)) {
+      updated.push(updatedProject);
+    }
     saveProjects(updated);
+
+    // Save to Firestore
+    try {
+      await saveProjectToFirestore(updatedProject);
+    } catch (err) {
+      console.error("Failed to save to Firestore:", err);
+    }
+
     setLastSaved(new Date());
     setTimeout(() => setIsSaving(false), 300);
   }, [project]);
@@ -118,12 +161,10 @@ export function ProjectEditorPage() {
     setProject((prev) => (prev ? { ...prev, [key]: value } : prev));
   };
 
-  const refreshFromR2 = async () => {
-    if (!project?.r2Folder) return;
-    const config = getR2Config();
-    if (!config?.workerUrl) return;
+  const refreshFromStorage = async () => {
+    if (!project?.storagePath) return;
     setRefreshing(true);
-    const images = await listFolderImages(config, project.r2Folder);
+    const images = await listFolderImages(project.storagePath);
     setFolderImages(images);
     update("images", images);
     if (!project.coverImageKey && images.length > 0) {
@@ -197,31 +238,25 @@ export function ProjectEditorPage() {
 
   const handleFileUpload = async (files: FileList | null) => {
     if (!files || !project) return;
-    const config = getR2Config();
-    if (!config?.workerUrl) {
-      alert("Worker URL not configured. Go to Settings first.");
-      return;
-    }
 
     setUploading(true);
 
-    // Determine folder name
-    const folder = project.r2Folder
-      ? project.r2Folder.replace(/\/$/, "")
-      : project.title.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+    // Determine storage folder name
+    const folder = project.storagePath
+      ? project.storagePath.replace(/\/$/, "")
+      : `projects/${project.id}`;
 
-    // If no r2Folder set, set it now
-    if (!project.r2Folder) {
-      update("r2Folder", folder + "/");
+    // If no storagePath set, set it now
+    if (!project.storagePath) {
+      update("storagePath", folder + "/");
     }
 
     for (const file of Array.from(files)) {
       const key = `${folder}/${file.name}`;
-      const result = await uploadFile(config, key, file);
+      const result = await uploadFile(key, file);
 
       if (result.ok) {
-        // Add to images list
-        const newImg: R2Image = {
+        const newImg: StorageImage = {
           key: result.key,
           name: file.name,
           url: result.url,
@@ -246,16 +281,20 @@ export function ProjectEditorPage() {
             images: updatedImages,
             contentBlocks: updatedBlocks,
             coverImageKey: prev.coverImageKey || result.url,
+            storagePath: prev.storagePath || folder + "/",
           };
         });
+      } else {
+        console.error("Upload failed:", result.error);
+        alert(`Upload failed for "${file.name}": ${result.error}\n\nMake sure Firebase Storage rules allow writes. See Settings for instructions.`);
       }
     }
 
     setUploading(false);
   };
 
-  // Add image from existing R2 images to blocks
-  const addExistingImageToBlocks = (img: R2Image) => {
+  // Add image from existing folder images to blocks
+  const addExistingImageToBlocks = (img: StorageImage) => {
     addImageBlock(img.url, img.key);
   };
 
@@ -301,7 +340,7 @@ export function ProjectEditorPage() {
             {project.status}
           </Badge>
           <Button size="sm" onClick={save} disabled={isSaving} className="gap-1.5">
-            <Save className="size-4" />
+            <FloppyDisk className="size-4" />
             {isSaving ? "Saving..." : "Save"}
           </Button>
         </div>
@@ -314,46 +353,38 @@ export function ProjectEditorPage() {
             ════════════════════════════════════════════ */}
         <aside className="flex w-80 shrink-0 flex-col overflow-y-auto border-r border-border bg-muted/30 p-5">
           <div className="flex-1 space-y-5">
-            {/* Title — syncs to R2 folder */}
+            {/* Title */}
             <FieldGroup label="Title">
               <Input
                 value={project.title}
                 onChange={(e) => {
                   const title = e.target.value;
                   update("title", title);
-                  // Sync R2 folder from title
-                  const folder = title
-                    .toLowerCase()
-                    .replace(/\s+/g, "-")
-                    .replace(/[^a-z0-9-]/g, "");
-                  if (folder) {
-                    update("r2Folder", folder + "/");
-                  }
                 }}
                 placeholder="Project title"
                 className="text-sm"
               />
             </FieldGroup>
 
-            {/* R2 Folder (read-only, derived from title) */}
+            {/* Storage path (read-only) */}
             <div className="flex items-center gap-1.5 rounded-md bg-muted px-2.5 py-1.5">
               <FolderOpen className="size-3.5 shrink-0 text-muted-foreground" />
               <span className="truncate text-[11px] text-muted-foreground">
-                {project.r2Folder || "auto-created from title"}
+                {project.storagePath || "auto-created on first upload"}
               </span>
-              {project.r2Folder && (
+              {project.storagePath && (
                 <Button
                   size="icon"
                   variant="ghost"
                   className="ml-auto size-6 shrink-0"
-                  onClick={refreshFromR2}
+                  onClick={refreshFromStorage}
                   disabled={refreshing}
-                  title="Refresh from R2"
+                  title="Refresh from Storage"
                 >
                   {refreshing ? (
-                    <Loader2 className="size-3 animate-spin" />
+                    <LoaderCircle className="size-3 animate-spin" />
                   ) : (
-                    <RefreshCw className="size-3" />
+                    <RefreshClockwise className="size-3" />
                   )}
                 </Button>
               )}
@@ -389,9 +420,9 @@ export function ProjectEditorPage() {
 
             <Separator />
 
-            {/* R2 folder images (thumbnails) */}
+            {/* Folder images (thumbnails) */}
             {folderImages.length > 0 && (
-              <FieldGroup label={`R2 Images (${folderImages.length})`}>
+              <FieldGroup label={`Images (${folderImages.length})`}>
                 <div className="mt-1 grid grid-cols-3 gap-1.5">
                   {folderImages.map((img, idx) => {
                     const isInBlocks = project.contentBlocks.some(
@@ -434,14 +465,16 @@ export function ProjectEditorPage() {
               variant="ghost"
               className="w-full gap-1.5 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive"
               onClick={async () => {
-                if (!confirm("Delete this project and all its R2 images? This cannot be undone.")) return;
-                // Delete from R2
-                if (project.r2Folder) {
-                  const config = getR2Config();
-                  if (config?.workerUrl) {
-                    const { deleteR2Folder } = await import("../services/r2");
-                    await deleteR2Folder(config, project.r2Folder);
-                  }
+                if (!confirm("Delete this project and all its images? This cannot be undone.")) return;
+                // Delete from Firebase Storage
+                if (project.storagePath) {
+                  await deleteStorageFolder(project.storagePath);
+                }
+                // Delete from Firestore
+                try {
+                  await deleteProjectFromFirestore(project.id);
+                } catch (err) {
+                  console.error("Failed to delete from Firestore:", err);
                 }
                 // Delete from localStorage
                 const projects = loadProjects().filter((p) => p.id !== project.id);
@@ -449,7 +482,7 @@ export function ProjectEditorPage() {
                 navigate("/admin");
               }}
             >
-              <Trash2 className="size-3.5" />
+              <Trash className="size-3.5" />
               Delete Project
             </Button>
           </div>
@@ -472,7 +505,7 @@ export function ProjectEditorPage() {
                   className="gap-1.5 text-xs"
                   onClick={addTextBlock}
                 >
-                  <Type className="size-3.5" />
+                  <TextFormat className="size-3.5" />
                   Text
                 </Button>
                 <Button
@@ -483,9 +516,9 @@ export function ProjectEditorPage() {
                   disabled={uploading}
                 >
                   {uploading ? (
-                    <Loader2 className="size-3.5 animate-spin" />
+                    <LoaderCircle className="size-3.5 animate-spin" />
                   ) : (
-                    <Upload className="size-3.5" />
+                    <CloudUpload className="size-3.5" />
                   )}
                   Upload Image
                 </Button>
@@ -504,7 +537,7 @@ export function ProjectEditorPage() {
             {project.contentBlocks.length === 0 ? (
               <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border py-20">
                 <div className="flex size-16 items-center justify-center rounded-2xl bg-muted">
-                  <ImageIcon className="size-7 text-muted-foreground/40" />
+                  <Image className="size-7 text-muted-foreground/40" />
                 </div>
                 <p className="mt-4 text-sm font-medium text-foreground">
                   Start building your project post
@@ -520,7 +553,7 @@ export function ProjectEditorPage() {
                     className="gap-1.5"
                     onClick={() => fileInputRef.current?.click()}
                   >
-                    <Upload className="size-4" />
+                    <CloudUpload className="size-4" />
                     Upload Images
                   </Button>
                   <Button
@@ -529,7 +562,7 @@ export function ProjectEditorPage() {
                     className="gap-1.5"
                     onClick={addTextBlock}
                   >
-                    <Type className="size-4" />
+                    <TextFormat className="size-4" />
                     Add Text
                   </Button>
                 </div>
@@ -663,7 +696,7 @@ function ContentBlockEditor({
           className="flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
           title="Remove block"
         >
-          <Trash2 className="size-3.5" />
+          <Trash className="size-3.5" />
         </button>
       </div>
 

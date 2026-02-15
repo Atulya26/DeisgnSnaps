@@ -1,9 +1,10 @@
 import { NavLink, Outlet } from "react-router-dom";
 import {
   FolderOpen,
-  Settings,
-  ExternalLink,
-} from "lucide-react";
+  SettingsGear,
+  External,
+  Logout,
+} from "geist-icons";
 import {
   SidebarProvider,
   Sidebar,
@@ -19,13 +20,16 @@ import {
   SidebarInset,
 } from "../../app/components/ui/sidebar";
 import { cn } from "../../app/components/ui/utils";
+import { useAuth } from "./AuthContext";
 
 const navItems = [
   { to: "/admin", icon: FolderOpen, label: "Projects", end: true },
-  { to: "/admin/settings", icon: Settings, label: "Settings", end: false },
+  { to: "/admin/settings", icon: SettingsGear, label: "Settings", end: false },
 ];
 
 export function AdminLayout() {
+  const { user, signOut } = useAuth();
+
   return (
     <SidebarProvider>
       <Sidebar variant="sidebar" collapsible="icon">
@@ -70,7 +74,14 @@ export function AdminLayout() {
           </SidebarGroup>
         </SidebarContent>
 
-        <SidebarFooter className="px-4 py-3">
+        <SidebarFooter className="space-y-1 px-4 py-3">
+          {/* Signed-in user */}
+          {user && (
+            <div className="truncate px-2 text-[10px] text-muted-foreground/60">
+              {user.email}
+            </div>
+          )}
+
           <a
             href="/"
             target="_blank"
@@ -80,9 +91,21 @@ export function AdminLayout() {
               "transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
             )}
           >
-            <ExternalLink className="size-4" />
+            <External className="size-4" />
             <span className="truncate">View Portfolio</span>
           </a>
+
+          <button
+            type="button"
+            onClick={signOut}
+            className={cn(
+              "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-muted-foreground",
+              "transition-colors hover:bg-destructive/10 hover:text-destructive"
+            )}
+          >
+            <Logout className="size-4" />
+            <span className="truncate">Sign Out</span>
+          </button>
         </SidebarFooter>
       </Sidebar>
 

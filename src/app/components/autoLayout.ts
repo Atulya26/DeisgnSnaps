@@ -3,80 +3,85 @@ import type { Project } from "./types";
 /**
  * Auto-layout engine for the infinite canvas.
  *
- * Distributes projects in an evenly-spaced masonry grid with varied card sizes.
- * Equal-weighted spacing: column gaps and row gaps are visually balanced.
- * Deterministic — same input always produces the same output.
+ * Distributes projects in a clean masonry grid that works well with any
+ * number of projects (1 to 100+). Cards have uniform width per column
+ * with varied heights for visual interest.
+ *
+ * Key principles:
+ *   - Column count adapts to project count (fewer projects = fewer columns)
+ *   - Uniform card width within each column (no "floating" cards)
+ *   - Height variety from a repeating pattern for visual rhythm
+ *   - Shortest-column placement for balanced masonry
+ *   - Deterministic — same input always produces the same output
  */
 
 // ── Layout constants ──
-const GAP_X = 90;  // horizontal gap between columns
-const GAP_Y = 90;  // vertical gap between rows — equal to horizontal for uniform feel
-const PADDING_LEFT = 30; // left margin — kept small so tile seams look seamless
-const PADDING_TOP = 30;  // top margin — kept small so tile seams look seamless
-const COLS = 7;    // number of columns
+const CARD_WIDTH = 340;   // uniform card width — clean grid
+const GAP_X = 120;        // horizontal gap between columns — generous breathing room
+const GAP_Y = 110;        // vertical gap between rows — generous breathing room
+const PADDING_LEFT = 60;  // left margin
+const PADDING_TOP = 60;   // top margin
+const MAX_COLS = 7;       // maximum number of columns
 
-// Card size presets — gives visual variety
-const CARD_SIZES: { width: number; height: number }[] = [
-  { width: 380, height: 280 },
-  { width: 340, height: 400 },
-  { width: 420, height: 300 },
-  { width: 360, height: 260 },
-  { width: 400, height: 290 },
-  { width: 340, height: 250 },
-  { width: 370, height: 280 },
-  { width: 360, height: 420 },
-  { width: 380, height: 280 },
-  { width: 320, height: 390 },
-  { width: 400, height: 300 },
-  { width: 350, height: 420 },
+// Height presets — gives visual variety while keeping things tidy
+const HEIGHT_PATTERN = [
+  280, 340, 260, 380, 300, 260, 320, 360, 280, 300,
+  340, 260, 380, 280, 320, 300, 360, 280, 340, 260,
 ];
 
-// Deterministic size based on index
-function seededSize(index: number): { width: number; height: number } {
-  return CARD_SIZES[index % CARD_SIZES.length];
+/**
+ * Determine optimal column count based on project count.
+ * Aims for roughly 5-8 rows per column so the grid never looks too sparse.
+ */
+function getColumnCount(projectCount: number): number {
+  if (projectCount <= 3) return projectCount;
+  if (projectCount <= 8) return 3;
+  if (projectCount <= 15) return 4;
+  if (projectCount <= 24) return 5;
+  if (projectCount <= 35) return 6;
+  return MAX_COLS;
 }
-
-// Each column's center is spaced evenly; cards are centered within their column.
-// Column center spacing = max card width (420) + GAP_X
-const COL_CENTER_SPACING = 420 + GAP_X;
 
 /**
  * Compute x, y, width, height for every project.
- * Uses a "shortest column" masonry approach with cards centered in their column.
+ * Uses a "shortest column" masonry approach with uniform-width cards.
  */
 export function autoLayoutProjects(
   projects: Omit<Project, "x" | "y" | "width" | "height">[]
 ): Project[] {
+  const count = projects.length;
+  if (count === 0) return [];
+
+  const cols = getColumnCount(count);
+
   // Track the bottom edge of each column
-  const colHeights = new Array(COLS).fill(PADDING_TOP);
+  const colHeights = new Array(cols).fill(PADDING_TOP);
 
   return projects.map((project, index) => {
-    const size = seededSize(index);
+    const height = HEIGHT_PATTERN[index % HEIGHT_PATTERN.length];
 
     // Find the shortest column
     let minCol = 0;
     let minHeight = colHeights[0];
-    for (let c = 1; c < COLS; c++) {
+    for (let c = 1; c < cols; c++) {
       if (colHeights[c] < minHeight) {
         minHeight = colHeights[c];
         minCol = c;
       }
     }
 
-    // Center the card within its column slot
-    const colCenterX = PADDING_LEFT + (420 / 2) + minCol * COL_CENTER_SPACING;
-    const x = colCenterX - size.width / 2;
+    const x = PADDING_LEFT + minCol * (CARD_WIDTH + GAP_X);
     const y = colHeights[minCol];
 
-    // Update the column height (card height + title bar ~48px + vertical gap)
-    colHeights[minCol] = y + size.height + 48 + GAP_Y;
+    // Update the column height (card height + gap)
+    colHeights[minCol] = y + height + GAP_Y;
 
     return {
       ...project,
       x,
       y,
-      width: size.width,
-      height: size.height,
+      width: CARD_WIDTH,
+      height,
     } as Project;
   });
 }

@@ -4,20 +4,18 @@ import Image from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
 import {
-  Bold,
-  Italic,
-  Strikethrough,
-  List,
+  TextBold,
+  TextItalic,
+  TextStrikethrough,
+  ListUnordered,
   ListOrdered,
-  Quote,
-  Heading2,
-  Heading3,
+  TextHeading,
   Link as LinkIcon,
-  ImageIcon,
-  Undo,
-  Redo,
+  Image as ImageIcon,
+  RotateCounterClockwise,
+  RotateClockwise,
   Minus,
-} from "lucide-react";
+} from "geist-icons";
 import { cn } from "../../app/components/ui/utils";
 import { Button } from "../../app/components/ui/button";
 import { Separator } from "../../app/components/ui/separator";
@@ -82,21 +80,21 @@ export function RichTextEditor({
           active={editor.isActive("bold")}
           aria-label="Bold"
         >
-          <Bold className="size-4" />
+          <TextBold className="size-4" />
         </ToolbarButton>
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleItalic().run()}
           active={editor.isActive("italic")}
           aria-label="Italic"
         >
-          <Italic className="size-4" />
+          <TextItalic className="size-4" />
         </ToolbarButton>
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleStrike().run()}
           active={editor.isActive("strike")}
           aria-label="Strikethrough"
         >
-          <Strikethrough className="size-4" />
+          <TextStrikethrough className="size-4" />
         </ToolbarButton>
 
         <Separator orientation="vertical" className="mx-1 h-5" />
@@ -108,7 +106,7 @@ export function RichTextEditor({
           active={editor.isActive("heading", { level: 2 })}
           aria-label="Heading 2"
         >
-          <Heading2 className="size-4" />
+          <TextHeading className="size-4" />
         </ToolbarButton>
         <ToolbarButton
           onClick={() =>
@@ -117,7 +115,7 @@ export function RichTextEditor({
           active={editor.isActive("heading", { level: 3 })}
           aria-label="Heading 3"
         >
-          <Heading3 className="size-4" />
+          <TextHeading className="size-4" />
         </ToolbarButton>
 
         <Separator orientation="vertical" className="mx-1 h-5" />
@@ -127,7 +125,7 @@ export function RichTextEditor({
           active={editor.isActive("bulletList")}
           aria-label="Bullet list"
         >
-          <List className="size-4" />
+          <ListUnordered className="size-4" />
         </ToolbarButton>
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
@@ -141,7 +139,7 @@ export function RichTextEditor({
           active={editor.isActive("blockquote")}
           aria-label="Blockquote"
         >
-          <Quote className="size-4" />
+          <span className="inline-flex size-4 items-center justify-center text-[10px] font-serif leading-none">❝</span>
         </ToolbarButton>
         <ToolbarButton
           onClick={() => editor.chain().focus().setHorizontalRule().run()}
@@ -166,14 +164,14 @@ export function RichTextEditor({
           disabled={!editor.can().undo()}
           aria-label="Undo"
         >
-          <Undo className="size-4" />
+          <RotateCounterClockwise className="size-4" />
         </ToolbarButton>
         <ToolbarButton
           onClick={() => editor.chain().focus().redo().run()}
           disabled={!editor.can().redo()}
           aria-label="Redo"
         >
-          <Redo className="size-4" />
+          <RotateClockwise className="size-4" />
         </ToolbarButton>
       </div>
 
