@@ -12,6 +12,9 @@ import { PortfolioCard } from "./PortfolioCard";
 import { ZoomControls } from "./ZoomControls";
 import { useTheme } from "./ThemeContext";
 import { BackgroundRippleEffect } from "./BackgroundRippleEffect";
+import { computeInitialCamera } from "./autoLayout";
+
+const TOOLBAR_OFFSET = 70; // must match App.tsx paddingTop
 
 interface InfiniteCanvasProps {
   projects: Project[];
@@ -69,12 +72,28 @@ export function InfiniteCanvas({
   const containerRef = useRef<HTMLDivElement>(null);
   const transformGroupRef = useRef<HTMLDivElement>(null);
 
+  // ── Initial camera: centered on the masonry bounds so ultrawide/4K screens
+  //     don't leave a big empty band. Computed once from the first `projects`
+  //     snapshot — panning is unaffected when admin entries resolve later. ──
+  const initialCameraSeed = useMemo(
+    () => {
+      if (typeof window === "undefined") return { x: -60, y: -40 };
+      return computeInitialCamera(
+        projects,
+        { width: window.innerWidth, height: window.innerHeight - TOOLBAR_OFFSET },
+        DEFAULT_ZOOM
+      );
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
   // ── Camera & zoom live in refs (never trigger React re-renders) ──
-  const camera = useRef({ x: -60, y: -40 });
+  const camera = useRef({ ...initialCameraSeed });
   const zoom = useRef(DEFAULT_ZOOM);
 
   // Smooth targets — input handlers write here, render loop lerps toward them
-  const targetCamera = useRef({ x: -60, y: -40 });
+  const targetCamera = useRef({ ...initialCameraSeed });
   const targetZoom = useRef(DEFAULT_ZOOM);
 
   // ── Drag state ──
@@ -109,7 +128,7 @@ export function InfiniteCanvas({
   const lastFrameTime = useRef(0);
 
   // ── React state: only for tile calculation & zoom display (updated sparingly) ──
-  const [tileCamera, setTileCamera] = useState({ x: -60, y: -40 });
+  const [tileCamera, setTileCamera] = useState(initialCameraSeed);
   const [tileZoom, setTileZoom] = useState(DEFAULT_ZOOM);
   const [displayZoom, setDisplayZoom] = useState(DEFAULT_ZOOM);
   const lastDisplayZoomUpdate = useRef(0);
@@ -779,7 +798,7 @@ export function InfiniteCanvas({
         ref={transformGroupRef}
         className="absolute left-0 top-0 z-[1]"
         style={{
-          transform: `scale(${DEFAULT_ZOOM}) translate3d(${60}px, ${40}px, 0)`,
+          transform: `scale(${DEFAULT_ZOOM}) translate3d(${-initialCameraSeed.x}px, ${-initialCameraSeed.y}px, 0)`,
           transformOrigin: "0 0",
           willChange: "transform",
           contain: "layout style",

@@ -81,6 +81,31 @@ function AppContent() {
     return autoLayoutProjects(allProjects);
   }, [adminEntries]);
 
+  // Warm the hero batch on idle so cards feel instant once the boot overlay
+  // fades. Browser de-dupes the preload with the later <img> request.
+  useEffect(() => {
+    if (projects.length === 0) return;
+    const idle =
+      (window as Window & {
+        requestIdleCallback?: (cb: () => void) => number;
+      }).requestIdleCallback ??
+      ((cb: () => void) => setTimeout(cb, 200));
+
+    idle(() => {
+      const seen = new Set<string>();
+      for (const p of projects.slice(0, 10)) {
+        if (!p.imageUrl || seen.has(p.imageUrl)) continue;
+        seen.add(p.imageUrl);
+        const l = document.createElement("link");
+        l.rel = "preload";
+        l.as = "image";
+        l.href = p.imageUrl;
+        (l as HTMLLinkElement & { fetchPriority?: string }).fetchPriority = "high";
+        document.head.appendChild(l);
+      }
+    });
+  }, [projects]);
+
   const handleOpenProject = useCallback((project: Project, rect: DOMRect) => {
     originRectRef.current = rect;
     setOriginRect(rect);

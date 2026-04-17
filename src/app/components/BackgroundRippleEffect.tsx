@@ -204,6 +204,12 @@ export const BackgroundRippleEffect = React.memo(
 
     // Main loop — only redraws when camera moved or pushed dots are animating
     const tick = useCallback(() => {
+      // Skip entirely when tab is hidden — no CPU burn on backgrounded tabs.
+      if (typeof document !== "undefined" && document.hidden) {
+        rafId.current = requestAnimationFrame(tick);
+        return;
+      }
+
       const cam = cameraRef.current;
       const z = zoomRef.current;
       const last = lastDrawnCamera.current;
@@ -246,6 +252,15 @@ export const BackgroundRippleEffect = React.memo(
         cancelAnimationFrame(rafId.current);
       };
     }, [tick, draw]);
+
+    // Redraw once when returning to the tab so the grid is correct before the next real frame.
+    useEffect(() => {
+      const onVisible = () => {
+        if (!document.hidden) draw();
+      };
+      document.addEventListener("visibilitychange", onVisible);
+      return () => document.removeEventListener("visibilitychange", onVisible);
+    }, [draw]);
 
     useEffect(() => {
       draw();

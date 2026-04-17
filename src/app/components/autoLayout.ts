@@ -85,3 +85,37 @@ export function autoLayoutProjects(
     } as Project;
   });
 }
+
+/** Tight bounding box of an already-laid-out project set. */
+export function getLayoutBounds(projects: Project[]) {
+  if (projects.length === 0) return { minX: 0, minY: 0, maxX: 0, maxY: 0 };
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (const p of projects) {
+    if (p.x < minX) minX = p.x;
+    if (p.y < minY) minY = p.y;
+    if (p.x + p.width > maxX) maxX = p.x + p.width;
+    if (p.y + p.height > maxY) maxY = p.y + p.height;
+  }
+  return { minX, minY, maxX, maxY };
+}
+
+/**
+ * Initial camera position that centers the masonry in the visible canvas area
+ * at the given zoom. Shared between `InfiniteCanvas` (seed refs) and
+ * `BootSequence` (scatter-target calculation) so the boot handoff is pixel-
+ * perfect on any viewport size.
+ */
+export function computeInitialCamera(
+  projects: Project[],
+  viewport: { width: number; height: number },
+  zoom: number
+) {
+  if (projects.length === 0) return { x: -60, y: -40 };
+  const { minX, minY, maxX, maxY } = getLayoutBounds(projects);
+  const centerX = (minX + maxX) / 2;
+  const centerY = (minY + maxY) / 2;
+  return {
+    x: centerX - viewport.width / (2 * zoom),
+    y: centerY - viewport.height / (2 * zoom),
+  };
+}

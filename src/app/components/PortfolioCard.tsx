@@ -90,13 +90,12 @@ export function PortfolioCard({ project, onOpen, skipAnimation, index = 0 }: Por
             backgroundColor: colors.imageBg,
           }}
         >
-          {/* Shimmer */}
+          {/* Shimmer — pure-CSS animation (see styles/index.css). Avoids
+              N infinite motion animations when cards replicate across tiles. */}
           {!imageLoaded && (
-            <motion.div
-              className="absolute inset-0"
+            <div
+              className="portfolio-card-shimmer absolute inset-0"
               style={{ backgroundColor: colors.shimmer }}
-              animate={{ opacity: [0.4, 0.7, 0.4] }}
-              transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
             />
           )}
 
@@ -112,6 +111,9 @@ export function PortfolioCard({ project, onOpen, skipAnimation, index = 0 }: Por
               src={project.imageUrl}
               alt={project.title}
               className="h-full w-full object-cover"
+              decoding="async"
+              loading={index < 8 ? "eager" : "lazy"}
+              fetchPriority={index < 8 ? "high" : "low"}
               onLoad={() => setImageLoaded(true)}
               style={{ opacity: imageLoaded ? 1 : 0, transition: "opacity 0.5s ease" }}
             />

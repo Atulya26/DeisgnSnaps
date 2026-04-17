@@ -1,6 +1,7 @@
 import { useRef, useEffect, useCallback, useMemo } from "react";
 import { gsap } from "gsap";
 import { useTheme } from "./ThemeContext";
+import { computeInitialCamera } from "./autoLayout";
 import type { Project } from "./types";
 
 interface BootSequenceProps {
@@ -10,8 +11,6 @@ interface BootSequenceProps {
 
 // Must match InfiniteCanvas constants exactly
 const DEFAULT_ZOOM = 0.60;
-const CAMERA_X = -60;
-const CAMERA_Y = -40;
 const TOOLBAR_HEIGHT = 70;
 const TITLE_BAR_HEIGHT = 48; // approx height of the title bar below image
 
@@ -52,18 +51,20 @@ export function BootSequence({ projects, onComplete }: BootSequenceProps) {
 
   // Compute the EXACT screen positions each card will have on the real canvas.
   // This replicates InfiniteCanvas's transform: scale(zoom) translate3d(-camX, -camY, 0)
-  // plus the toolbar offset.
+  // plus the toolbar offset. The camera origin is shared with InfiniteCanvas via
+  // `computeInitialCamera` so the handoff lands pixel-perfect on any viewport.
   const scatterPositions = useMemo(() => {
     const z = DEFAULT_ZOOM;
-    const offsetX = -CAMERA_X; // 60
-    const offsetY = -CAMERA_Y; // 40
+    const vw = typeof window !== "undefined" ? window.innerWidth : 1440;
+    const vh = typeof window !== "undefined" ? window.innerHeight - TOOLBAR_HEIGHT : 900;
+    const cam = computeInitialCamera(projects, { width: vw, height: vh }, z);
 
     return projects.map((p) => {
       // Canvas-space → screen-space:
-      // screenX = (projectX + cameraOffset) * zoom
-      // screenY = (projectY + cameraOffset) * zoom + toolbarHeight
-      const sx = (p.x + offsetX) * z;
-      const sy = (p.y + offsetY) * z + TOOLBAR_HEIGHT;
+      // screenX = (projectX - camX) * zoom
+      // screenY = (projectY - camY) * zoom + toolbarHeight
+      const sx = (p.x - cam.x) * z;
+      const sy = (p.y - cam.y) * z + TOOLBAR_HEIGHT;
       const sw = p.width * z;
       const sh = p.height * z;
       const titleH = TITLE_BAR_HEIGHT * z;
