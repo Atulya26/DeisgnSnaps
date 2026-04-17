@@ -28,6 +28,7 @@ export function BootSequence({ projects, onComplete }: BootSequenceProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
   const stackCardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const scatterCardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const scatterGroupRef = useRef<HTMLDivElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
   const statusRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
@@ -112,6 +113,17 @@ export function BootSequence({ projects, onComplete }: BootSequenceProps) {
       });
     });
 
+    // Scatter group starts slightly zoomed-in. At fade-out, we tween this
+    // to 1.0 — feels like the camera pulls back into the final masonry.
+    // Similar to shopify.design's hero→grid reveal, minus any visual/design
+    // change: the live canvas underneath stays at DEFAULT_ZOOM the whole time.
+    if (scatterGroupRef.current) {
+      gsap.set(scatterGroupRef.current, {
+        scale: 1.08,
+        transformOrigin: "center center",
+      });
+    }
+
     gsap.set(logo, { opacity: 0, y: -8 });
     gsap.set(status, { opacity: 0 });
 
@@ -194,9 +206,24 @@ export function BootSequence({ projects, onComplete }: BootSequenceProps) {
       );
     });
 
-    // ── Phase 4: Fade overlay — seamless handoff ──
+    // ── Phase 4: Hero-settle + seamless handoff ──
     const lastScatterDelay = scatterStart + 0.1 + scatterEls.length * SCATTER_STAGGER;
-    const fadeStart = lastScatterDelay + 0.25;
+    // Start the pullback a hair before the fade so cards settle while the
+    // overlay is still opaque; the overlay finishes fading after the group
+    // has already reached scale 1.0 — pixel-perfect match with the canvas.
+    const settleStart = lastScatterDelay + 0.15;
+    const fadeStart = settleStart + 0.55;
+    if (scatterGroupRef.current) {
+      tl.to(
+        scatterGroupRef.current,
+        {
+          scale: 1.0,
+          duration: 0.9,
+          ease: "power2.out",
+        },
+        settleStart
+      );
+    }
     tl.to(
       overlay,
       {
@@ -304,7 +331,13 @@ export function BootSequence({ projects, onComplete }: BootSequenceProps) {
         </div>
       ))}
 
-      {/* ── Scatter cards (Phase 3) — exact canvas replicas ── */}
+      {/* ── Scatter cards (Phase 3) — exact canvas replicas ──
+           Wrapped in a group so Phase 4 can pull back from scale 1.08 → 1.0. */}
+      <div
+        ref={scatterGroupRef}
+        className="absolute inset-0"
+        style={{ willChange: "transform" }}
+      >
       {projects.map((project, idx) => {
         const pos = scatterPositions[idx];
         if (!pos) return null;
@@ -391,6 +424,7 @@ export function BootSequence({ projects, onComplete }: BootSequenceProps) {
           </div>
         );
       })}
+      </div>
 
       {/* ── Center status (no counter) ── */}
       <div className="pointer-events-none absolute inset-0 z-30 flex flex-col items-center justify-center">

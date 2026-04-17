@@ -46,7 +46,7 @@ export function PortfolioCard({ project, onOpen, skipAnimation, index = 0 }: Por
         top: project.y,
         width: project.width,
       }}
-      initial={skipAnimation || prefersReduced ? false : { opacity: 0, y: 20, scale: 0.97 }}
+      initial={skipAnimation || prefersReduced ? false : { opacity: 0, y: 14, scale: 1.04 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={skipAnimation || prefersReduced ? { duration: 0 } : {
         duration: 0.7,
