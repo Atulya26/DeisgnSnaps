@@ -103,6 +103,20 @@ function AppContent() {
         (l as HTMLLinkElement & { fetchPriority?: string }).fetchPriority = "high";
         document.head.appendChild(l);
       }
+
+      // Second idle pass: off-thread decode of the next band so scrolling
+      // into view is instantaneous. decode() resolves once the bitmap is
+      // ready to paint; errors are ignored (some browsers reject on abort).
+      idle(() => {
+        for (const p of projects.slice(10, 30)) {
+          if (!p.imageUrl || seen.has(p.imageUrl)) continue;
+          seen.add(p.imageUrl);
+          const img = new Image();
+          img.decoding = "async";
+          img.src = p.imageUrl;
+          img.decode?.().catch(() => {});
+        }
+      });
     });
   }, [projects]);
 

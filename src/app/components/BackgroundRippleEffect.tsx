@@ -116,8 +116,16 @@ export const BackgroundRippleEffect = React.memo(
     // Animation
     const rafId = useRef(0);
     const running = useRef(false);
-    // Track last-drawn camera state so we can skip redraws when nothing changed
-    const lastDrawnCamera = useRef({ x: -9999, y: -9999, z: -1 });
+    // Track last-drawn camera + pointer state so we can skip redraws when
+    // nothing visibly changed. Pointer fields let us idle during hover-still.
+    const lastDrawnCamera = useRef({
+      x: -9999,
+      y: -9999,
+      z: -1,
+      px: -9999,
+      py: -9999,
+      pIn: false,
+    });
 
     const draw = useCallback(() => {
       const canvas = canvasRef.current;
@@ -156,6 +164,11 @@ export const BackgroundRippleEffect = React.memo(
       const proxSq = cfg.PROXIMITY * cfg.PROXIMITY;
       const pushed = pushedDots.current;
 
+      // Hoist the zoom into the transform so we can skip save/translate/scale/
+      // restore per dot. Each dot becomes 1 setTransform + 1 fill — ~2.5× fewer
+      // canvas API calls per frame on 100–250 visible dots.
+      const T = dpr * z;
+
       let colIdx = 0;
       for (let sx = offsetX; sx <= w + scaledGap; sx += scaledGap) {
         let rowIdx = 0;
@@ -189,17 +202,18 @@ export const BackgroundRippleEffect = React.memo(
             fillStyle = `rgb(${r},${g},${b})`;
           }
 
-          ctx.save();
-          ctx.translate(drawX, drawY);
-          if (z !== 1) ctx.scale(z, z);
+          ctx.setTransform(T, 0, 0, T, drawX * dpr, drawY * dpr);
           ctx.fillStyle = fillStyle;
           ctx.fill(circlePath);
-          ctx.restore();
 
           rowIdx++;
         }
         colIdx++;
       }
+
+      // Restore to the baseline transform so any follow-up clearRect / resize
+      // sees a plain (dpr, 0, 0, dpr) matrix.
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }, [cameraRef, zoomRef, circlePath]);
 
     // Main loop — only redraws when camera moved or pushed dots are animating
@@ -217,17 +231,28 @@ export const BackgroundRippleEffect = React.memo(
       const hasPushed = pushed.size > 0;
       const ptr = pointerRef.current;
 
-      // Skip draw if camera hasn't moved, no pushed dots, and pointer isn't near canvas
       const cameraMoved =
         Math.abs(cam.x - last.x) > 0.01 ||
         Math.abs(cam.y - last.y) > 0.01 ||
         Math.abs(z - last.z) > 0.0001;
 
-      if (cameraMoved || hasPushed || ptr.inCanvas) {
+      // Also check whether the pointer actually moved since the last draw —
+      // before, hovering a still cursor over the canvas re-drew every single
+      // tick (60–120×/sec) even though proximity color depended only on the
+      // pointer position, which hadn't changed.
+      const pointerMoved =
+        Math.abs(ptr.x - last.px) > 0.5 ||
+        Math.abs(ptr.y - last.py) > 0.5 ||
+        ptr.inCanvas !== last.pIn;
+
+      if (cameraMoved || hasPushed || (ptr.inCanvas && pointerMoved)) {
         draw();
         last.x = cam.x;
         last.y = cam.y;
         last.z = z;
+        last.px = ptr.x;
+        last.py = ptr.y;
+        last.pIn = ptr.inCanvas;
       }
 
       // Clean up finished push animations
