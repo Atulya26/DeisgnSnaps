@@ -94,6 +94,31 @@ export const defaultDarkColors: ThemeColors = {
   rippleColor: { r: 180, g: 180, b: 175 },
 };
 
+/** Animation configuration for cards and transitions */
+export interface AnimationConfig {
+  cardHoverScale: number;
+  cardHoverLift: number;
+  cardBorderRadius: number;
+  cardImageZoom: number;
+  transitionStiffness: number;
+  transitionDamping: number;
+  transitionMass: number;
+  panelSpringDuration: number;
+  panelSpringBounce: number;
+}
+
+export const defaultAnimationConfig: AnimationConfig = {
+  cardHoverScale: 1.04,
+  cardHoverLift: 4,
+  cardBorderRadius: 14,
+  cardImageZoom: 1.04,
+  transitionStiffness: 350,
+  transitionDamping: 30,
+  transitionMass: 1,
+  panelSpringDuration: 0.5,
+  panelSpringBounce: 0.04,
+};
+
 /** Helper: create bgAlpha from a hex bg color */
 function hexToBgAlpha(hex: string, alpha = 0.82): string {
   const m = hex.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
@@ -113,15 +138,14 @@ interface ThemeContextValue {
   colors: ThemeColors;
   toggleTheme: (e?: React.MouseEvent) => void;
   transition: TransitionState;
-  /** Dot grid config — live-editable */
   dotGridConfig: DotGridConfig;
   setDotGridConfig: (cfg: Partial<DotGridConfig>) => void;
-  /** Color overrides */
   lightOverrides: Partial<ThemeColors>;
   darkOverrides: Partial<ThemeColors>;
   setLightOverrides: (o: Partial<ThemeColors>) => void;
   setDarkOverrides: (o: Partial<ThemeColors>) => void;
-  /** Reset everything to defaults */
+  animationConfig: AnimationConfig;
+  setAnimationConfig: (cfg: Partial<AnimationConfig>) => void;
   resetAll: () => void;
 }
 
@@ -136,6 +160,8 @@ const ThemeContext = createContext<ThemeContextValue>({
   darkOverrides: {},
   setLightOverrides: () => {},
   setDarkOverrides: () => {},
+  animationConfig: defaultAnimationConfig,
+  setAnimationConfig: () => {},
   resetAll: () => {},
 });
 
@@ -149,10 +175,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   });
   const transitioning = useRef(false);
 
-  // Editable configs
   const [dotGridConfig, setDotGridConfigState] = useState<DotGridConfig>(defaultDotGridConfig);
   const [lightOverrides, setLightOverridesState] = useState<Partial<ThemeColors>>({});
   const [darkOverrides, setDarkOverridesState] = useState<Partial<ThemeColors>>({});
+  const [animationConfig, setAnimationConfigState] = useState<AnimationConfig>(defaultAnimationConfig);
 
   const setDotGridConfig = useCallback((cfg: Partial<DotGridConfig>) => {
     setDotGridConfigState((prev) => ({ ...prev, ...cfg }));
@@ -166,10 +192,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setDarkOverridesState((prev) => ({ ...prev, ...o }));
   }, []);
 
+  const setAnimationConfig = useCallback((cfg: Partial<AnimationConfig>) => {
+    setAnimationConfigState((prev) => ({ ...prev, ...cfg }));
+  }, []);
+
   const resetAll = useCallback(() => {
     setDotGridConfigState(defaultDotGridConfig);
     setLightOverridesState({});
     setDarkOverridesState({});
+    setAnimationConfigState(defaultAnimationConfig);
   }, []);
 
   const toggleTheme = useCallback(
@@ -231,6 +262,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         darkOverrides,
         setLightOverrides,
         setDarkOverrides,
+        animationConfig,
+        setAnimationConfig,
         resetAll,
       }}
     >

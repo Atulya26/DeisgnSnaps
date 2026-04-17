@@ -17,7 +17,7 @@ export function PortfolioCard({ project, onOpen, skipAnimation, index = 0 }: Por
   const [imageLoaded, setImageLoaded] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const prefersReduced = useReducedMotion();
-  const { theme, colors } = useTheme();
+  const { theme, colors, animationConfig } = useTheme();
 
   const handleClick = () => {
     if (!cardRef.current) return;
@@ -59,7 +59,7 @@ export function PortfolioCard({ project, onOpen, skipAnimation, index = 0 }: Por
       <motion.div
         className="group relative overflow-hidden"
         style={{
-          borderRadius: 14,
+          borderRadius: animationConfig.cardBorderRadius,
           backgroundColor: colors.cardBg,
           boxShadow: colors.cardShadow,
           border: `1px solid ${theme === "light" ? "rgba(0,0,0,0.04)" : "rgba(255,255,255,0.04)"}`,
@@ -76,7 +76,7 @@ export function PortfolioCard({ project, onOpen, skipAnimation, index = 0 }: Por
             borderColor: theme === "light" ? "rgba(0,0,0,0.04)" : "rgba(255,255,255,0.04)",
           },
           hovered: {
-            y: -4,
+            y: -animationConfig.cardHoverLift,
             boxShadow: colors.cardShadowHover,
             borderColor: theme === "light" ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.08)",
           },
@@ -104,7 +104,7 @@ export function PortfolioCard({ project, onOpen, skipAnimation, index = 0 }: Por
             className="h-full w-full"
             variants={{
               idle: { scale: 1 },
-              hovered: { scale: 1.04 },
+              hovered: { scale: animationConfig.cardImageZoom },
             }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           >

@@ -6,7 +6,9 @@
       "Bash(npx vite build:*)",
       "Bash(/Users/atulya/Desktop/Cnvasportfolio/node_modules/.bin/tsc:*)",
       "Bash(npm install:*)",
-      "Bash(/Users/atulya/Desktop/Cnvasportfolio/node_modules/.bin/vite build:*)"
+      "Bash(/Users/atulya/Desktop/Cnvasportfolio/node_modules/.bin/vite build:*)",
+      "Bash(npm run dev:*)",
+      "Bash(claude mcp add:*)"
     ]
   }
 }
