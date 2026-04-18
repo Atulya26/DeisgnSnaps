@@ -860,7 +860,7 @@ export function InfiniteCanvas({
                   project={project}
                   onOpen={handleCardOpen}
                   skipAnimation={!isOriginTile}
-                  index={i}
+                  index={isOriginTile ? i : 999}
                 />
               ))}
             </div>

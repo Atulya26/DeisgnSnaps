@@ -6,6 +6,9 @@
   "scripts": {
     "build": "vite build",
     "dev": "vite",
+    "sync:dribbble": "node scripts/sync-dribbble.mjs",
+    "sync:dribbble:local": "node scripts/sync-dribbble-local.mjs",
+    "sync:dribbble:public": "node scripts/sync-dribbble-public.mjs",
     "dev:worker": "npx wrangler dev --config worker/wrangler.jsonc",
     "deploy:worker": "npx wrangler deploy --config worker/wrangler.jsonc"
   },

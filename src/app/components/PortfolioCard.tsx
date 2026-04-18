@@ -112,10 +112,10 @@ function PortfolioCardImpl({ project, onOpen, skipAnimation, index = 0 }: Portfo
               alt={project.title}
               className="h-full w-full object-cover"
               decoding="async"
-              loading={index < 8 ? "eager" : "lazy"}
+              loading={index < 4 ? "eager" : "lazy"}
               // React's peer version here warns on camelCase `fetchPriority`;
               // lowercase is the valid HTML attr and passes through cleanly.
-              {...({ fetchpriority: index < 8 ? "high" : "low" } as Record<string, string>)}
+              {...({ fetchpriority: index < 4 ? "high" : "low" } as Record<string, string>)}
               onLoad={() => setImageLoaded(true)}
               style={{ opacity: imageLoaded ? 1 : 0, transition: "opacity 0.5s ease" }}
             />

@@ -284,7 +284,9 @@ export function BootSequence({ projects, onComplete }: BootSequenceProps) {
           <img
             src={project.imageUrl}
             alt=""
-            loading="eager"
+            loading={idx < 4 ? "eager" : "lazy"}
+            decoding="async"
+            {...({ fetchpriority: idx < 4 ? "high" : "low" } as Record<string, string>)}
             className="h-full w-full object-cover"
             style={{ pointerEvents: "none" }}
           />
@@ -346,7 +348,9 @@ export function BootSequence({ projects, onComplete }: BootSequenceProps) {
                 <img
                   src={project.imageUrl}
                   alt=""
-                  loading="eager"
+                  loading="lazy"
+                  decoding="async"
+                  {...({ fetchpriority: "low" } as Record<string, string>)}
                   className="h-full w-full object-cover"
                   style={{ pointerEvents: "none" }}
                 />

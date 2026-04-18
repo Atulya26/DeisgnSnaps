@@ -1,5 +1,30 @@
 import type { Project } from "./types";
 
+// Temporary gallery placeholders so the project-detail interactions can be
+// exercised against both single-image and multi-image cases.
+const placeholderDetailGalleries = {
+  lumina: [
+    "https://images.unsplash.com/photo-1720962158883-b0f2021fb51e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmdXR1cmlzdGljJTIwdGVjaG5vbG9neSUyMGludGVyZmFjZXxlbnwxfHx8fDE3NzA0NjQwNTR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    "https://images.unsplash.com/photo-1575388902449-6bca946ad549?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3ZWJzaXRlJTIwZGFzaGJvYXJkJTIwaW50ZXJmYWNlJTIwZGVzaWdufGVufDF8fHx8MTc3MDU0MjE1OXww&ixlib=rb-4.1.0&q=80&w=1080",
+    "https://images.unsplash.com/photo-1741466071751-c62474d2d3ae?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3b3Jrc3BhY2UlMjBkZXNrJTIwc2V0dXAlMjBjcmVhdGl2ZXxlbnwxfHx8fDE3NzA1NDIxNzh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+  ],
+  apex: [
+    "https://images.unsplash.com/photo-1596742578443-7682ef5251cd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2JpbGUlMjBhcHAlMjBVSSUyMGRlc2lnbiUyMGRhcmt8ZW58MXx8fHwxNzcwNTM2MDQwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+    "https://images.unsplash.com/photo-1720962158883-b0f2021fb51e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmdXR1cmlzdGljJTIwdGVjaG5vbG9neSUyMGludGVyZmFjZXxlbnwxfHx8fDE3NzA0NjQwNTR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    "https://images.unsplash.com/photo-1598296087805-0eedb25ce2d3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhZXJpYWwlMjBjaXR5JTIwcGhvdG9ncmFwaHklMjBuaWdodHxlbnwxfHx8fDE3NzA1NDIxNzN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+  ],
+  maison: [
+    "https://images.unsplash.com/photo-1558707538-c56435bdcdf3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtaW5pbWFsJTIwcG9zdGVyJTIwdHlwb2dyYXBoeSUyMGRlc2lnbnxlbnwxfHx8fDE3NzA1NDIxNjF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    "https://images.unsplash.com/photo-1560087459-7665dcbd23c8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjcmVhdGl2ZSUyMGRpcmVjdGlvbiUyMGVkaXRvcmlhbCUyMGxheW91dHxlbnwxfHx8fDE3NzA1NDIxNjV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    "https://images.unsplash.com/photo-1629380321696-99d97eaa492a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjZXJhbWljJTIwcG90dGVyeSUyMGhhbmRtYWRlJTIwY3JhZnR8ZW58MXx8fHwxNzcwNTQyMTc0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+  ],
+  studioSetup: [
+    "https://images.unsplash.com/photo-1575388902449-6bca946ad549?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3ZWJzaXRlJTIwZGFzaGJvYXJkJTIwaW50ZXJmYWNlJTIwZGVzaWdufGVufDF8fHx8MTc3MDU0MjE1OXww&ixlib=rb-4.1.0&q=80&w=1080",
+    "https://images.unsplash.com/photo-1705321963943-de94bb3f0dd3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtaW5pbWFsaXN0JTIwbGl2aW5nJTIwcm9vbSUyMGludGVyaW9yJTIwZGVzaWdufGVufDF8fHx8MTc3MDU0MTY2MXww&ixlib=rb-4.1.0&q=80&w=1080",
+    "https://images.unsplash.com/photo-1722977735215-d28f2ac6efba?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxib29rc3RvcmUlMjBsaWJyYXJ5JTIwc2hlbHZlcyUyMHdhcm18ZW58MXx8fHwxNzcwNTQyMTc5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+  ],
+} as const;
+
 export const projects: Project[] = [
   {
     id: "1",
@@ -9,6 +34,7 @@ export const projects: Project[] = [
     imageUrl: "https://images.unsplash.com/photo-1596742578443-7682ef5251cd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2JpbGUlMjBhcHAlMjBVSSUyMGRlc2lnbiUyMGRhcmt8ZW58MXx8fHwxNzcwNTM2MDQwfDA&ixlib=rb-4.1.0&q=80&w=1080",
     description: "A mindfulness and wellness app designed with dark mode aesthetics. The interface focuses on calm interactions, smooth transitions, and an intuitive journaling experience that helps users track their mental health journey.",
     tags: ["UI/UX", "Mobile", "Wellness"],
+    galleryImages: placeholderDetailGalleries.lumina,
     x: 80, y: 60, width: 320, height: 240,
   },
   {
@@ -19,6 +45,7 @@ export const projects: Project[] = [
     imageUrl: "https://images.unsplash.com/photo-1575388902449-6bca946ad549?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3ZWJzaXRlJTIwZGFzaGJvYXJkJTIwaW50ZXJmYWNlJTIwZGVzaWdufGVufDF8fHx8MTc3MDU0MjE1OXww&ixlib=rb-4.1.0&q=80&w=1080",
     description: "An analytics dashboard for a SaaS fintech platform. Designed to present complex financial data through clear visualizations, real-time metrics, and customizable widget layouts.",
     tags: ["Dashboard", "SaaS", "Data Viz"],
+    galleryImages: placeholderDetailGalleries.apex,
     x: 480, y: 30, width: 360, height: 260,
   },
   {
@@ -29,6 +56,7 @@ export const projects: Project[] = [
     imageUrl: "https://images.unsplash.com/photo-1616205255812-c07c8102cc02?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxicmFuZCUyMGlkZW50aXR5JTIwZGVzaWduJTIwbW9ja3VwfGVufDF8fHx8MTc3MDUyODU3N3ww&ixlib=rb-4.1.0&q=80&w=1080",
     description: "Complete brand identity system for a luxury home furnishing company. Includes logo suite, color system, typography guidelines, packaging design, and digital asset templates.",
     tags: ["Branding", "Identity", "Luxury"],
+    galleryImages: placeholderDetailGalleries.maison,
     x: 930, y: 80, width: 280, height: 350,
   },
   {
@@ -249,6 +277,7 @@ export const projects: Project[] = [
     imageUrl: "https://images.unsplash.com/photo-1741466071751-c62474d2d3ae?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3b3Jrc3BhY2UlMjBkZXNrJTIwc2V0dXAlMjBjcmVhdGl2ZXxlbnwxfHx8fDE3NzA1NDIxNzh8MA&ixlib=rb-4.1.0&q=80&w=1080",
     description: "Documentation of creative workspaces around the world. A photographic essay exploring how environment shapes creativity, from minimalist studios to chaotic workshops.",
     tags: ["Documentary", "Workspace", "Creative"],
+    galleryImages: placeholderDetailGalleries.studioSetup,
     x: 90, y: 1050, width: 300, height: 230,
   },
   {

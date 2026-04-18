@@ -1,4 +1,12 @@
-import { useEffect, useCallback, useState, useRef } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { Cross, ArrowLeft, ArrowRight } from "geist-icons";
 import { gsap } from "gsap";
@@ -18,6 +26,10 @@ interface ProjectDetailProps {
   originRect: DOMRect | null;
   onClose: () => void;
   onNavigate: (project: Project) => void;
+}
+
+interface HorizontalGalleryHandle {
+  step: (dir: 1 | -1) => void;
 }
 
 const slideVariants = {
@@ -44,10 +56,9 @@ export function ProjectDetail({
 }: ProjectDetailProps) {
   const [currentIndex, setCurrentIndex] = useState(-1);
   const [direction, setDirection] = useState(0);
-  const touchStartX = useRef(0);
-  const touchEndX = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
+  const galleryRef = useRef<HorizontalGalleryHandle | null>(null);
   const prefersReduced = useReducedMotion();
   const { colors, theme } = useTheme();
   const lenisRef = useRef<Lenis | null>(null);
@@ -176,6 +187,41 @@ export function ProjectDetail({
   }, [project, currentIndex, prefersReduced]);
 
   const currentProject = currentIndex >= 0 ? projects[currentIndex] : null;
+  const galleryAll = useMemo(() => {
+    if (!currentProject) return [];
+
+    const seen = new Set<string>();
+    const out: { url: string; caption?: string }[] = [];
+    const primaryImageUrl = currentProject.coverImageUrl ?? currentProject.imageUrl;
+    const galleryImages =
+      currentProject.galleryImages?.filter(
+        (url) => url !== currentProject.imageUrl && url !== primaryImageUrl
+      ) ?? [];
+    const hasContentBlocks =
+      currentProject.contentBlocks && currentProject.contentBlocks.length > 0;
+
+    if (primaryImageUrl && !seen.has(primaryImageUrl)) {
+      seen.add(primaryImageUrl);
+      out.push({ url: primaryImageUrl });
+    }
+
+    for (const url of galleryImages) {
+      if (!url || seen.has(url)) continue;
+      seen.add(url);
+      out.push({ url });
+    }
+
+    if (hasContentBlocks) {
+      for (const block of currentProject.contentBlocks!) {
+        if (block.type === "image" && block.url && !seen.has(block.url)) {
+          seen.add(block.url);
+          out.push({ url: block.url, caption: block.caption });
+        }
+      }
+    }
+
+    return out;
+  }, [currentProject]);
 
   const goNext = useCallback(() => {
     if (currentIndex < projects.length - 1) {
@@ -210,53 +256,19 @@ export function ProjectDetail({
     if (!project) return;
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
-      if (e.key === "ArrowRight") goNext();
-      if (e.key === "ArrowLeft") goPrev();
+      if ((e.key === "ArrowRight" || e.key === "ArrowLeft") && galleryAll.length > 1) {
+        e.preventDefault();
+        galleryRef.current?.step(e.key === "ArrowRight" ? 1 : -1);
+      }
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [project, onClose, goNext, goPrev]);
-
-  // Swipe (touch)
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-  };
-  const handleTouchMove = (e: React.TouchEvent) => {
-    touchEndX.current = e.touches[0].clientX;
-  };
-  const handleTouchEnd = () => {
-    const diff = touchStartX.current - touchEndX.current;
-    if (Math.abs(diff) > 60) {
-      if (diff > 0) goNext();
-      else goPrev();
-    }
-  };
-
-  // Swipe (mouse)
-  const isDragging = useRef(false);
-  const dragStartX = useRef(0);
-  const handleMouseDown = (e: React.MouseEvent) => {
-    isDragging.current = true;
-    dragStartX.current = e.clientX;
-  };
-  const handleMouseUp = (e: React.MouseEvent) => {
-    if (!isDragging.current) return;
-    isDragging.current = false;
-    const diff = dragStartX.current - e.clientX;
-    if (Math.abs(diff) > 80) {
-      if (diff > 0) goNext();
-      else goPrev();
-    }
-  };
+  }, [galleryAll.length, onClose, project]);
 
   if (!currentProject) return null;
 
   const hasContentBlocks =
     currentProject.contentBlocks && currentProject.contentBlocks.length > 0;
-  const galleryImages =
-    currentProject.galleryImages?.filter(
-      (url) => url !== currentProject.imageUrl
-    ) ?? [];
 
   const displayNum = String(currentIndex + 1).padStart(2, "0");
   const totalNum = String(projects.length).padStart(2, "0");
@@ -269,31 +281,6 @@ export function ProjectDetail({
   const cardBorder = theme === "light" ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.08)";
   const metaColor = theme === "light" ? "rgba(0,0,0,0.55)" : "rgba(255,255,255,0.55)";
   const galleryBtnBg = theme === "light" ? "rgba(255,255,255,0.92)" : "rgba(30,30,30,0.92)";
-
-  // Build the horizontal-scroll gallery source list: cover + gallery images +
-  // any image-type content blocks. Dedupe by url.
-  const galleryAll: { url: string; caption?: string }[] = (() => {
-    const seen = new Set<string>();
-    const out: { url: string; caption?: string }[] = [];
-    if (currentProject.imageUrl && !seen.has(currentProject.imageUrl)) {
-      seen.add(currentProject.imageUrl);
-      out.push({ url: currentProject.imageUrl });
-    }
-    for (const url of galleryImages) {
-      if (!url || seen.has(url)) continue;
-      seen.add(url);
-      out.push({ url });
-    }
-    if (hasContentBlocks) {
-      for (const b of currentProject.contentBlocks!) {
-        if (b.type === "image" && b.url && !seen.has(b.url)) {
-          seen.add(b.url);
-          out.push({ url: b.url, caption: b.caption });
-        }
-      }
-    }
-    return out;
-  })();
 
   // Text-only content blocks stay vertical after the gallery.
   const textBlocks = hasContentBlocks
@@ -313,11 +300,6 @@ export function ProjectDetail({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0, y: 16 }}
             transition={easings.fade}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-            onMouseDown={handleMouseDown}
-            onMouseUp={handleMouseUp}
           >
             {/* ── Sticky top bar ── */}
             <motion.div
@@ -437,6 +419,7 @@ export function ProjectDetail({
                       transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
                     >
                       <HorizontalGallery
+                        ref={galleryRef}
                         images={galleryAll}
                         theme={theme}
                         bg={colors.imageBg}
@@ -656,24 +639,73 @@ interface HorizontalGalleryProps {
   captionColor: string;
 }
 
-function HorizontalGallery({
+const HorizontalGallery = forwardRef<HorizontalGalleryHandle, HorizontalGalleryProps>(function HorizontalGallery({
   images,
   theme,
   bg,
   btnBg,
   textColor,
   captionColor,
-}: HorizontalGalleryProps) {
+}: HorizontalGalleryProps, ref) {
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const dragStateRef = useRef({
+    active: false,
+    pointerId: -1,
+    startX: 0,
+    startScrollLeft: 0,
+  });
+  const [activeIndex, setActiveIndex] = useState(0);
   const [canPrev, setCanPrev] = useState(false);
   const [canNext, setCanNext] = useState(true);
+  const [isPointerDragging, setIsPointerDragging] = useState(false);
+  const hasMultipleImages = images.length > 1;
+
+  const scrollToIndex = useCallback((targetIndex: number, behavior: ScrollBehavior = "smooth") => {
+    const el = scrollerRef.current;
+    const slide = slideRefs.current[targetIndex];
+    if (!el || !slide) return;
+
+    const left = Math.max(0, slide.offsetLeft - (el.clientWidth - slide.clientWidth) / 2);
+    el.scrollTo({ left, behavior });
+  }, []);
 
   const updateEdges = useCallback(() => {
     const el = scrollerRef.current;
     if (!el) return;
-    setCanPrev(el.scrollLeft > 4);
-    setCanNext(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
-  }, []);
+    if (!hasMultipleImages) {
+      setActiveIndex(0);
+      setCanPrev(false);
+      setCanNext(false);
+      return;
+    }
+
+    const viewportCenter = el.scrollLeft + el.clientWidth / 2;
+    let nextIndex = 0;
+    let minDistance = Number.POSITIVE_INFINITY;
+
+    slideRefs.current.forEach((slide, idx) => {
+      if (!slide) return;
+      const slideCenter = slide.offsetLeft + slide.clientWidth / 2;
+      const distance = Math.abs(slideCenter - viewportCenter);
+      if (distance < minDistance) {
+        minDistance = distance;
+        nextIndex = idx;
+      }
+    });
+
+    setActiveIndex(nextIndex);
+    setCanPrev(nextIndex > 0);
+    setCanNext(nextIndex < images.length - 1);
+  }, [hasMultipleImages, images.length]);
+
+  const step = useCallback((dir: 1 | -1) => {
+    if (!hasMultipleImages) return;
+    const targetIndex = Math.max(0, Math.min(images.length - 1, activeIndex + dir));
+    scrollToIndex(targetIndex);
+  }, [activeIndex, hasMultipleImages, images.length, scrollToIndex]);
+
+  useImperativeHandle(ref, () => ({ step }), [step]);
 
   useEffect(() => {
     const el = scrollerRef.current;
@@ -687,38 +719,90 @@ function HorizontalGallery({
     };
   }, [updateEdges, images.length]);
 
-  const step = (dir: 1 | -1) => {
+  useEffect(() => {
+    setActiveIndex(0);
+    setCanPrev(false);
+    setCanNext(images.length > 1);
+    requestAnimationFrame(() => updateEdges());
+  }, [images, updateEdges]);
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!hasMultipleImages || e.pointerType === "touch") return;
     const el = scrollerRef.current;
     if (!el) return;
-    const slide = el.querySelector<HTMLElement>("[data-slide]");
-    const gap = 24;
-    const delta = (slide?.offsetWidth ?? el.clientWidth * 0.8) + gap;
-    el.scrollBy({ left: delta * dir, behavior: "smooth" });
+
+    dragStateRef.current = {
+      active: true,
+      pointerId: e.pointerId,
+      startX: e.clientX,
+      startScrollLeft: el.scrollLeft,
+    };
+    setIsPointerDragging(true);
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const el = scrollerRef.current;
+    const dragState = dragStateRef.current;
+    if (!el || !dragState.active) return;
+
+    const deltaX = e.clientX - dragState.startX;
+    el.scrollLeft = dragState.startScrollLeft - deltaX;
+  };
+
+  const endPointerDrag = (e: React.PointerEvent<HTMLDivElement>) => {
+    const dragState = dragStateRef.current;
+    if (!dragState.active) return;
+
+    dragStateRef.current = {
+      active: false,
+      pointerId: -1,
+      startX: 0,
+      startScrollLeft: 0,
+    };
+    setIsPointerDragging(false);
+
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    }
   };
 
   const arrowBg = btnBg;
   const arrowBorder = theme === "light" ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.08)";
+  const sidePadding = "max(24px, calc((100vw - 1100px) / 2))";
+  const slideWidth = hasMultipleImages
+    ? "min(900px, 74vw)"
+    : "min(980px, calc(100vw - 48px))";
 
   return (
     <div className="relative">
       <div
         ref={scrollerRef}
-        className="hide-scrollbar flex snap-x snap-mandatory gap-6 overflow-x-auto"
+        className={`hide-scrollbar flex gap-6 ${hasMultipleImages ? "snap-x snap-mandatory overflow-x-auto" : "justify-center overflow-hidden"}`}
         style={{
-          scrollPaddingInline: "max(24px, calc((100vw - 1100px) / 2))",
-          paddingInline: "max(24px, calc((100vw - 1100px) / 2))",
+          scrollPaddingInline: hasMultipleImages ? sidePadding : undefined,
+          paddingInline: sidePadding,
           paddingBlock: 8,
+          cursor: hasMultipleImages ? (isPointerDragging ? "grabbing" : "grab") : "default",
+          overscrollBehaviorX: "contain",
+          userSelect: isPointerDragging ? "none" : undefined,
         }}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={endPointerDrag}
+        onPointerCancel={endPointerDrag}
       >
         {images.map((img, i) => (
           <div
             key={img.url + i}
+            ref={(el) => {
+              slideRefs.current[i] = el;
+            }}
             data-slide
-            className="snap-center shrink-0"
+            className={`${hasMultipleImages ? "snap-center" : ""} shrink-0`}
             style={{
-              // Smaller on desktop so the title/description peeks below the
-              // fold — viewer sees there's more to read without scrolling.
-              width: "min(900px, 74vw)",
+              width: slideWidth,
+              maxWidth: "100%",
             }}
           >
             <div
@@ -733,6 +817,9 @@ function HorizontalGallery({
                 src={img.url}
                 alt={img.caption ?? `Project image ${i + 1}`}
                 className="h-full w-full object-cover"
+                decoding="async"
+                loading={i === 0 ? "eager" : "lazy"}
+                {...({ fetchpriority: i === 0 ? "high" : "low" } as Record<string, string>)}
                 style={{ display: "block" }}
               />
             </div>
@@ -805,4 +892,4 @@ function HorizontalGallery({
       )}
     </div>
   );
-}
+});

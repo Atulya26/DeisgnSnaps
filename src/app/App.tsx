@@ -1,6 +1,7 @@
-import { useState, useCallback, useRef, useMemo, useEffect } from "react";
+import { useState, useCallback, useRef, useMemo } from "react";
 import type { Project } from "./components/types";
 import { projects as hardcodedProjects } from "./components/data";
+import { localPortfolioProjects } from "./components/portfolioData.local.generated";
 import { Toolbar } from "./components/Toolbar";
 import { InfiniteCanvas } from "./components/InfiniteCanvas";
 import { ProjectDetail } from "./components/ProjectDetail";
@@ -9,29 +10,6 @@ import { BootSequence } from "./components/BootSequence";
 import { autoLayoutProjects } from "./components/autoLayout";
 import { ThemeProvider, useTheme } from "./components/ThemeContext";
 import { ThemeTransition } from "./components/ThemeTransition";
-import type { AdminProject } from "../admin/types";
-import { getPublishedProjects } from "../admin/services/firebase";
-
-/** Convert AdminProject[] to the shape expected by the portfolio */
-function mapAdminToPortfolio(
-  adminProjects: AdminProject[]
-): { project: Omit<Project, "x" | "y" | "width" | "height"> }[] {
-  return adminProjects
-    .filter((p) => p.status === "published" && p.title && p.coverImageKey)
-    .map((p) => ({
-      project: {
-        id: `admin-${p.id}`,
-        title: p.title,
-        category: p.category,
-        year: p.year,
-        imageUrl: p.coverImageKey,
-        description: p.description,
-        tags: p.tags,
-        galleryImages: p.images?.map((img) => img.url).filter(Boolean) ?? [],
-        contentBlocks: p.contentBlocks ?? [],
-      },
-    }));
-}
 
 function AppContent() {
   const { colors } = useTheme();
@@ -39,47 +17,16 @@ function AppContent() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [originRect, setOriginRect] = useState<DOMRect | null>(null);
   const originRectRef = useRef<DOMRect | null>(null);
-  const [adminEntries, setAdminEntries] = useState<
-    { project: Omit<Project, "x" | "y" | "width" | "height"> }[]
-  >([]);
-  const [firestoreLoaded, setFirestoreLoaded] = useState(false);
 
-  // Load published projects from Firestore on mount — BEFORE boot starts
-  useEffect(() => {
-    async function loadFromFirestore() {
-      try {
-        const published = await getPublishedProjects();
-        if (published.length > 0) {
-          setAdminEntries(mapAdminToPortfolio(published));
-        }
-      } catch (err) {
-        console.error("Failed to load published projects from Firestore:", err);
-      } finally {
-        setFirestoreLoaded(true);
-      }
-    }
-    loadFromFirestore();
-  }, []);
-
-  // Merge hardcoded + published admin projects, then auto-layout everything
+  // Local-first portfolio source for static hosting. The admin code remains
+  // in the repo, but the public site no longer depends on the admin API.
   const projects = useMemo(() => {
-    const adminTitles = new Set(
-      adminEntries.map((e) => e.project.title.toLowerCase())
-    );
+    const allProjects = localPortfolioProjects.length > 0
+      ? localPortfolioProjects
+      : hardcodedProjects.map(({ x, y, width, height, ...rest }) => rest);
 
-    // Strip x/y/w/h from hardcoded projects — auto-layout will recompute
-    const hardcoded = hardcodedProjects
-      .filter((p) => !adminTitles.has(p.title.toLowerCase()))
-      .map(({ x, y, width, height, ...rest }) => rest);
-
-    const adminPlain = adminEntries.map((e) => e.project);
-
-    // Combine: hardcoded first, admin appended at end
-    const allProjects = [...hardcoded, ...adminPlain];
-
-    // Auto-layout computes x, y, width, height for every project
     return autoLayoutProjects(allProjects);
-  }, [adminEntries]);
+  }, []);
 
   // Warm the hero batch on idle so cards feel instant once the boot overlay
   // fades. Browser de-dupes the preload with the later <img> request.
@@ -155,8 +102,8 @@ function AppContent() {
       <CustomCursor />
       <ThemeTransition />
 
-      {/* Boot sequence overlay — waits for Firestore so it only runs once */}
-      {isBooting && firestoreLoaded && (
+      {/* Boot sequence overlay */}
+      {isBooting && projects.length > 0 && (
         <BootSequence projects={projects} onComplete={handleBootComplete} />
       )}
 
