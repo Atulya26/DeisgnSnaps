@@ -12,6 +12,9 @@ import { PortfolioCard } from "./PortfolioCard";
 import { ZoomControls } from "./ZoomControls";
 import { useTheme } from "./ThemeContext";
 import { BackgroundRippleEffect } from "./BackgroundRippleEffect";
+import { computeInitialCamera } from "./autoLayout";
+
+const TOOLBAR_OFFSET = 64; // must match Toolbar.tsx height — canvas pans under the translucent bar
 
 interface InfiniteCanvasProps {
   projects: Project[];
@@ -27,8 +30,9 @@ const TILE_PADDING = 30;
 // ── Physics tuning (Lenis-inspired smooth feel) ──
 const MOMENTUM_FRICTION = 0.985;       // Gentler friction → longer, smoother coast (was 0.96)
 const MOMENTUM_MIN_VELOCITY = 0.003;   // Lower stop threshold → momentum carries further
-const WHEEL_LERP_MOUSE = 0.12;        // Smoother catch-up for discrete mouse wheel (was 0.08)
+const WHEEL_LERP_MOUSE = 0.18;        // Snappier catch-up for discrete mouse wheel — reduces rubber-band feel on sustained scroll
 const WHEEL_LERP_TRACKPAD = 0.55;     // Light smoothing for trackpad (was 0.45)
+const SCROLL_IDLE_MS = 140;           // Restore pointer events this long after the last wheel tick
 const ZOOM_LERP = 0.12;               // Slightly faster zoom response (was 0.10)
 const SETTLE_THRESHOLD = 0.05;        // Tighter settle → less visible snap at end
 const ZOOM_SETTLE_THRESHOLD = 0.0003; // Tighter zoom settle
@@ -69,12 +73,31 @@ export function InfiniteCanvas({
   const containerRef = useRef<HTMLDivElement>(null);
   const transformGroupRef = useRef<HTMLDivElement>(null);
 
+  // ── Initial camera: centered on the masonry bounds so ultrawide/4K screens
+  //     don't leave a big empty band. Computed once from the first `projects`
+  //     snapshot — panning is unaffected when admin entries resolve later.
+  //     topInset = TOOLBAR_OFFSET because the canvas extends under the
+  //     translucent toolbar; content should center in the visible area. ──
+  const initialCameraSeed = useMemo(
+    () => {
+      if (typeof window === "undefined") return { x: -60, y: -40 };
+      return computeInitialCamera(
+        projects,
+        { width: window.innerWidth, height: window.innerHeight },
+        DEFAULT_ZOOM,
+        TOOLBAR_OFFSET
+      );
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
   // ── Camera & zoom live in refs (never trigger React re-renders) ──
-  const camera = useRef({ x: -60, y: -40 });
+  const camera = useRef({ ...initialCameraSeed });
   const zoom = useRef(DEFAULT_ZOOM);
 
   // Smooth targets — input handlers write here, render loop lerps toward them
-  const targetCamera = useRef({ x: -60, y: -40 });
+  const targetCamera = useRef({ ...initialCameraSeed });
   const targetZoom = useRef(DEFAULT_ZOOM);
 
   // ── Drag state ──
@@ -109,7 +132,7 @@ export function InfiniteCanvas({
   const lastFrameTime = useRef(0);
 
   // ── React state: only for tile calculation & zoom display (updated sparingly) ──
-  const [tileCamera, setTileCamera] = useState({ x: -60, y: -40 });
+  const [tileCamera, setTileCamera] = useState(initialCameraSeed);
   const [tileZoom, setTileZoom] = useState(DEFAULT_ZOOM);
   const [displayZoom, setDisplayZoom] = useState(DEFAULT_ZOOM);
   const lastDisplayZoomUpdate = useRef(0);
@@ -441,6 +464,21 @@ export function InfiniteCanvas({
     };
   }, [markInteracted, ensureLoop, applyTransform, syncTiles, setDragVisuals]);
 
+  // ── Scroll-lock: while the wheel is actively firing, cards must NOT
+  //     receive hover/pointer events. Without this, a mouse that happens
+  //     to sit over a card during a long scroll triggers whileHover, which
+  //     animates boxShadow/borderColor/y and competes with the transform
+  //     on the compositor — that's the jitter. Same trick drag already
+  //     uses in setDragVisuals, extended to continuous wheel activity. ──
+  const scrollIdleTimer = useRef<number | null>(null);
+  const isScrollActive = useRef(false);
+  const setScrollActive = useCallback((active: boolean) => {
+    if (active === isScrollActive.current) return;
+    isScrollActive.current = active;
+    const tg = transformGroupRef.current;
+    if (tg) tg.style.pointerEvents = active ? "none" : "";
+  }, []);
+
   // ──────────── Wheel: Scroll = Pan, Ctrl/Cmd+Scroll = Zoom ────────────
   useEffect(() => {
     const el = containerRef.current;
@@ -450,6 +488,16 @@ export function InfiniteCanvas({
       e.preventDefault();
       cancelMomentum();
       markInteracted();
+
+      // Lock out hover compositing for the duration of this scroll burst.
+      setScrollActive(true);
+      if (scrollIdleTimer.current !== null) {
+        window.clearTimeout(scrollIdleTimer.current);
+      }
+      scrollIdleTimer.current = window.setTimeout(() => {
+        setScrollActive(false);
+        scrollIdleTimer.current = null;
+      }, SCROLL_IDLE_MS);
 
       const z = zoom.current;
 
@@ -505,8 +553,15 @@ export function InfiniteCanvas({
     };
 
     el.addEventListener("wheel", handleWheel, { passive: false });
-    return () => el.removeEventListener("wheel", handleWheel);
-  }, [markInteracted, cancelMomentum, ensureLoop, applyTransform, syncTiles]);
+    return () => {
+      el.removeEventListener("wheel", handleWheel);
+      if (scrollIdleTimer.current !== null) {
+        window.clearTimeout(scrollIdleTimer.current);
+        scrollIdleTimer.current = null;
+      }
+      setScrollActive(false);
+    };
+  }, [markInteracted, cancelMomentum, ensureLoop, applyTransform, syncTiles, setScrollActive]);
 
   // ──────────── Touch: Drag + Pinch Zoom ────────────
   useEffect(() => {
@@ -779,7 +834,7 @@ export function InfiniteCanvas({
         ref={transformGroupRef}
         className="absolute left-0 top-0 z-[1]"
         style={{
-          transform: `scale(${DEFAULT_ZOOM}) translate3d(${60}px, ${40}px, 0)`,
+          transform: `scale(${DEFAULT_ZOOM}) translate3d(${-initialCameraSeed.x}px, ${-initialCameraSeed.y}px, 0)`,
           transformOrigin: "0 0",
           willChange: "transform",
           contain: "layout style",
@@ -805,7 +860,7 @@ export function InfiniteCanvas({
                   project={project}
                   onOpen={handleCardOpen}
                   skipAnimation={!isOriginTile}
-                  index={i}
+                  index={isOriginTile ? i : 999}
                 />
               ))}
             </div>

@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, memo } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { ArrowUpRight } from "geist-icons";
 import type { Project } from "./types";
@@ -13,11 +13,11 @@ interface PortfolioCardProps {
   index?: number;
 }
 
-export function PortfolioCard({ project, onOpen, skipAnimation, index = 0 }: PortfolioCardProps) {
+function PortfolioCardImpl({ project, onOpen, skipAnimation, index = 0 }: PortfolioCardProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const prefersReduced = useReducedMotion();
-  const { theme, colors } = useTheme();
+  const { theme, colors, animationConfig } = useTheme();
 
   const handleClick = () => {
     if (!cardRef.current) return;
@@ -45,6 +45,9 @@ export function PortfolioCard({ project, onOpen, skipAnimation, index = 0 }: Por
         left: project.x,
         top: project.y,
         width: project.width,
+        // NOTE: we intentionally do NOT use content-visibility:auto here.
+        // Paint containment clips the card's hover box-shadow at the bottom.
+        // Tile-level culling + React.memo already keep scroll smooth.
       }}
       initial={skipAnimation || prefersReduced ? false : { opacity: 0, y: 20, scale: 0.97 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -59,7 +62,7 @@ export function PortfolioCard({ project, onOpen, skipAnimation, index = 0 }: Por
       <motion.div
         className="group relative overflow-hidden"
         style={{
-          borderRadius: 14,
+          borderRadius: animationConfig.cardBorderRadius,
           backgroundColor: colors.cardBg,
           boxShadow: colors.cardShadow,
           border: `1px solid ${theme === "light" ? "rgba(0,0,0,0.04)" : "rgba(255,255,255,0.04)"}`,
@@ -76,7 +79,7 @@ export function PortfolioCard({ project, onOpen, skipAnimation, index = 0 }: Por
             borderColor: theme === "light" ? "rgba(0,0,0,0.04)" : "rgba(255,255,255,0.04)",
           },
           hovered: {
-            y: -4,
+            y: -animationConfig.cardHoverLift,
             boxShadow: colors.cardShadowHover,
             borderColor: theme === "light" ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.08)",
           },
@@ -90,13 +93,11 @@ export function PortfolioCard({ project, onOpen, skipAnimation, index = 0 }: Por
             backgroundColor: colors.imageBg,
           }}
         >
-          {/* Shimmer */}
+          {/* Shimmer — pure-CSS animation avoids one Motion loop per card. */}
           {!imageLoaded && (
-            <motion.div
-              className="absolute inset-0"
+            <div
+              className="portfolio-card-shimmer absolute inset-0"
               style={{ backgroundColor: colors.shimmer }}
-              animate={{ opacity: [0.4, 0.7, 0.4] }}
-              transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
             />
           )}
 
@@ -104,7 +105,7 @@ export function PortfolioCard({ project, onOpen, skipAnimation, index = 0 }: Por
             className="h-full w-full"
             variants={{
               idle: { scale: 1 },
-              hovered: { scale: 1.04 },
+              hovered: { scale: animationConfig.cardImageZoom },
             }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           >
@@ -112,6 +113,9 @@ export function PortfolioCard({ project, onOpen, skipAnimation, index = 0 }: Por
               src={project.imageUrl}
               alt={project.title}
               className="h-full w-full object-cover"
+              decoding="async"
+              loading={index < 4 ? "eager" : "lazy"}
+              {...({ fetchpriority: index < 4 ? "high" : "low" } as Record<string, string>)}
               onLoad={() => setImageLoaded(true)}
               style={{ opacity: imageLoaded ? 1 : 0, transition: "opacity 0.5s ease" }}
             />
@@ -208,3 +212,14 @@ export function PortfolioCard({ project, onOpen, skipAnimation, index = 0 }: Por
     </motion.div>
   );
 }
+
+// memo: prevents every card from re-rendering when any sibling's image
+// loads or when InfiniteCanvas re-renders at tile-key boundaries.
+export const PortfolioCard = memo(PortfolioCardImpl, (prev, next) => {
+  return (
+    prev.project === next.project &&
+    prev.onOpen === next.onOpen &&
+    prev.skipAnimation === next.skipAnimation &&
+    prev.index === next.index
+  );
+});

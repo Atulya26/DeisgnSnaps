@@ -6,6 +6,9 @@
   "scripts": {
     "build": "vite build",
     "dev": "vite",
+    "sync:dribbble": "node scripts/sync-dribbble.mjs",
+    "sync:dribbble:local": "node scripts/sync-dribbble-local.mjs",
+    "sync:dribbble:public": "node scripts/sync-dribbble-public.mjs",
     "dev:worker": "npx wrangler dev --config worker/wrangler.jsonc",
     "deploy:worker": "npx wrangler deploy --config worker/wrangler.jsonc"
   },
@@ -42,10 +45,12 @@
     "@tiptap/pm": "^3.19.0",
     "@tiptap/react": "^3.19.0",
     "@tiptap/starter-kit": "^3.19.0",
+    "@use-gesture/react": "^10.3.1",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "cmdk": "1.1.1",
     "date-fns": "3.6.0",
+    "dialkit": "^0.2.2",
     "embla-carousel-react": "8.6.0",
     "geist": "^1.7.0",
     "geist-icons": "^1.3.0",

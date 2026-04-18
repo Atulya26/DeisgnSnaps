@@ -34,7 +34,7 @@ export function Toolbar({ projectCount }: ToolbarProps) {
       <div className="flex items-center gap-4">
         <motion.span
           style={{
-            fontFamily: "'Instrument Serif', Georgia, serif",
+            fontFamily: "'Inter', sans-serif",
             fontSize: 22,
             fontWeight: 400,
             color: colors.text,
@@ -45,7 +45,7 @@ export function Toolbar({ projectCount }: ToolbarProps) {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.3 }}
         >
-          Studio
+          Atulya
         </motion.span>
         <motion.span
           style={{
@@ -54,7 +54,7 @@ export function Toolbar({ projectCount }: ToolbarProps) {
             color: colors.textMuted,
             letterSpacing: "0.08em",
             textTransform: "uppercase" as const,
-            fontFamily: "'Geist Mono', monospace",
+            fontFamily: "'Inter', sans-serif",
           }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -66,21 +66,23 @@ export function Toolbar({ projectCount }: ToolbarProps) {
 
       {/* Right: Nav + controls */}
       <div className="flex items-center gap-1">
-        {/* Nav links — understated, editorial */}
+        {/* Nav links — uppercase editorial style */}
         {["About", "Contact"].map((label, i) => (
           <motion.button
             key={label}
             type="button"
             className="relative rounded-full px-4 py-1.5 transition-colors"
             style={{
-              fontSize: 13,
-              fontWeight: 400,
+              fontSize: 11,
+              fontWeight: 500,
+              fontFamily: "'Inter', sans-serif",
               color: colors.textSecondary,
-              letterSpacing: "-0.01em",
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
             }}
             whileHover={{
               color: colors.text,
-              backgroundColor: theme === "light" ? "rgba(0,0,0,0.04)" : "rgba(255,255,255,0.05)",
+              backgroundColor: theme === "light" ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.06)",
             }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
