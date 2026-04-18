@@ -162,7 +162,7 @@ function AppContent() {
 
       <Toolbar projectCount={projects.length} />
 
-      <div className="h-full" style={{ paddingTop: 70 }}>
+      <div className="h-full" style={{ paddingTop: 88 }}>
         <InfiniteCanvas
           projects={projects}
           onOpenProject={handleOpenProject}

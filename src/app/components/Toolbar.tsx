@@ -18,9 +18,9 @@ export function Toolbar({ projectCount }: ToolbarProps) {
     <motion.header
       className="fixed left-0 right-0 top-0 z-40 flex items-center justify-between"
       style={{
-        height: 70,
-        paddingLeft: 28,
-        paddingRight: 24,
+        height: 88,
+        paddingLeft: 40,
+        paddingRight: 32,
         backgroundColor: colors.bgAlpha,
         backdropFilter: "blur(28px) saturate(1.5)",
         WebkitBackdropFilter: "blur(28px) saturate(1.5)",
@@ -30,37 +30,36 @@ export function Toolbar({ projectCount }: ToolbarProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
     >
-      {/* Left: Logo + brand */}
-      <div className="flex items-center gap-4">
+      {/* Left: Wordmark + byline */}
+      <div className="flex items-baseline gap-4">
         <motion.span
           style={{
             fontFamily: "'Inter', sans-serif",
-            fontSize: 22,
-            fontWeight: 400,
+            fontSize: 30,
+            fontWeight: 700,
             color: colors.text,
-            letterSpacing: "-0.02em",
+            letterSpacing: "-0.035em",
             lineHeight: 1,
           }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
         >
           Atulya
         </motion.span>
         <motion.span
           style={{
-            fontSize: 11,
-            fontWeight: 400,
-            color: colors.textMuted,
-            letterSpacing: "0.08em",
-            textTransform: "uppercase" as const,
+            fontSize: 13,
+            fontWeight: 500,
+            color: colors.textSecondary,
+            letterSpacing: "-0.005em",
             fontFamily: "'Inter', sans-serif",
           }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.45 }}
+          transition={{ duration: 0.7, delay: 0.45 }}
         >
-          {projectCount} Works
+          Design Portfolio — {projectCount} works
         </motion.span>
       </div>
 
@@ -71,14 +70,13 @@ export function Toolbar({ projectCount }: ToolbarProps) {
           <motion.button
             key={label}
             type="button"
-            className="relative rounded-full px-4 py-1.5 transition-colors"
+            className="relative rounded-full px-5 py-2 transition-colors"
             style={{
-              fontSize: 11,
+              fontSize: 14,
               fontWeight: 500,
               fontFamily: "'Inter', sans-serif",
               color: colors.textSecondary,
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
+              letterSpacing: "-0.005em",
             }}
             whileHover={{
               color: colors.text,

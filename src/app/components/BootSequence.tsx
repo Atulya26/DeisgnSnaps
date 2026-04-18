@@ -11,8 +11,8 @@ interface BootSequenceProps {
 
 // Must match InfiniteCanvas constants exactly
 const DEFAULT_ZOOM = 0.60;
-const TOOLBAR_HEIGHT = 70;
-const TITLE_BAR_HEIGHT = 48; // approx height of the title bar below image
+const TOOLBAR_HEIGHT = 88;
+const TITLE_BAR_HEIGHT = 56; // approx height of the title bar below image (Tier 5: bigger type)
 
 /**
  * Boot Sequence — "Card Stack → Scatter to exact canvas positions"
@@ -239,9 +239,9 @@ export function BootSequence({ projects, onComplete }: BootSequenceProps) {
     };
   }, [projects, scatterPositions, onComplete, STACK_W, STACK_H]);
 
-  // Theme colors
-  const bgColor = theme === "light" ? "#F5F3EF" : "#161616";
-  const cardBg = theme === "light" ? "#FEFEFE" : "#1E1E1E";
+  // Theme colors — synced with ThemeContext.defaultLightColors / defaultDarkColors
+  const bgColor = theme === "light" ? "#FFFFFF" : "#161616";
+  const cardBg = theme === "light" ? "#FFFFFF" : "#1E1E1E";
   const cardBorder = theme === "light" ? "rgba(0,0,0,0.04)" : "rgba(255,255,255,0.04)";
   const textColor = theme === "light" ? "#171717" : "#ECECEC";
   const mutedColor = theme === "light" ? "#999" : "#555";
@@ -275,13 +275,14 @@ export function BootSequence({ projects, onComplete }: BootSequenceProps) {
       >
         <span
           style={{
-            fontFamily: "'Instrument Serif', Georgia, serif",
-            fontSize: 22,
+            fontFamily: "'Inter', sans-serif",
+            fontSize: 30,
+            fontWeight: 700,
             color: textColor,
-            letterSpacing: "-0.02em",
+            letterSpacing: "-0.035em",
           }}
         >
-          Studio
+          Atulya
         </span>
       </div>
 
@@ -372,49 +373,37 @@ export function BootSequence({ projects, onComplete }: BootSequenceProps) {
                 style={{ pointerEvents: "none" }}
               />
             </div>
-            {/* Title bar — replica of PortfolioCard */}
+            {/* Title bar — replica of PortfolioCard (Tier 5 typography) */}
             <div
-              className="flex items-center justify-between gap-1 overflow-hidden"
+              className="flex items-center justify-between gap-2 overflow-hidden"
               style={{
                 backgroundColor: cardBg,
-                padding: `${6 * DEFAULT_ZOOM}px ${8 * DEFAULT_ZOOM}px`,
+                padding: `${18 * DEFAULT_ZOOM}px ${24 * DEFAULT_ZOOM}px`,
                 height: pos.titleH,
               }}
             >
-              <div className="flex items-center gap-1 overflow-hidden">
-                <span
-                  style={{
-                    fontSize: 10 * DEFAULT_ZOOM,
-                    color: colors.textMuted,
-                    fontFamily: "'Geist Mono', monospace",
-                    letterSpacing: "0.02em",
-                    opacity: 0.6,
-                    flexShrink: 0,
-                  }}
-                >
-                  {String(idx + 1).padStart(2, "0")}
-                </span>
-                <span
-                  className="truncate"
-                  style={{
-                    fontSize: 14 * DEFAULT_ZOOM,
-                    color: colors.text,
-                    fontWeight: 450,
-                    letterSpacing: "-0.015em",
-                  }}
-                >
-                  {project.title}
-                </span>
-              </div>
+              <span
+                className="truncate"
+                style={{
+                  fontSize: 20 * DEFAULT_ZOOM,
+                  color: colors.text,
+                  fontWeight: 600,
+                  letterSpacing: "-0.02em",
+                  fontFamily: "'Inter', sans-serif",
+                  lineHeight: 1.25,
+                }}
+              >
+                {project.title}
+              </span>
               {project.category && (
                 <span
                   className="shrink-0"
                   style={{
-                    fontSize: 10 * DEFAULT_ZOOM,
+                    fontSize: 13 * DEFAULT_ZOOM,
                     color: colors.textMuted,
-                    letterSpacing: "0.04em",
-                    textTransform: "uppercase" as const,
-                    fontFamily: "'Geist Mono', monospace",
+                    fontWeight: 500,
+                    letterSpacing: "-0.005em",
+                    fontFamily: "'Inter', sans-serif",
                   }}
                 >
                   {project.category}
@@ -431,14 +420,14 @@ export function BootSequence({ projects, onComplete }: BootSequenceProps) {
         <div ref={statusRef}>
           <span
             style={{
-              fontFamily: "'Geist Mono', monospace",
-              fontSize: 10,
+              fontFamily: "'Inter', sans-serif",
+              fontSize: 12,
+              fontWeight: 500,
               color: mutedColor,
-              letterSpacing: "0.12em",
-              textTransform: "uppercase" as const,
+              letterSpacing: "-0.005em",
             }}
           >
-            Loading works
+            Loading works…
           </span>
         </div>
         <div

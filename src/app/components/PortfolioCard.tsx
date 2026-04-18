@@ -32,9 +32,6 @@ function PortfolioCardImpl({ project, onOpen, skipAnimation, index = 0 }: Portfo
     }
   };
 
-  // Format index as 2-digit number for visual label
-  const displayNum = String(index + 1).padStart(2, "0");
-
   return (
     <motion.div
       ref={cardRef}
@@ -159,53 +156,38 @@ function PortfolioCardImpl({ project, onOpen, skipAnimation, index = 0 }: Portfo
 
         {/* Title bar */}
         <div
-          className="flex items-center justify-between gap-3 px-4"
+          className="flex items-center justify-between gap-4 px-6"
           style={{
             backgroundColor: colors.cardBg,
-            paddingTop: 12,
-            paddingBottom: 12,
+            paddingTop: 18,
+            paddingBottom: 18,
           }}
         >
-          {/* Project number + title */}
-          <div className="flex items-center gap-2.5 overflow-hidden">
-            <span
-              style={{
-                fontSize: 10,
-                fontWeight: 400,
-                color: colors.textMuted,
-                fontFamily: "'Geist Mono', monospace",
-                letterSpacing: "0.02em",
-                flexShrink: 0,
-                opacity: 0.6,
-              }}
-            >
-              {displayNum}
-            </span>
-            <h3
-              className="truncate"
-              style={{
-                fontSize: 14,
-                color: colors.text,
-                lineHeight: 1.3,
-                fontWeight: 450,
-                letterSpacing: "-0.015em",
-              }}
-            >
-              {project.title}
-            </h3>
-          </div>
+          {/* Title */}
+          <h3
+            className="truncate"
+            style={{
+              fontSize: 20,
+              color: colors.text,
+              lineHeight: 1.25,
+              fontWeight: 600,
+              letterSpacing: "-0.02em",
+              fontFamily: "'Inter', sans-serif",
+            }}
+          >
+            {project.title}
+          </h3>
 
-          {/* Category — if present, displayed as small uppercase label */}
+          {/* Category — small caps, Inter */}
           {project.category && (
             <span
               className="shrink-0"
               style={{
-                fontSize: 10,
-                fontWeight: 400,
+                fontSize: 13,
+                fontWeight: 500,
                 color: colors.textMuted,
-                letterSpacing: "0.04em",
-                textTransform: "uppercase" as const,
-                fontFamily: "'Geist Mono', monospace",
+                letterSpacing: "-0.005em",
+                fontFamily: "'Inter', sans-serif",
               }}
             >
               {project.category}

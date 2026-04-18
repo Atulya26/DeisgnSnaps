@@ -16,17 +16,19 @@ import type { Project } from "./types";
  */
 
 // ── Layout constants ──
-const CARD_WIDTH = 340;   // uniform card width — clean grid
-const GAP_X = 120;        // horizontal gap between columns — generous breathing room
-const GAP_Y = 110;        // vertical gap between rows — generous breathing room
-const PADDING_LEFT = 60;  // left margin
-const PADDING_TOP = 60;   // top margin
+// Tier 5: cards scaled up ~30% for a UI-showcase portfolio feel. Gaps
+// scale proportionally so density stays similar at DEFAULT_ZOOM=0.60.
+const CARD_WIDTH = 440;   // uniform card width — bigger, reads well at 60% zoom
+const GAP_X = 140;        // horizontal gap between columns
+const GAP_Y = 130;        // vertical gap between rows
+const PADDING_LEFT = 80;  // left margin
+const PADDING_TOP = 80;   // top margin
 const MAX_COLS = 7;       // maximum number of columns
 
 // Height presets — gives visual variety while keeping things tidy
 const HEIGHT_PATTERN = [
-  280, 340, 260, 380, 300, 260, 320, 360, 280, 300,
-  340, 260, 380, 280, 320, 300, 360, 280, 340, 260,
+  360, 440, 340, 500, 390, 340, 420, 470, 360, 390,
+  440, 340, 500, 360, 420, 390, 470, 360, 440, 340,
 ];
 
 /**

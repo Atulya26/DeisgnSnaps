@@ -48,7 +48,6 @@ export function ProjectDetail({
   const touchEndX = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
-  const sidebarRef = useRef<HTMLDivElement>(null);
   const prefersReduced = useReducedMotion();
   const { colors, theme } = useTheme();
   const lenisRef = useRef<Lenis | null>(null);
@@ -262,15 +261,15 @@ export function ProjectDetail({
   const displayNum = String(currentIndex + 1).padStart(2, "0");
   const totalNum = String(projects.length).padStart(2, "0");
 
-  // Theme-aware card colors
+  // Theme-aware card colors (Tier 5: white-first, Inter, no magazine sidebar)
   const cardBg = theme === "light" ? "#FFFFFF" : "#1C1C1C";
   const cardBorder = theme === "light" ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.06)";
   const cardShadow = theme === "light"
-    ? "0 4px 40px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04)"
+    ? "0 4px 40px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)"
     : "0 4px 40px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.2)";
-  const textureBg = theme === "light" ? "#EAE8E3" : "#111111";
-  const textureLineColor = theme === "light" ? "rgba(0,0,0,0.04)" : "rgba(255,255,255,0.03)";
-  const sidebarTextColor = theme === "light" ? "rgba(0,0,0,0.35)" : "rgba(255,255,255,0.25)";
+  const textureBg = theme === "light" ? "#F7F7F7" : "#111111";
+  const textureLineColor = theme === "light" ? "rgba(0,0,0,0.035)" : "rgba(255,255,255,0.03)";
+  const metaColor = theme === "light" ? "rgba(0,0,0,0.55)" : "rgba(255,255,255,0.55)";
 
   return (
     <AnimatePresence>
@@ -332,25 +331,28 @@ export function ProjectDetail({
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
             >
-              {/* Left: Project counter + title */}
+              {/* Left: Project counter + title (Inter, cleaner) */}
               <div className="flex items-center gap-4">
                 <span
                   style={{
-                    fontSize: 11,
-                    color: sidebarTextColor,
-                    letterSpacing: "0.1em",
-                    fontFamily: "'Geist Mono', monospace",
+                    fontSize: 13,
+                    fontWeight: 500,
+                    color: metaColor,
+                    letterSpacing: "-0.005em",
+                    fontFamily: "'Inter', sans-serif",
+                    fontVariantNumeric: "tabular-nums",
                   }}
                 >
-                  {displayNum}/{totalNum}
+                  {displayNum} / {totalNum}
                 </span>
                 <span
                   className="hidden sm:block"
                   style={{
-                    fontSize: 13,
+                    fontSize: 14,
                     color: colors.textSecondary,
-                    fontWeight: 400,
+                    fontWeight: 500,
                     letterSpacing: "-0.01em",
+                    fontFamily: "'Inter', sans-serif",
                   }}
                 >
                   {currentProject.title}
@@ -420,136 +422,16 @@ export function ProjectDetail({
                 animate={prefersReduced ? { opacity: 1 } : "center"}
                 exit={prefersReduced ? { opacity: 0 } : "exit"}
                 transition={prefersReduced ? { duration: 0.15 } : { duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                className="flex min-h-screen justify-center px-4 pb-24 pt-20 sm:px-8 lg:px-0"
+                className="flex min-h-screen justify-center px-4 pb-24 pt-20 sm:px-8"
                 onClick={(e) => e.stopPropagation()}
               >
-                {/* ── Desktop sidebar (left gutter) — hidden on mobile ── */}
-                <div
-                  ref={sidebarRef}
-                  className="mr-8 hidden w-48 shrink-0 lg:block"
-                  style={{ paddingTop: 48 }}
-                >
-                  <div className="sticky top-28">
-                    {/* Project number — large, faded */}
-                    <motion.div
-                      initial={{ opacity: 0, x: -12 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
-                    >
-                      <span
-                        style={{
-                          fontSize: 64,
-                          fontWeight: 300,
-                          color: sidebarTextColor,
-                          fontFamily: "'Instrument Serif', Georgia, serif",
-                          lineHeight: 1,
-                          display: "block",
-                        }}
-                      >
-                        {displayNum}
-                      </span>
-                    </motion.div>
-
-                    {/* Category label */}
-                    <motion.div
-                      className="mt-6"
-                      initial={{ opacity: 0, x: -8 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], delay: 0.45 }}
-                    >
-                      <span
-                        style={{
-                          fontSize: 10,
-                          fontWeight: 400,
-                          color: sidebarTextColor,
-                          letterSpacing: "0.12em",
-                          textTransform: "uppercase" as const,
-                          fontFamily: "'Geist Mono', monospace",
-                        }}
-                      >
-                        {currentProject.category}
-                      </span>
-                    </motion.div>
-
-                    {/* Year */}
-                    <motion.div
-                      className="mt-2"
-                      initial={{ opacity: 0, x: -8 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], delay: 0.5 }}
-                    >
-                      <span
-                        style={{
-                          fontSize: 10,
-                          color: sidebarTextColor,
-                          fontFamily: "'Geist Mono', monospace",
-                          letterSpacing: "0.06em",
-                        }}
-                      >
-                        {currentProject.year}
-                      </span>
-                    </motion.div>
-
-                    {/* Tags — vertical */}
-                    <motion.div
-                      className="mt-8 flex flex-col gap-2"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.5, delay: 0.6 }}
-                    >
-                      {currentProject.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          style={{
-                            fontSize: 10,
-                            color: sidebarTextColor,
-                            fontFamily: "'Geist Mono', monospace",
-                            letterSpacing: "0.04em",
-                          }}
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </motion.div>
-
-                    {/* Scroll indicator */}
-                    <motion.div
-                      className="mt-12"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.5, delay: 0.8 }}
-                    >
-                      <div
-                        style={{
-                          width: 1,
-                          height: 48,
-                          backgroundColor: sidebarTextColor,
-                          marginBottom: 8,
-                        }}
-                      />
-                      <span
-                        style={{
-                          fontSize: 9,
-                          color: sidebarTextColor,
-                          fontFamily: "'Geist Mono', monospace",
-                          letterSpacing: "0.15em",
-                          textTransform: "uppercase" as const,
-                          writingMode: "vertical-lr" as const,
-                        }}
-                      >
-                        Scroll
-                      </span>
-                    </motion.div>
-                  </div>
-                </div>
-
                 {/* ── Content card ── */}
                 <motion.div
                   ref={cardRef}
-                  className="w-full max-w-[860px]"
+                  className="w-full max-w-[1040px]"
                   style={{
                     backgroundColor: cardBg,
-                    borderRadius: 20,
+                    borderRadius: 24,
                     border: `1px solid ${cardBorder}`,
                     boxShadow: cardShadow,
                     overflow: "hidden",
@@ -558,99 +440,86 @@ export function ProjectDetail({
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.15 }}
                 >
-                  {/* ── Hero Image — with parallax ── */}
-                  <div data-hero className="overflow-hidden">
-                    <ImageWithFallback
-                      src={currentProject.imageUrl}
-                      alt={currentProject.title}
-                      className="w-full"
-                      style={{ minHeight: 300, display: "block" }}
-                    />
-                  </div>
+                  {/* ── Header (before hero): category + year, then big title ── */}
+                  <div className="px-8 pt-10 pb-8 sm:px-14 sm:pt-14 sm:pb-10">
+                    {/* Meta row — Inter, inline, all themes */}
+                    <motion.div
+                      className="flex items-center gap-3"
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: 0.25 }}
+                    >
+                      {currentProject.category && (
+                        <span
+                          style={{
+                            fontSize: 13,
+                            fontWeight: 500,
+                            color: metaColor,
+                            letterSpacing: "-0.005em",
+                            fontFamily: "'Inter', sans-serif",
+                          }}
+                        >
+                          {currentProject.category}
+                        </span>
+                      )}
+                      {currentProject.category && currentProject.year && (
+                        <span
+                          aria-hidden
+                          style={{
+                            width: 3,
+                            height: 3,
+                            borderRadius: "50%",
+                            backgroundColor: metaColor,
+                            opacity: 0.5,
+                          }}
+                        />
+                      )}
+                      {currentProject.year && (
+                        <span
+                          style={{
+                            fontSize: 13,
+                            fontWeight: 500,
+                            color: metaColor,
+                            letterSpacing: "-0.005em",
+                            fontFamily: "'Inter', sans-serif",
+                            fontVariantNumeric: "tabular-nums",
+                          }}
+                        >
+                          {currentProject.year}
+                        </span>
+                      )}
+                    </motion.div>
 
-                  {/* ── Card inner content ── */}
-                  <div className="px-6 py-8 sm:px-10 sm:py-10">
-                    {/* Mobile-only meta header (hidden on desktop where sidebar shows it) */}
-                    <div className="mb-1 flex items-center gap-3 lg:hidden">
-                      <span
-                        style={{
-                          fontSize: 11,
-                          color: colors.textMuted,
-                          fontFamily: "'Geist Mono', monospace",
-                          letterSpacing: "0.06em",
-                        }}
-                      >
-                        {currentProject.category}
-                      </span>
-                      <span
-                        style={{ fontSize: 11, color: colors.borderLight, fontFamily: "'Geist Mono', monospace" }}
-                      >
-                        /
-                      </span>
-                      <span
-                        style={{
-                          fontSize: 11,
-                          color: colors.textMuted,
-                          fontFamily: "'Geist Mono', monospace",
-                          letterSpacing: "0.06em",
-                        }}
-                      >
-                        {currentProject.year}
-                      </span>
-                    </div>
-
-                    {/* Title */}
+                    {/* Big Inter display title */}
                     <motion.h1
-                      className="text-balance"
+                      className="mt-4 text-balance"
                       style={{
-                        fontFamily: "'Instrument Serif', Georgia, serif",
-                        fontSize: "clamp(28px, 4vw, 44px)",
-                        fontWeight: 400,
-                        color: theme === "light" ? "#111" : "#F0F0F0",
-                        letterSpacing: "-0.02em",
-                        lineHeight: 1.1,
+                        fontFamily: "'Inter', sans-serif",
+                        fontSize: "clamp(36px, 5.5vw, 72px)",
+                        fontWeight: 700,
+                        color: colors.text,
+                        letterSpacing: "-0.035em",
+                        lineHeight: 1.02,
                       }}
                       initial={{ opacity: 0, y: 12 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
+                      transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
                     >
                       {currentProject.title}
                     </motion.h1>
-
-                    {/* Tags — mobile inline, desktop hidden (shown in sidebar) */}
-                    <motion.div
-                      className="mt-4 flex flex-wrap gap-1.5 lg:hidden"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.4 }}
-                    >
-                      {currentProject.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="rounded-full px-2.5 py-0.5"
-                          style={{
-                            fontSize: 10,
-                            color: colors.textMuted,
-                            border: `1px solid ${cardBorder}`,
-                            fontFamily: "'Geist Mono', monospace",
-                            letterSpacing: "0.02em",
-                          }}
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </motion.div>
 
                     {/* Description */}
                     {currentProject.description && (
                       <motion.p
                         className="mt-6 text-pretty sm:mt-8"
                         style={{
-                          fontSize: 15,
-                          color: theme === "light" ? "#555" : "#999",
-                          lineHeight: 1.8,
-                          maxWidth: 600,
-                          letterSpacing: "-0.005em",
+                          fontFamily: "'Inter', sans-serif",
+                          fontSize: 18,
+                          fontWeight: 400,
+                          color: colors.textSecondary,
+                          lineHeight: 1.55,
+                          maxWidth: 720,
+                          letterSpacing: "-0.01em",
                         }}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -660,21 +529,52 @@ export function ProjectDetail({
                       </motion.p>
                     )}
 
-                    {/* ── Separator ── */}
-                    <motion.div
-                      className="mt-8 sm:mt-10"
-                      style={{
-                        height: 1,
-                        backgroundColor: cardBorder,
-                        transformOrigin: "left",
-                      }}
-                      initial={{ scaleX: 0 }}
-                      animate={{ scaleX: 1 }}
-                      transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0.45 }}
-                    />
+                    {/* Tag pills — Inter */}
+                    {currentProject.tags?.length > 0 && (
+                      <motion.div
+                        className="mt-6 flex flex-wrap gap-2"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.45 }}
+                      >
+                        {currentProject.tags.map((tag) => (
+                          <span
+                            key={tag}
+                            className="rounded-full px-3 py-1"
+                            style={{
+                              fontSize: 12,
+                              fontWeight: 500,
+                              color: colors.textSecondary,
+                              border: `1px solid ${cardBorder}`,
+                              fontFamily: "'Inter', sans-serif",
+                              letterSpacing: "-0.005em",
+                            }}
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </motion.div>
+                    )}
+                  </div>
 
+                  {/* ── Hero Image — with parallax ── */}
+                  <div
+                    data-hero
+                    className="overflow-hidden"
+                    style={{ backgroundColor: colors.imageBg }}
+                  >
+                    <ImageWithFallback
+                      src={currentProject.imageUrl}
+                      alt={currentProject.title}
+                      className="w-full"
+                      style={{ minHeight: 300, display: "block" }}
+                    />
+                  </div>
+
+                  {/* ── Card inner content: gallery / content blocks ── */}
+                  <div className="px-8 py-10 sm:px-14 sm:py-14">
                     {/* ── Gallery: GSAP scroll-driven reveal ── */}
-                    <div className="mt-8 space-y-6 sm:mt-10 sm:space-y-8">
+                    <div className="space-y-6 sm:space-y-8">
                       {/* Content Blocks */}
                       {hasContentBlocks &&
                         currentProject.contentBlocks!
@@ -702,12 +602,13 @@ export function ProjectDetail({
                                   />
                                   {block.caption && (
                                     <p
-                                      className="px-4 py-2.5"
+                                      className="px-5 py-3"
                                       style={{
-                                        fontSize: 11,
+                                        fontSize: 13,
+                                        fontWeight: 500,
                                         color: colors.textMuted,
-                                        fontFamily: "'Geist Mono', monospace",
-                                        letterSpacing: "0.02em",
+                                        fontFamily: "'Inter', sans-serif",
+                                        letterSpacing: "-0.005em",
                                       }}
                                     >
                                       {block.caption}
@@ -724,9 +625,11 @@ export function ProjectDetail({
                                   data-reveal
                                   className="prose prose-neutral max-w-none"
                                   style={{
-                                    fontSize: 14,
-                                    color: theme === "light" ? "#555" : "#999",
-                                    lineHeight: 1.8,
+                                    fontFamily: "'Inter', sans-serif",
+                                    fontSize: 16,
+                                    color: colors.textSecondary,
+                                    lineHeight: 1.7,
+                                    letterSpacing: "-0.005em",
                                   }}
                                   dangerouslySetInnerHTML={{ __html: block.content }}
                                 />
@@ -758,14 +661,15 @@ export function ProjectDetail({
                     </div>
 
                     {/* ── Card footer ── */}
-                    <div className="mt-10 flex items-center justify-between sm:mt-14">
+                    <div className="mt-12 flex items-center justify-between sm:mt-16">
                       <span
                         style={{
-                          fontSize: 10,
-                          color: sidebarTextColor,
-                          fontFamily: "'Geist Mono', monospace",
-                          letterSpacing: "0.1em",
-                          textTransform: "uppercase" as const,
+                          fontSize: 13,
+                          fontWeight: 500,
+                          color: metaColor,
+                          fontFamily: "'Inter', sans-serif",
+                          letterSpacing: "-0.005em",
+                          fontVariantNumeric: "tabular-nums",
                         }}
                       >
                         {displayNum} / {totalNum}
@@ -774,42 +678,41 @@ export function ProjectDetail({
                         {currentIndex > 0 && (
                           <button
                             onClick={(e) => { e.stopPropagation(); goPrev(); }}
-                            className="flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5 transition-all hover:opacity-70 active:scale-95"
+                            className="flex cursor-pointer items-center gap-2 rounded-full px-4 py-2 transition-all hover:opacity-70 active:scale-95"
                             style={{
-                              fontSize: 11,
-                              color: colors.textMuted,
+                              fontSize: 13,
+                              fontWeight: 500,
+                              color: colors.textSecondary,
                               border: `1px solid ${cardBorder}`,
-                              fontFamily: "'Geist Mono', monospace",
-                              letterSpacing: "0.02em",
+                              fontFamily: "'Inter', sans-serif",
+                              letterSpacing: "-0.005em",
                             }}
                           >
-                            <ArrowLeft size={12} />
-                            Prev
+                            <ArrowLeft size={14} />
+                            Previous
                           </button>
                         )}
                         {currentIndex < projects.length - 1 && (
                           <button
                             onClick={(e) => { e.stopPropagation(); goNext(); }}
-                            className="flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5 transition-all hover:opacity-70 active:scale-95"
+                            className="flex cursor-pointer items-center gap-2 rounded-full px-4 py-2 transition-all hover:opacity-70 active:scale-95"
                             style={{
-                              fontSize: 11,
-                              color: colors.textMuted,
+                              fontSize: 13,
+                              fontWeight: 500,
+                              color: colors.textSecondary,
                               border: `1px solid ${cardBorder}`,
-                              fontFamily: "'Geist Mono', monospace",
-                              letterSpacing: "0.02em",
+                              fontFamily: "'Inter', sans-serif",
+                              letterSpacing: "-0.005em",
                             }}
                           >
                             Next
-                            <ArrowRight size={12} />
+                            <ArrowRight size={14} />
                           </button>
                         )}
                       </div>
                     </div>
                   </div>
                 </motion.div>
-
-                {/* ── Desktop right gutter — hidden on mobile ── */}
-                <div className="ml-8 hidden w-48 shrink-0 lg:block" />
               </motion.div>
             </AnimatePresence>
           </motion.div>
