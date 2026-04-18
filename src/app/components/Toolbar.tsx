@@ -6,10 +6,11 @@ import { useTheme } from "./ThemeContext";
 import { ThemeEditor } from "./ThemeEditor";
 
 interface ToolbarProps {
-  projectCount: number;
+  /** Accepted but unused — kept for API stability with App.tsx. */
+  projectCount?: number;
 }
 
-export function Toolbar({ projectCount }: ToolbarProps) {
+export function Toolbar(_props: ToolbarProps) {
   const { theme, colors, toggleTheme } = useTheme();
   const [editorOpen, setEditorOpen] = useState(false);
 
@@ -30,8 +31,8 @@ export function Toolbar({ projectCount }: ToolbarProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
     >
-      {/* Left: Wordmark + byline */}
-      <div className="flex items-baseline gap-4">
+      {/* Left: Wordmark only */}
+      <div className="flex items-center">
         <motion.span
           style={{
             fontFamily: "'Inter', sans-serif",
@@ -46,20 +47,6 @@ export function Toolbar({ projectCount }: ToolbarProps) {
           transition={{ duration: 0.7, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
         >
           Atulya
-        </motion.span>
-        <motion.span
-          style={{
-            fontSize: 13,
-            fontWeight: 500,
-            color: colors.textSecondary,
-            letterSpacing: "-0.005em",
-            fontFamily: "'Inter', sans-serif",
-          }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.7, delay: 0.45 }}
-        >
-          Design Portfolio — {projectCount} works
         </motion.span>
       </div>
 

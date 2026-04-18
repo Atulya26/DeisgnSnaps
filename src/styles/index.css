@@ -16,3 +16,14 @@
 @media (prefers-reduced-motion: reduce) {
   .portfolio-card-shimmer { animation: none; opacity: 0.5; }
 }
+
+/* Hide native scrollbar on the horizontal project-detail gallery so the
+   flat shopify-style strip reads cleanly. Keyboard + trackpad + arrows
+   still scroll it. */
+.hide-scrollbar {
+  scrollbar-width: none;         /* Firefox */
+  -ms-overflow-style: none;      /* IE/Edge */
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;                  /* WebKit */
+}

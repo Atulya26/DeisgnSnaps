@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useState, useRef, useMemo } from "react";
+import { useEffect, useCallback, useState, useRef } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { Cross, ArrowLeft, ArrowRight } from "geist-icons";
 import { gsap } from "gsap";
@@ -261,53 +261,54 @@ export function ProjectDetail({
   const displayNum = String(currentIndex + 1).padStart(2, "0");
   const totalNum = String(projects.length).padStart(2, "0");
 
-  // Theme-aware card colors (Tier 5: white-first, Inter, no magazine sidebar)
-  const cardBg = theme === "light" ? "#FFFFFF" : "#1C1C1C";
-  const cardBorder = theme === "light" ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.06)";
-  const cardShadow = theme === "light"
-    ? "0 4px 40px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)"
-    : "0 4px 40px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.2)";
-  const textureBg = theme === "light" ? "#F7F7F7" : "#111111";
-  const textureLineColor = theme === "light" ? "rgba(0,0,0,0.035)" : "rgba(255,255,255,0.03)";
+  // Tier 6: unified page — no floating card, no dot-pattern backdrop.
+  // Every surface uses the main theme colors so the detail page reads as
+  // one continuous document, not three disconnected layers.
+  const pageBg = colors.bg;
+  const topbarBg = theme === "light" ? "rgba(255,255,255,0.82)" : "rgba(18,18,18,0.82)";
+  const cardBorder = theme === "light" ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.08)";
   const metaColor = theme === "light" ? "rgba(0,0,0,0.55)" : "rgba(255,255,255,0.55)";
+  const galleryBtnBg = theme === "light" ? "rgba(255,255,255,0.92)" : "rgba(30,30,30,0.92)";
+
+  // Build the horizontal-scroll gallery source list: cover + gallery images +
+  // any image-type content blocks. Dedupe by url.
+  const galleryAll: { url: string; caption?: string }[] = (() => {
+    const seen = new Set<string>();
+    const out: { url: string; caption?: string }[] = [];
+    if (currentProject.imageUrl && !seen.has(currentProject.imageUrl)) {
+      seen.add(currentProject.imageUrl);
+      out.push({ url: currentProject.imageUrl });
+    }
+    for (const url of galleryImages) {
+      if (!url || seen.has(url)) continue;
+      seen.add(url);
+      out.push({ url });
+    }
+    if (hasContentBlocks) {
+      for (const b of currentProject.contentBlocks!) {
+        if (b.type === "image" && b.url && !seen.has(b.url)) {
+          seen.add(b.url);
+          out.push({ url: b.url, caption: b.caption });
+        }
+      }
+    }
+    return out;
+  })();
+
+  // Text-only content blocks stay vertical after the gallery.
+  const textBlocks = hasContentBlocks
+    ? currentProject.contentBlocks!.filter((b) => b.type === "text")
+    : [];
 
   return (
     <AnimatePresence>
       {project && (
         <>
-          {/* ── Textured backdrop ── */}
-          <motion.div
-            className="fixed inset-0 z-50"
-            style={{ backgroundColor: textureBg }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={easings.slowFade}
-            onClick={onClose}
-          >
-            {/* Dot pattern texture */}
-            <div
-              className="absolute inset-0"
-              style={{
-                backgroundImage: `radial-gradient(${textureLineColor} 1px, transparent 1px)`,
-                backgroundSize: "24px 24px",
-              }}
-            />
-            {/* Subtle gradient wash from top */}
-            <div
-              className="absolute inset-0"
-              style={{
-                background: theme === "light"
-                  ? "linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 40%)"
-                  : "linear-gradient(180deg, rgba(0,0,0,0.3) 0%, transparent 40%)",
-              }}
-            />
-          </motion.div>
-
-          {/* ── Scrollable content layer ── */}
+          {/* ── Unified white page (no backdrop layer) ── */}
           <motion.div
             ref={containerRef}
             className="fixed inset-0 z-50 overflow-y-auto"
+            style={{ backgroundColor: pageBg }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0, y: 16 }}
@@ -318,14 +319,15 @@ export function ProjectDetail({
             onMouseDown={handleMouseDown}
             onMouseUp={handleMouseUp}
           >
-            {/* ── Fixed top bar ── */}
+            {/* ── Sticky top bar ── */}
             <motion.div
               key={`topbar-${currentProject.id}`}
-              className="fixed left-0 right-0 top-0 z-20 flex items-center justify-between px-5 py-4 sm:px-8"
+              className="fixed left-0 right-0 top-0 z-20 flex items-center justify-between px-6 py-5 sm:px-10"
               style={{
-                backgroundColor: theme === "light" ? "rgba(234,232,227,0.8)" : "rgba(17,17,17,0.8)",
+                backgroundColor: topbarBg,
                 backdropFilter: "blur(20px) saturate(1.4)",
                 WebkitBackdropFilter: "blur(20px) saturate(1.4)",
+                borderBottom: `1px solid ${cardBorder}`,
               }}
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
@@ -422,37 +424,23 @@ export function ProjectDetail({
                 animate={prefersReduced ? { opacity: 1 } : "center"}
                 exit={prefersReduced ? { opacity: 0 } : "exit"}
                 transition={prefersReduced ? { duration: 0.15 } : { duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                className="flex min-h-screen justify-center px-4 pb-24 pt-20 sm:px-8"
+                className="min-h-screen px-6 pb-24 pt-32 sm:px-10 sm:pt-36"
                 onClick={(e) => e.stopPropagation()}
               >
-                {/* ── Content card ── */}
-                <motion.div
-                  ref={cardRef}
-                  className="w-full max-w-[1040px]"
-                  style={{
-                    backgroundColor: cardBg,
-                    borderRadius: 24,
-                    border: `1px solid ${cardBorder}`,
-                    boxShadow: cardShadow,
-                    overflow: "hidden",
-                  }}
-                  initial={{ opacity: 0, y: 24, scale: 0.98 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.15 }}
-                >
-                  {/* ── Header (before hero): category + year, then big title ── */}
-                  <div className="px-8 pt-10 pb-8 sm:px-14 sm:pt-14 sm:pb-10">
-                    {/* Meta row — Inter, inline, all themes */}
+                <div ref={cardRef}>
+                  {/* ── Hero: meta + title + description + tags ── */}
+                  <div className="mx-auto max-w-[1100px]">
+                    {/* Meta row */}
                     <motion.div
                       className="flex items-center gap-3"
                       initial={{ opacity: 0, y: 6 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: 0.25 }}
+                      transition={{ duration: 0.5, delay: 0.2 }}
                     >
                       {currentProject.category && (
                         <span
                           style={{
-                            fontSize: 13,
+                            fontSize: 14,
                             fontWeight: 500,
                             color: metaColor,
                             letterSpacing: "-0.005em",
@@ -477,7 +465,7 @@ export function ProjectDetail({
                       {currentProject.year && (
                         <span
                           style={{
-                            fontSize: 13,
+                            fontSize: 14,
                             fontWeight: 500,
                             color: metaColor,
                             letterSpacing: "-0.005em",
@@ -495,54 +483,52 @@ export function ProjectDetail({
                       className="mt-4 text-balance"
                       style={{
                         fontFamily: "'Inter', sans-serif",
-                        fontSize: "clamp(36px, 5.5vw, 72px)",
+                        fontSize: "clamp(40px, 6.2vw, 88px)",
                         fontWeight: 700,
                         color: colors.text,
-                        letterSpacing: "-0.035em",
-                        lineHeight: 1.02,
+                        letterSpacing: "-0.04em",
+                        lineHeight: 1.0,
                       }}
                       initial={{ opacity: 0, y: 12 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
+                      transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: 0.25 }}
                     >
                       {currentProject.title}
                     </motion.h1>
 
-                    {/* Description */}
                     {currentProject.description && (
                       <motion.p
                         className="mt-6 text-pretty sm:mt-8"
                         style={{
                           fontFamily: "'Inter', sans-serif",
-                          fontSize: 18,
+                          fontSize: 19,
                           fontWeight: 400,
                           color: colors.textSecondary,
                           lineHeight: 1.55,
-                          maxWidth: 720,
+                          maxWidth: 760,
                           letterSpacing: "-0.01em",
                         }}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], delay: 0.4 }}
+                        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], delay: 0.35 }}
                       >
                         {currentProject.description}
                       </motion.p>
                     )}
 
-                    {/* Tag pills — Inter */}
                     {currentProject.tags?.length > 0 && (
                       <motion.div
                         className="mt-6 flex flex-wrap gap-2"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        transition={{ delay: 0.45 }}
+                        transition={{ delay: 0.4 }}
                       >
                         {currentProject.tags.map((tag) => (
                           <span
                             key={tag}
-                            className="rounded-full px-3 py-1"
+                            className="rounded-full px-3 py-1.5"
                             style={{
-                              fontSize: 12,
+                              fontSize: 13,
                               fontWeight: 500,
                               color: colors.textSecondary,
                               border: `1px solid ${cardBorder}`,
@@ -557,167 +543,275 @@ export function ProjectDetail({
                     )}
                   </div>
 
-                  {/* ── Hero Image — with parallax ── */}
-                  <div
-                    data-hero
-                    className="overflow-hidden"
-                    style={{ backgroundColor: colors.imageBg }}
-                  >
-                    <ImageWithFallback
-                      src={currentProject.imageUrl}
-                      alt={currentProject.title}
-                      className="w-full"
-                      style={{ minHeight: 300, display: "block" }}
-                    />
-                  </div>
+                  {/* ── Horizontal-scroll gallery (shopify.design style) ──
+                       Full-bleed so it reads as the main event, not a card. */}
+                  {galleryAll.length > 0 && (
+                    <motion.div
+                      className="relative mt-14 sm:mt-20"
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.45 }}
+                    >
+                      <HorizontalGallery
+                        images={galleryAll}
+                        theme={theme}
+                        bg={colors.imageBg}
+                        btnBg={galleryBtnBg}
+                        textColor={colors.text}
+                        captionColor={colors.textMuted}
+                      />
+                    </motion.div>
+                  )}
 
-                  {/* ── Card inner content: gallery / content blocks ── */}
-                  <div className="px-8 py-10 sm:px-14 sm:py-14">
-                    {/* ── Gallery: GSAP scroll-driven reveal ── */}
-                    <div className="space-y-6 sm:space-y-8">
-                      {/* Content Blocks */}
-                      {hasContentBlocks &&
-                        currentProject.contentBlocks!
-                          .filter((block) => {
-                            if (block.type === "image" && block.url === currentProject.imageUrl) return false;
-                            return true;
-                          })
-                          .map((block, idx) => {
-                            if (block.type === "image") {
-                              return (
-                                <div
-                                  key={block.id}
-                                  data-reveal
-                                  className="overflow-hidden"
-                                  style={{
-                                    borderRadius: 12,
-                                    backgroundColor: colors.imageBg,
-                                  }}
-                                >
-                                  <ImageWithFallback
-                                    src={block.url}
-                                    alt={block.caption || `Image ${idx + 1}`}
-                                    className="w-full"
-                                    style={{ display: "block" }}
-                                  />
-                                  {block.caption && (
-                                    <p
-                                      className="px-5 py-3"
-                                      style={{
-                                        fontSize: 13,
-                                        fontWeight: 500,
-                                        color: colors.textMuted,
-                                        fontFamily: "'Inter', sans-serif",
-                                        letterSpacing: "-0.005em",
-                                      }}
-                                    >
-                                      {block.caption}
-                                    </p>
-                                  )}
-                                </div>
-                              );
-                            }
-
-                            if (block.type === "text") {
-                              return (
-                                <div
-                                  key={block.id}
-                                  data-reveal
-                                  className="prose prose-neutral max-w-none"
-                                  style={{
-                                    fontFamily: "'Inter', sans-serif",
-                                    fontSize: 16,
-                                    color: colors.textSecondary,
-                                    lineHeight: 1.7,
-                                    letterSpacing: "-0.005em",
-                                  }}
-                                  dangerouslySetInnerHTML={{ __html: block.content }}
-                                />
-                              );
-                            }
-                            return null;
-                          })}
-
-                      {/* Legacy gallery images */}
-                      {!hasContentBlocks &&
-                        galleryImages.map((url, idx) => (
-                          <div
-                            key={url + idx}
-                            data-reveal
-                            className="overflow-hidden"
-                            style={{
-                              borderRadius: 12,
-                              backgroundColor: colors.imageBg,
-                            }}
-                          >
-                            <ImageWithFallback
-                              src={url}
-                              alt={`${currentProject.title} - ${idx + 2}`}
-                              className="w-full"
-                              style={{ display: "block" }}
-                            />
-                          </div>
-                        ))}
+                  {/* ── Optional vertical text blocks ── */}
+                  {textBlocks.length > 0 && (
+                    <div className="mx-auto mt-16 max-w-[760px] space-y-6 sm:mt-20">
+                      {textBlocks.map((block) => (
+                        <div
+                          key={block.id}
+                          data-reveal
+                          className="prose prose-neutral max-w-none"
+                          style={{
+                            fontFamily: "'Inter', sans-serif",
+                            fontSize: 17,
+                            color: colors.textSecondary,
+                            lineHeight: 1.7,
+                            letterSpacing: "-0.005em",
+                          }}
+                          dangerouslySetInnerHTML={{ __html: (block as { content: string }).content }}
+                        />
+                      ))}
                     </div>
+                  )}
 
-                    {/* ── Card footer ── */}
-                    <div className="mt-12 flex items-center justify-between sm:mt-16">
-                      <span
-                        style={{
-                          fontSize: 13,
-                          fontWeight: 500,
-                          color: metaColor,
-                          fontFamily: "'Inter', sans-serif",
-                          letterSpacing: "-0.005em",
-                          fontVariantNumeric: "tabular-nums",
-                        }}
-                      >
-                        {displayNum} / {totalNum}
-                      </span>
-                      <div className="flex items-center gap-3">
-                        {currentIndex > 0 && (
-                          <button
-                            onClick={(e) => { e.stopPropagation(); goPrev(); }}
-                            className="flex cursor-pointer items-center gap-2 rounded-full px-4 py-2 transition-all hover:opacity-70 active:scale-95"
-                            style={{
-                              fontSize: 13,
-                              fontWeight: 500,
-                              color: colors.textSecondary,
-                              border: `1px solid ${cardBorder}`,
-                              fontFamily: "'Inter', sans-serif",
-                              letterSpacing: "-0.005em",
-                            }}
-                          >
-                            <ArrowLeft size={14} />
-                            Previous
-                          </button>
-                        )}
-                        {currentIndex < projects.length - 1 && (
-                          <button
-                            onClick={(e) => { e.stopPropagation(); goNext(); }}
-                            className="flex cursor-pointer items-center gap-2 rounded-full px-4 py-2 transition-all hover:opacity-70 active:scale-95"
-                            style={{
-                              fontSize: 13,
-                              fontWeight: 500,
-                              color: colors.textSecondary,
-                              border: `1px solid ${cardBorder}`,
-                              fontFamily: "'Inter', sans-serif",
-                              letterSpacing: "-0.005em",
-                            }}
-                          >
-                            Next
-                            <ArrowRight size={14} />
-                          </button>
-                        )}
-                      </div>
+                  {/* ── Footer ── */}
+                  <div className="mx-auto mt-20 flex max-w-[1100px] items-center justify-between sm:mt-28">
+                    <span
+                      style={{
+                        fontSize: 14,
+                        fontWeight: 500,
+                        color: metaColor,
+                        fontFamily: "'Inter', sans-serif",
+                        letterSpacing: "-0.005em",
+                        fontVariantNumeric: "tabular-nums",
+                      }}
+                    >
+                      {displayNum} / {totalNum}
+                    </span>
+                    <div className="flex items-center gap-3">
+                      {currentIndex > 0 && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); goPrev(); }}
+                          className="flex cursor-pointer items-center gap-2 rounded-full px-5 py-2.5 transition-all hover:opacity-70 active:scale-95"
+                          style={{
+                            fontSize: 14,
+                            fontWeight: 500,
+                            color: colors.textSecondary,
+                            border: `1px solid ${cardBorder}`,
+                            fontFamily: "'Inter', sans-serif",
+                            letterSpacing: "-0.005em",
+                          }}
+                        >
+                          <ArrowLeft size={14} />
+                          Previous
+                        </button>
+                      )}
+                      {currentIndex < projects.length - 1 && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); goNext(); }}
+                          className="flex cursor-pointer items-center gap-2 rounded-full px-5 py-2.5 transition-all hover:opacity-70 active:scale-95"
+                          style={{
+                            fontSize: 14,
+                            fontWeight: 500,
+                            color: colors.textSecondary,
+                            border: `1px solid ${cardBorder}`,
+                            fontFamily: "'Inter', sans-serif",
+                            letterSpacing: "-0.005em",
+                          }}
+                        >
+                          Next
+                          <ArrowRight size={14} />
+                        </button>
+                      )}
                     </div>
                   </div>
-                </motion.div>
+                </div>
               </motion.div>
             </AnimatePresence>
           </motion.div>
         </>
       )}
     </AnimatePresence>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Horizontal-scroll gallery — shopify.design-style full-bleed strip.
+// CSS scroll-snap for native feel; left/right arrows for mouse-only users.
+// ─────────────────────────────────────────────────────────────────────────
+interface HorizontalGalleryProps {
+  images: { url: string; caption?: string }[];
+  theme: "light" | "dark";
+  bg: string;
+  btnBg: string;
+  textColor: string;
+  captionColor: string;
+}
+
+function HorizontalGallery({
+  images,
+  theme,
+  bg,
+  btnBg,
+  textColor,
+  captionColor,
+}: HorizontalGalleryProps) {
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const [canPrev, setCanPrev] = useState(false);
+  const [canNext, setCanNext] = useState(true);
+
+  const updateEdges = useCallback(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    setCanPrev(el.scrollLeft > 4);
+    setCanNext(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+  }, []);
+
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    updateEdges();
+    el.addEventListener("scroll", updateEdges, { passive: true });
+    window.addEventListener("resize", updateEdges);
+    return () => {
+      el.removeEventListener("scroll", updateEdges);
+      window.removeEventListener("resize", updateEdges);
+    };
+  }, [updateEdges, images.length]);
+
+  const step = (dir: 1 | -1) => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const slide = el.querySelector<HTMLElement>("[data-slide]");
+    const gap = 24;
+    const delta = (slide?.offsetWidth ?? el.clientWidth * 0.8) + gap;
+    el.scrollBy({ left: delta * dir, behavior: "smooth" });
+  };
+
+  const arrowBg = btnBg;
+  const arrowBorder = theme === "light" ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.08)";
+
+  return (
+    <div className="relative">
+      <div
+        ref={scrollerRef}
+        className="hide-scrollbar flex snap-x snap-mandatory gap-6 overflow-x-auto"
+        style={{
+          scrollPaddingInline: "max(24px, calc((100vw - 1100px) / 2))",
+          paddingInline: "max(24px, calc((100vw - 1100px) / 2))",
+          paddingBlock: 8,
+        }}
+      >
+        {images.map((img, i) => (
+          <div
+            key={img.url + i}
+            data-slide
+            className="snap-center shrink-0"
+            style={{
+              width: "min(1040px, 86vw)",
+            }}
+          >
+            <div
+              className="overflow-hidden"
+              style={{
+                backgroundColor: bg,
+                borderRadius: 20,
+                aspectRatio: "16 / 10",
+              }}
+            >
+              <ImageWithFallback
+                src={img.url}
+                alt={img.caption ?? `Project image ${i + 1}`}
+                className="h-full w-full object-cover"
+                style={{ display: "block" }}
+              />
+            </div>
+            <div className="mt-4 flex items-center justify-between px-1">
+              <span
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: 14,
+                  fontWeight: 500,
+                  color: textColor,
+                  letterSpacing: "-0.005em",
+                }}
+              >
+                {img.caption ?? `Frame ${String(i + 1).padStart(2, "0")}`}
+              </span>
+              <span
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: 13,
+                  fontWeight: 500,
+                  color: captionColor,
+                  letterSpacing: "-0.005em",
+                  fontVariantNumeric: "tabular-nums",
+                }}
+              >
+                {String(i + 1).padStart(2, "0")} / {String(images.length).padStart(2, "0")}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Arrow buttons — only show when there's more than one slide */}
+      {images.length > 1 && (
+        <>
+          <button
+            type="button"
+            onClick={() => step(-1)}
+            aria-label="Previous image"
+            disabled={!canPrev}
+            className="absolute top-1/2 -translate-y-1/2 rounded-full transition-opacity active:scale-95 disabled:opacity-0"
+            style={{
+              left: 16,
+              width: 44,
+              height: 44,
+              backgroundColor: arrowBg,
+              border: `1px solid ${arrowBorder}`,
+              backdropFilter: "blur(12px) saturate(1.2)",
+              WebkitBackdropFilter: "blur(12px) saturate(1.2)",
+              boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
+              display: "grid",
+              placeItems: "center",
+            }}
+          >
+            <ArrowLeft size={16} color={textColor} />
+          </button>
+          <button
+            type="button"
+            onClick={() => step(1)}
+            aria-label="Next image"
+            disabled={!canNext}
+            className="absolute top-1/2 -translate-y-1/2 rounded-full transition-opacity active:scale-95 disabled:opacity-0"
+            style={{
+              right: 16,
+              width: 44,
+              height: 44,
+              backgroundColor: arrowBg,
+              border: `1px solid ${arrowBorder}`,
+              backdropFilter: "blur(12px) saturate(1.2)",
+              WebkitBackdropFilter: "blur(12px) saturate(1.2)",
+              boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
+              display: "grid",
+              placeItems: "center",
+            }}
+          >
+            <ArrowRight size={16} color={textColor} />
+          </button>
+        </>
+      )}
+    </div>
   );
 }

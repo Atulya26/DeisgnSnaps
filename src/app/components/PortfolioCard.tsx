@@ -42,13 +42,10 @@ function PortfolioCardImpl({ project, onOpen, skipAnimation, index = 0 }: Portfo
         left: project.x,
         top: project.y,
         width: project.width,
-        // Skip layout + paint for cards that aren't on screen. Intrinsic size
-        // reserves space so the browser can still hit-test and position
-        // siblings without having painted. Biggest single scroll-smoothness
-        // win when tiles replicate 50+ cards each.
-        contentVisibility: "auto",
-        containIntrinsicSize: `${project.height + 48}px ${project.width}px`,
-      } as React.CSSProperties}
+        // NOTE: we intentionally do NOT use content-visibility:auto here.
+        // Paint containment clips the card's hover box-shadow at the bottom.
+        // Tile-level culling + React.memo already keep scroll smooth.
+      }}
       initial={skipAnimation || prefersReduced ? false : { opacity: 0, y: 14, scale: 1.04 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={skipAnimation || prefersReduced ? { duration: 0 } : {
