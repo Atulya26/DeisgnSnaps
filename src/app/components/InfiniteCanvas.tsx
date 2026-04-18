@@ -14,7 +14,7 @@ import { useTheme } from "./ThemeContext";
 import { BackgroundRippleEffect } from "./BackgroundRippleEffect";
 import { computeInitialCamera } from "./autoLayout";
 
-const TOOLBAR_OFFSET = 88; // must match App.tsx paddingTop + Toolbar height
+const TOOLBAR_OFFSET = 64; // must match Toolbar.tsx height — canvas pans under the translucent bar
 
 interface InfiniteCanvasProps {
   projects: Project[];

@@ -19,12 +19,12 @@ export function Toolbar(_props: ToolbarProps) {
     <motion.header
       className="fixed left-0 right-0 top-0 z-40 flex items-center justify-between"
       style={{
-        height: 88,
-        paddingLeft: 40,
-        paddingRight: 32,
+        height: 64,
+        paddingLeft: 24,
+        paddingRight: 18,
         backgroundColor: colors.bgAlpha,
-        backdropFilter: "blur(28px) saturate(1.5)",
-        WebkitBackdropFilter: "blur(28px) saturate(1.5)",
+        backdropFilter: "blur(24px) saturate(1.5)",
+        WebkitBackdropFilter: "blur(24px) saturate(1.5)",
         borderBottom: `1px solid ${colors.border}`,
       }}
       initial={{ opacity: 0, y: -10 }}
@@ -36,10 +36,10 @@ export function Toolbar(_props: ToolbarProps) {
         <motion.span
           style={{
             fontFamily: "'Inter', sans-serif",
-            fontSize: 30,
+            fontSize: 22,
             fontWeight: 700,
             color: colors.text,
-            letterSpacing: "-0.035em",
+            letterSpacing: "-0.03em",
             lineHeight: 1,
           }}
           initial={{ opacity: 0, y: 4 }}

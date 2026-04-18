@@ -716,7 +716,9 @@ function HorizontalGallery({
             data-slide
             className="snap-center shrink-0"
             style={{
-              width: "min(1040px, 86vw)",
+              // Smaller on desktop so the title/description peeks below the
+              // fold — viewer sees there's more to read without scrolling.
+              width: "min(900px, 74vw)",
             }}
           >
             <div
@@ -734,18 +736,9 @@ function HorizontalGallery({
                 style={{ display: "block" }}
               />
             </div>
-            <div className="mt-4 flex items-center justify-between px-1">
-              <span
-                style={{
-                  fontFamily: "'Inter', sans-serif",
-                  fontSize: 14,
-                  fontWeight: 500,
-                  color: textColor,
-                  letterSpacing: "-0.005em",
-                }}
-              >
-                {img.caption ?? `Frame ${String(i + 1).padStart(2, "0")}`}
-              </span>
+            {/* Below the image: just the NN/TT counter (right-aligned).
+                Caption label above removed per Tier 8 feedback. */}
+            <div className="mt-3 flex items-center justify-end px-1">
               <span
                 style={{
                   fontFamily: "'Inter', sans-serif",
