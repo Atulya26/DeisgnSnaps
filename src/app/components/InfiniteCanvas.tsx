@@ -30,8 +30,9 @@ const TILE_PADDING = 30;
 // ── Physics tuning (Lenis-inspired smooth feel) ──
 const MOMENTUM_FRICTION = 0.985;       // Gentler friction → longer, smoother coast (was 0.96)
 const MOMENTUM_MIN_VELOCITY = 0.003;   // Lower stop threshold → momentum carries further
-const WHEEL_LERP_MOUSE = 0.12;        // Smoother catch-up for discrete mouse wheel (was 0.08)
+const WHEEL_LERP_MOUSE = 0.18;        // Snappier catch-up for discrete mouse wheel — reduces rubber-band feel on sustained scroll
 const WHEEL_LERP_TRACKPAD = 0.55;     // Light smoothing for trackpad (was 0.45)
+const SCROLL_IDLE_MS = 140;           // Restore pointer events this long after the last wheel tick
 const ZOOM_LERP = 0.12;               // Slightly faster zoom response (was 0.10)
 const SETTLE_THRESHOLD = 0.05;        // Tighter settle → less visible snap at end
 const ZOOM_SETTLE_THRESHOLD = 0.0003; // Tighter zoom settle
@@ -460,6 +461,21 @@ export function InfiniteCanvas({
     };
   }, [markInteracted, ensureLoop, applyTransform, syncTiles, setDragVisuals]);
 
+  // ── Scroll-lock: while the wheel is actively firing, cards must NOT
+  //     receive hover/pointer events. Without this, a mouse that happens
+  //     to sit over a card during a long scroll triggers whileHover, which
+  //     animates boxShadow/borderColor/y and competes with the transform
+  //     on the compositor — that's the jitter. Same trick drag already
+  //     uses in setDragVisuals, extended to continuous wheel activity. ──
+  const scrollIdleTimer = useRef<number | null>(null);
+  const isScrollActive = useRef(false);
+  const setScrollActive = useCallback((active: boolean) => {
+    if (active === isScrollActive.current) return;
+    isScrollActive.current = active;
+    const tg = transformGroupRef.current;
+    if (tg) tg.style.pointerEvents = active ? "none" : "";
+  }, []);
+
   // ──────────── Wheel: Scroll = Pan, Ctrl/Cmd+Scroll = Zoom ────────────
   useEffect(() => {
     const el = containerRef.current;
@@ -469,6 +485,16 @@ export function InfiniteCanvas({
       e.preventDefault();
       cancelMomentum();
       markInteracted();
+
+      // Lock out hover compositing for the duration of this scroll burst.
+      setScrollActive(true);
+      if (scrollIdleTimer.current !== null) {
+        window.clearTimeout(scrollIdleTimer.current);
+      }
+      scrollIdleTimer.current = window.setTimeout(() => {
+        setScrollActive(false);
+        scrollIdleTimer.current = null;
+      }, SCROLL_IDLE_MS);
 
       const z = zoom.current;
 
@@ -524,8 +550,15 @@ export function InfiniteCanvas({
     };
 
     el.addEventListener("wheel", handleWheel, { passive: false });
-    return () => el.removeEventListener("wheel", handleWheel);
-  }, [markInteracted, cancelMomentum, ensureLoop, applyTransform, syncTiles]);
+    return () => {
+      el.removeEventListener("wheel", handleWheel);
+      if (scrollIdleTimer.current !== null) {
+        window.clearTimeout(scrollIdleTimer.current);
+        scrollIdleTimer.current = null;
+      }
+      setScrollActive(false);
+    };
+  }, [markInteracted, cancelMomentum, ensureLoop, applyTransform, syncTiles, setScrollActive]);
 
   // ──────────── Touch: Drag + Pinch Zoom ────────────
   useEffect(() => {

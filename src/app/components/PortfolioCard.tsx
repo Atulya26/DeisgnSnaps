@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, memo } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { ArrowUpRight } from "geist-icons";
 import type { Project } from "./types";
@@ -13,7 +13,7 @@ interface PortfolioCardProps {
   index?: number;
 }
 
-export function PortfolioCard({ project, onOpen, skipAnimation, index = 0 }: PortfolioCardProps) {
+function PortfolioCardImpl({ project, onOpen, skipAnimation, index = 0 }: PortfolioCardProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const prefersReduced = useReducedMotion();
@@ -45,7 +45,13 @@ export function PortfolioCard({ project, onOpen, skipAnimation, index = 0 }: Por
         left: project.x,
         top: project.y,
         width: project.width,
-      }}
+        // Skip layout + paint for cards that aren't on screen. Intrinsic size
+        // reserves space so the browser can still hit-test and position
+        // siblings without having painted. Biggest single scroll-smoothness
+        // win when tiles replicate 50+ cards each.
+        contentVisibility: "auto",
+        containIntrinsicSize: `${project.height + 48}px ${project.width}px`,
+      } as React.CSSProperties}
       initial={skipAnimation || prefersReduced ? false : { opacity: 0, y: 14, scale: 1.04 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={skipAnimation || prefersReduced ? { duration: 0 } : {
@@ -210,3 +216,15 @@ export function PortfolioCard({ project, onOpen, skipAnimation, index = 0 }: Por
     </motion.div>
   );
 }
+
+// memo: prevents every card from re-rendering when any sibling's image
+// loads (setImageLoaded) or when InfiniteCanvas re-renders at tile-key
+// boundaries. With ~50–200 cards mounted, this is a real scroll-time win.
+export const PortfolioCard = memo(PortfolioCardImpl, (prev, next) => {
+  return (
+    prev.project === next.project &&
+    prev.onOpen === next.onOpen &&
+    prev.skipAnimation === next.skipAnimation &&
+    prev.index === next.index
+  );
+});
