@@ -75,14 +75,17 @@ export function InfiniteCanvas({
 
   // ── Initial camera: centered on the masonry bounds so ultrawide/4K screens
   //     don't leave a big empty band. Computed once from the first `projects`
-  //     snapshot — panning is unaffected when admin entries resolve later. ──
+  //     snapshot — panning is unaffected when admin entries resolve later.
+  //     topInset = TOOLBAR_OFFSET because the canvas extends under the
+  //     translucent toolbar; content should center in the visible area. ──
   const initialCameraSeed = useMemo(
     () => {
       if (typeof window === "undefined") return { x: -60, y: -40 };
       return computeInitialCamera(
         projects,
-        { width: window.innerWidth, height: window.innerHeight - TOOLBAR_OFFSET },
-        DEFAULT_ZOOM
+        { width: window.innerWidth, height: window.innerHeight },
+        DEFAULT_ZOOM,
+        TOOLBAR_OFFSET
       );
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps

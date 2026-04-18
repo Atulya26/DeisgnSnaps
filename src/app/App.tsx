@@ -162,7 +162,11 @@ function AppContent() {
 
       <Toolbar projectCount={projects.length} />
 
-      <div className="h-full" style={{ paddingTop: 88 }}>
+      {/* Canvas fills the whole viewport — toolbar sits on top as a
+          translucent overlay. Cards pan under it for that shopify-style
+          soft-blur feel. Initial camera compensates via topInset so
+          content still centers in the visible (below-toolbar) area. */}
+      <div className="h-full">
         <InfiniteCanvas
           projects={projects}
           onOpenProject={handleOpenProject}

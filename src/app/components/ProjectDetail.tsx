@@ -424,18 +424,37 @@ export function ProjectDetail({
                 animate={prefersReduced ? { opacity: 1 } : "center"}
                 exit={prefersReduced ? { opacity: 0 } : "exit"}
                 transition={prefersReduced ? { duration: 0.15 } : { duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                className="min-h-screen px-6 pb-24 pt-32 sm:px-10 sm:pt-36"
+                className="min-h-screen pb-24 pt-28 sm:pt-32"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div ref={cardRef}>
-                  {/* ── Hero: meta + title + description + tags ── */}
-                  <div className="mx-auto max-w-[1100px]">
-                    {/* Meta row */}
+                  {/* ── GALLERY FIRST: portfolio = work showcase, words come after ── */}
+                  {galleryAll.length > 0 && (
+                    <motion.div
+                      className="relative"
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
+                    >
+                      <HorizontalGallery
+                        images={galleryAll}
+                        theme={theme}
+                        bg={colors.imageBg}
+                        btnBg={galleryBtnBg}
+                        textColor={colors.text}
+                        captionColor={colors.textMuted}
+                      />
+                    </motion.div>
+                  )}
+
+                  {/* ── Text block BELOW the gallery. Meta row then big
+                       title, description, tags. Scroll down to read. ── */}
+                  <div className="mx-auto mt-20 max-w-[1100px] px-6 sm:mt-28 sm:px-10">
                     <motion.div
                       className="flex items-center gap-3"
                       initial={{ opacity: 0, y: 6 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: 0.2 }}
+                      transition={{ duration: 0.5, delay: 0.35 }}
                     >
                       {currentProject.category && (
                         <span
@@ -478,7 +497,6 @@ export function ProjectDetail({
                       )}
                     </motion.div>
 
-                    {/* Big Inter display title */}
                     <motion.h1
                       className="mt-4 text-balance"
                       style={{
@@ -491,7 +509,7 @@ export function ProjectDetail({
                       }}
                       initial={{ opacity: 0, y: 12 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: 0.25 }}
+                      transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: 0.4 }}
                     >
                       {currentProject.title}
                     </motion.h1>
@@ -510,7 +528,7 @@ export function ProjectDetail({
                         }}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], delay: 0.35 }}
+                        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], delay: 0.5 }}
                       >
                         {currentProject.description}
                       </motion.p>
@@ -521,7 +539,7 @@ export function ProjectDetail({
                         className="mt-6 flex flex-wrap gap-2"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        transition={{ delay: 0.4 }}
+                        transition={{ delay: 0.55 }}
                       >
                         {currentProject.tags.map((tag) => (
                           <span
@@ -543,29 +561,9 @@ export function ProjectDetail({
                     )}
                   </div>
 
-                  {/* ── Horizontal-scroll gallery (shopify.design style) ──
-                       Full-bleed so it reads as the main event, not a card. */}
-                  {galleryAll.length > 0 && (
-                    <motion.div
-                      className="relative mt-14 sm:mt-20"
-                      initial={{ opacity: 0, y: 16 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.45 }}
-                    >
-                      <HorizontalGallery
-                        images={galleryAll}
-                        theme={theme}
-                        bg={colors.imageBg}
-                        btnBg={galleryBtnBg}
-                        textColor={colors.text}
-                        captionColor={colors.textMuted}
-                      />
-                    </motion.div>
-                  )}
-
                   {/* ── Optional vertical text blocks ── */}
                   {textBlocks.length > 0 && (
-                    <div className="mx-auto mt-16 max-w-[760px] space-y-6 sm:mt-20">
+                    <div className="mx-auto mt-16 max-w-[760px] space-y-6 px-6 sm:mt-20 sm:px-10">
                       {textBlocks.map((block) => (
                         <div
                           key={block.id}
@@ -585,7 +583,7 @@ export function ProjectDetail({
                   )}
 
                   {/* ── Footer ── */}
-                  <div className="mx-auto mt-20 flex max-w-[1100px] items-center justify-between sm:mt-28">
+                  <div className="mx-auto mt-20 flex max-w-[1100px] items-center justify-between px-6 sm:mt-28 sm:px-10">
                     <span
                       style={{
                         fontSize: 14,

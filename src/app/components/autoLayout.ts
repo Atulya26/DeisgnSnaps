@@ -106,11 +106,16 @@ export function getLayoutBounds(projects: Project[]) {
  * at the given zoom. Shared between `InfiniteCanvas` (seed refs) and
  * `BootSequence` (scatter-target calculation) so the boot handoff is pixel-
  * perfect on any viewport size.
+ *
+ * `topInset` accounts for a fixed overlay (e.g. translucent toolbar) sitting
+ * on top of the canvas: viewport.height is the full container height, and
+ * content is centered in the REMAINING visible area below the inset.
  */
 export function computeInitialCamera(
   projects: Project[],
   viewport: { width: number; height: number },
-  zoom: number
+  zoom: number,
+  topInset: number = 0
 ) {
   if (projects.length === 0) return { x: -60, y: -40 };
   const { minX, minY, maxX, maxY } = getLayoutBounds(projects);
@@ -118,6 +123,9 @@ export function computeInitialCamera(
   const centerY = (minY + maxY) / 2;
   return {
     x: centerX - viewport.width / (2 * zoom),
-    y: centerY - viewport.height / (2 * zoom),
+    // Place the content center at the midpoint of the visible area
+    // (topInset .. viewport.height). Derivation: (centerY - cam.y) * zoom
+    // should equal topInset + (viewport.height - topInset) / 2.
+    y: centerY - (viewport.height + topInset) / (2 * zoom),
   };
 }
