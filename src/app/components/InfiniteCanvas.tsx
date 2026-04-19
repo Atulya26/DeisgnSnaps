@@ -8,7 +8,7 @@ import {
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { ArrowMove } from "geist-icons";
 import type { Project } from "./types";
-import { PortfolioCard } from "./PortfolioCard";
+import { PortfolioCard, PortfolioCardReplica } from "./PortfolioCard";
 import { ZoomControls } from "./ZoomControls";
 import { useTheme } from "./ThemeContext";
 import { BackgroundRippleEffect } from "./BackgroundRippleEffect";
@@ -855,13 +855,20 @@ export function InfiniteCanvas({
               }}
             >
               {projects.map((project, i) => (
-                <PortfolioCard
-                  key={`${project.id}-${tile.key}`}
-                  project={project}
-                  onOpen={handleCardOpen}
-                  skipAnimation={!isOriginTile}
-                  index={isOriginTile ? i : 999}
-                />
+                isOriginTile ? (
+                  <PortfolioCard
+                    key={`${project.id}-${tile.key}`}
+                    project={project}
+                    onOpen={handleCardOpen}
+                    skipAnimation={false}
+                    index={i}
+                  />
+                ) : (
+                  <PortfolioCardReplica
+                    key={`${project.id}-${tile.key}`}
+                    project={project}
+                  />
+                )
               ))}
             </div>
           );

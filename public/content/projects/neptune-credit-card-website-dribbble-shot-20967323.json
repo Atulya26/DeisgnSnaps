@@ -1,0 +1,59 @@
+{
+  "id": "dribbble-shot-20967323",
+  "slug": "neptune-credit-card-website-dribbble-shot-20967323",
+  "title": "Neptune - Credit Card Website",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/neptune-credit-card-website-dribbble-shot-20967323/card.webp",
+  "coverImageUrl": "/portfolio/projects/neptune-credit-card-website-dribbble-shot-20967323/cover.webp",
+  "sortOrder": 43,
+  "status": "published",
+  "description": "",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:31:34.262Z",
+  "gallery": [
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/neptune-credit-card-website-dribbble-shot-20967323/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/neptune-credit-card-website-dribbble-shot-20967323/gallery-01.webp"
+    },
+    {
+      "id": "gallery-02",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/neptune-credit-card-website-dribbble-shot-20967323/gallery-02.webp"
+    },
+    {
+      "id": "gallery-03",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/neptune-credit-card-website-dribbble-shot-20967323/gallery-03.webp"
+    },
+    {
+      "id": "gallery-04",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/neptune-credit-card-website-dribbble-shot-20967323/gallery-04.webp"
+    },
+    {
+      "id": "gallery-05",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/neptune-credit-card-website-dribbble-shot-20967323/gallery-05.webp"
+    },
+    {
+      "id": "gallery-06",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/neptune-credit-card-website-dribbble-shot-20967323/gallery-06.webp"
+    }
+  ],
+  "blocks": []
+}

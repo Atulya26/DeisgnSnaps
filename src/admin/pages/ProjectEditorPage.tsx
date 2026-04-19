@@ -1,325 +1,255 @@
-import { useState, useEffect, useCallback, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
+  CloudUpload,
   FloppyDisk,
-  Image,
-  Plus,
-  FolderOpen,
-  RefreshClockwise,
   LoaderCircle,
+  Plus,
+  Star,
   TextFormat,
   Trash,
-  CloudUpload,
-  ChevronDown,
-  ChevronUp,
-  Star,
 } from "geist-icons";
 import { SidebarTrigger } from "../../app/components/ui/sidebar";
 import { Separator } from "../../app/components/ui/separator";
 import { Button } from "../../app/components/ui/button";
 import { Input } from "../../app/components/ui/input";
 import { Badge } from "../../app/components/ui/badge";
-import { RichTextEditor } from "../components/RichTextEditor";
-import type { AdminProject, StorageImage, ContentBlock, ImageBlock, TextBlock } from "../types";
+import type { AdminProjectDocument, MediaAsset, ProjectBlock } from "../types";
 import {
+  deleteProjectAsset,
+  deleteProjectFromFirestore,
   loadProjectFromFirestore,
   saveProjectToFirestore,
-  deleteProjectFromFirestore,
-  deleteStorageFolder,
-  uploadFile,
-  listFolderImages,
-  saveLocalProjects,
-  getLocalProjects,
+  uploadProjectAssets,
 } from "../services/firebase";
+import { optimizeImageUploads } from "../services/optimizeImageUploads";
 
-function loadProjects(): AdminProject[] {
-  return getLocalProjects();
+const LazyRichTextEditor = lazy(async () => {
+  const mod = await import("../components/RichTextEditor");
+  return { default: mod.RichTextEditor };
+});
+
+function getGalleryAssets(project: AdminProjectDocument) {
+  return project.assets.filter((asset) => asset.role === "gallery");
 }
 
-function saveProjects(projects: AdminProject[]) {
-  saveLocalProjects(projects);
+function getSelectedAsset(project: AdminProjectDocument, assetId?: string) {
+  return project.assets.find((asset) => asset.id === assetId) ?? null;
+}
+
+function syncProjectPreview(project: AdminProjectDocument): AdminProjectDocument {
+  const selectedCover = getSelectedAsset(project, project.coverAssetId);
+  const selectedCard = getSelectedAsset(project, project.cardAssetId);
+
+  return {
+    ...project,
+    coverImageUrl: selectedCover?.src ?? project.coverImageUrl ?? "",
+    cardImageUrl: selectedCard?.src ?? project.cardImageUrl ?? "",
+    gallery: [
+      ...(selectedCover
+        ? [{ ...selectedCover, id: "cover", role: "cover" as const }]
+        : []),
+      ...getGalleryAssets(project),
+    ],
+  };
 }
 
 export function ProjectEditorPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [project, setProject] = useState<AdminProject | null>(null);
-  const [folderImages, setFolderImages] = useState<StorageImage[]>([]);
+  const [project, setProject] = useState<AdminProjectDocument | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  const [refreshing, setRefreshing] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Load project — try Firestore first, fall back to localStorage
   useEffect(() => {
     async function load() {
-      if (id) {
-        try {
-          const fromFirestore = await loadProjectFromFirestore(id);
-          if (fromFirestore) {
-            // Migrate old projects that don't have contentBlocks
-            if (!fromFirestore.contentBlocks) {
-              fromFirestore.contentBlocks = [];
-              if (fromFirestore.images?.length) {
-                fromFirestore.contentBlocks = fromFirestore.images.map((img) => ({
-                  type: "image" as const,
-                  id: crypto.randomUUID(),
-                  url: img.url,
-                  key: img.key,
-                }));
-              }
-            }
-            setProject(fromFirestore);
-            setFolderImages(fromFirestore.images ?? []);
-            return;
-          }
-        } catch (err) {
-          console.error("Failed to load from Firestore:", err);
-        }
-      }
-
-      // Fallback to localStorage
-      const projects = loadProjects();
-      const found = projects.find((p) => p.id === id);
-      if (found) {
-        if (!found.contentBlocks) {
-          found.contentBlocks = [];
-          if (found.images?.length) {
-            found.contentBlocks = found.images.map((img) => ({
-              type: "image" as const,
-              id: crypto.randomUUID(),
-              url: img.url,
-              key: img.key,
-            }));
-          }
-        }
-        setProject(found);
-        setFolderImages(found.images ?? []);
-      } else {
+      if (!id) return;
+      const loadedProject = await loadProjectFromFirestore(id);
+      if (!loadedProject) {
         navigate("/admin");
+        return;
       }
+      setProject(syncProjectPreview(loadedProject));
     }
-    load();
+
+    void load();
   }, [id, navigate]);
 
-  // Load images from Firebase Storage folder
-  useEffect(() => {
-    if (!project?.storagePath) return;
-
-    listFolderImages(project.storagePath).then((images) => {
-      if (images.length > 0) {
-        setFolderImages(images);
-        setProject((prev) => (prev ? { ...prev, images } : prev));
-      }
-    });
-  }, [project?.storagePath]);
-
-  // Save — to Firestore + localStorage
   const save = useCallback(async () => {
     if (!project) return;
     setIsSaving(true);
-
-    const updatedProject = { ...project, updatedAt: new Date().toISOString() };
-
-    // Save to localStorage
-    const projects = loadProjects();
-    const updated = projects.map((p) =>
-      p.id === project.id ? updatedProject : p
-    );
-    // If not in localStorage yet, add it
-    if (!projects.some((p) => p.id === project.id)) {
-      updated.push(updatedProject);
-    }
-    saveProjects(updated);
-
-    // Save to Firestore
     try {
-      await saveProjectToFirestore(updatedProject);
-    } catch (err) {
-      console.error("Failed to save to Firestore:", err);
+      const saved = await saveProjectToFirestore(syncProjectPreview(project));
+      setProject(syncProjectPreview(saved));
+      setLastSaved(new Date());
+    } finally {
+      setIsSaving(false);
     }
-
-    setLastSaved(new Date());
-    setTimeout(() => setIsSaving(false), 300);
   }, [project]);
 
-  // Save on Cmd+S
   useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "s") {
-        e.preventDefault();
-        save();
+    const handleKey = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "s") {
+        event.preventDefault();
+        void save();
       }
     };
+
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
   }, [save]);
 
-  const update = <K extends keyof AdminProject>(key: K, value: AdminProject[K]) => {
-    setProject((prev) => (prev ? { ...prev, [key]: value } : prev));
+  const updateProject = <K extends keyof AdminProjectDocument>(key: K, value: AdminProjectDocument[K]) => {
+    setProject((current) => (current ? { ...current, [key]: value } : current));
   };
 
-  const refreshFromStorage = async () => {
-    if (!project?.storagePath) return;
-    setRefreshing(true);
-    const images = await listFolderImages(project.storagePath);
-    setFolderImages(images);
-    update("images", images);
-    if (!project.coverImageKey && images.length > 0) {
-      update("coverImageKey", images[0].url);
+  const galleryAssets = useMemo(
+    () => (project ? getGalleryAssets(project) : []),
+    [project]
+  );
+
+  const handleUpload = async (fileList: FileList | null) => {
+    if (!project || !fileList?.length) return;
+    setUploading(true);
+    try {
+      const optimizedFiles = await optimizeImageUploads(fileList);
+      const savedProject = await uploadProjectAssets(project.id, optimizedFiles);
+      setProject(syncProjectPreview(savedProject));
+      setLastSaved(new Date());
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Upload failed");
+    } finally {
+      setUploading(false);
     }
-    setRefreshing(false);
   };
 
-  // ── Content Blocks ──
-
-  const updateBlocks = (blocks: ContentBlock[]) => {
-    update("contentBlocks", blocks);
-  };
-
-  const addImageBlock = (url: string, key?: string) => {
+  const moveGalleryAsset = (assetId: string, direction: -1 | 1) => {
     if (!project) return;
-    const block: ImageBlock = {
-      type: "image",
-      id: crypto.randomUUID(),
-      url,
-      key,
-    };
-    updateBlocks([...project.contentBlocks, block]);
+    const assets = [...project.assets];
+    const galleryIds = galleryAssets.map((asset) => asset.id);
+    const currentIndex = galleryIds.findIndex((id) => id === assetId);
+    const nextIndex = currentIndex + direction;
+    if (currentIndex === -1 || nextIndex < 0 || nextIndex >= galleryIds.length) return;
+
+    const nextGalleryIds = [...galleryIds];
+    [nextGalleryIds[currentIndex], nextGalleryIds[nextIndex]] = [nextGalleryIds[nextIndex], nextGalleryIds[currentIndex]];
+
+    const galleryMap = new Map(galleryAssets.map((asset) => [asset.id, asset]));
+    const reorderedGalleryAssets = nextGalleryIds.map((id) => galleryMap.get(id)).filter(Boolean) as MediaAsset[];
+    const persistentAssets = assets.filter((asset) => asset.role !== "gallery");
+
+    setProject(
+      syncProjectPreview({
+        ...project,
+        assets: [...persistentAssets, ...reorderedGalleryAssets],
+      })
+    );
+  };
+
+  const setAssetAsCover = (assetId: string) => {
+    if (!project) return;
+    const selectedAsset = getSelectedAsset(project, assetId);
+    if (!selectedAsset) return;
+    setProject(
+      syncProjectPreview({
+        ...project,
+        coverAssetId: assetId,
+        coverImageUrl: selectedAsset.src,
+      })
+    );
+  };
+
+  const setAssetAsThumbnail = (assetId: string) => {
+    if (!project) return;
+    const selectedAsset = getSelectedAsset(project, assetId);
+    if (!selectedAsset) return;
+    setProject(
+      syncProjectPreview({
+        ...project,
+        cardAssetId: assetId,
+        cardImageUrl: selectedAsset.src,
+      })
+    );
   };
 
   const addTextBlock = () => {
     if (!project) return;
-    const block: TextBlock = {
-      type: "text",
-      id: crypto.randomUUID(),
-      content: "",
-    };
-    updateBlocks([...project.contentBlocks, block]);
+    const nextBlocks: ProjectBlock[] = [
+      ...project.blocks,
+      {
+        id: crypto.randomUUID(),
+        type: "text",
+        html: "",
+      },
+    ];
+    setProject({ ...project, blocks: nextBlocks });
+  };
+
+  const addImageBlock = (assetId: string) => {
+    if (!project) return;
+    const nextBlocks: ProjectBlock[] = [
+      ...project.blocks,
+      {
+        id: crypto.randomUUID(),
+        type: "image",
+        assetId,
+      },
+    ];
+    setProject({ ...project, blocks: nextBlocks });
+  };
+
+  const updateBlock = (blockId: string, updater: (block: ProjectBlock) => ProjectBlock) => {
+    if (!project) return;
+    setProject({
+      ...project,
+      blocks: project.blocks.map((block) => (block.id === blockId ? updater(block) : block)),
+    });
+  };
+
+  const moveBlock = (blockId: string, direction: -1 | 1) => {
+    if (!project) return;
+    const blocks = [...project.blocks];
+    const index = blocks.findIndex((block) => block.id === blockId);
+    const nextIndex = index + direction;
+    if (index === -1 || nextIndex < 0 || nextIndex >= blocks.length) return;
+    [blocks[index], blocks[nextIndex]] = [blocks[nextIndex], blocks[index]];
+    setProject({ ...project, blocks });
   };
 
   const removeBlock = (blockId: string) => {
     if (!project) return;
-    updateBlocks(project.contentBlocks.filter((b) => b.id !== blockId));
+    setProject({
+      ...project,
+      blocks: project.blocks.filter((block) => block.id !== blockId),
+    });
   };
 
-  const moveBlock = (blockId: string, direction: "up" | "down") => {
+  const removeAsset = async (assetId: string) => {
     if (!project) return;
-    const blocks = [...project.contentBlocks];
-    const idx = blocks.findIndex((b) => b.id === blockId);
-    if (idx === -1) return;
-    const newIdx = direction === "up" ? idx - 1 : idx + 1;
-    if (newIdx < 0 || newIdx >= blocks.length) return;
-    [blocks[idx], blocks[newIdx]] = [blocks[newIdx], blocks[idx]];
-    updateBlocks(blocks);
-  };
-
-  const updateBlockContent = (blockId: string, content: string) => {
-    if (!project) return;
-    updateBlocks(
-      project.contentBlocks.map((b) =>
-        b.id === blockId ? { ...b, content } : b
-      )
-    );
-  };
-
-  const updateBlockCaption = (blockId: string, caption: string) => {
-    if (!project) return;
-    updateBlocks(
-      project.contentBlocks.map((b) =>
-        b.id === blockId && b.type === "image" ? { ...b, caption } : b
-      )
-    );
-  };
-
-  // ── File Upload ──
-
-  const handleFileUpload = async (files: FileList | null) => {
-    if (!files || !project) return;
-
-    setUploading(true);
-
-    // Determine storage folder name
-    const folder = project.storagePath
-      ? project.storagePath.replace(/\/$/, "")
-      : `projects/${project.id}`;
-
-    // If no storagePath set, set it now
-    if (!project.storagePath) {
-      update("storagePath", folder + "/");
-    }
-
-    for (const file of Array.from(files)) {
-      const key = `${folder}/${file.name}`;
-      const result = await uploadFile(key, file);
-
-      if (result.ok) {
-        const newImg: StorageImage = {
-          key: result.key,
-          name: file.name,
-          url: result.url,
-          size: file.size,
-          lastModified: new Date(),
-        };
-        setFolderImages((prev) => [...prev, newImg]);
-        setProject((prev) => {
-          if (!prev) return prev;
-          const updatedImages = [...prev.images, newImg];
-          const updatedBlocks = [
-            ...prev.contentBlocks,
-            {
-              type: "image" as const,
-              id: crypto.randomUUID(),
-              url: result.url,
-              key: result.key,
-            },
-          ];
-          return {
-            ...prev,
-            images: updatedImages,
-            contentBlocks: updatedBlocks,
-            coverImageKey: prev.coverImageKey || result.url,
-            storagePath: prev.storagePath || folder + "/",
-          };
-        });
-      } else {
-        console.error("Upload failed:", result.error);
-        alert(`Upload failed for "${file.name}": ${result.error}\n\nMake sure Firebase Storage rules allow writes. See Settings for instructions.`);
-      }
-    }
-
-    setUploading(false);
-  };
-
-  // Add image from existing folder images to blocks
-  const addExistingImageToBlocks = (img: StorageImage) => {
-    addImageBlock(img.url, img.key);
+    const saved = await deleteProjectAsset(project.id, assetId);
+    setProject(syncProjectPreview(saved));
   };
 
   if (!project) return null;
 
+  const selectedCoverAsset = getSelectedAsset(project, project.coverAssetId);
+  const selectedCardAsset = getSelectedAsset(project, project.cardAssetId);
+
   return (
     <>
-      {/* Header */}
       <header className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-border px-6">
         <div className="flex items-center gap-3">
           <SidebarTrigger />
           <Separator orientation="vertical" className="h-5" />
-          <Button
-            variant="ghost"
-            size="sm"
-            className="gap-1.5"
-            onClick={() => navigate("/admin")}
-          >
+          <Button variant="ghost" size="sm" className="gap-1.5" onClick={() => navigate("/admin")}>
             <ArrowLeft className="size-4" />
             Projects
           </Button>
           <Separator orientation="vertical" className="h-5" />
-          <span className="truncate text-sm text-muted-foreground">
-            {project.title || "Untitled"}
-          </span>
+          <span className="truncate text-sm text-muted-foreground">{project.title || "Untitled"}</span>
         </div>
         <div className="flex items-center gap-2">
           {lastSaved && (
@@ -330,410 +260,303 @@ export function ProjectEditorPage() {
           <Badge
             variant={project.status === "published" ? "default" : "secondary"}
             className="cursor-pointer text-[10px] uppercase"
-            onClick={() =>
-              update(
-                "status",
-                project.status === "published" ? "draft" : "published"
-              )
-            }
+            onClick={() => updateProject("status", project.status === "published" ? "draft" : "published")}
           >
             {project.status}
           </Badge>
-          <Button size="sm" onClick={save} disabled={isSaving} className="gap-1.5">
+          <Button size="sm" onClick={() => void save()} disabled={isSaving} className="gap-1.5">
             <FloppyDisk className="size-4" />
             {isSaving ? "Saving..." : "Save"}
           </Button>
         </div>
       </header>
 
-      {/* Main content — two column layout */}
       <div className="flex flex-1 overflow-hidden">
-        {/* ════════════════════════════════════════════
-            LEFT SIDEBAR — Project details (compact)
-            ════════════════════════════════════════════ */}
-        <aside className="flex w-80 shrink-0 flex-col overflow-y-auto border-r border-border bg-muted/30 p-5">
-          <div className="flex-1 space-y-5">
-            {/* Title */}
+        <aside className="flex w-96 shrink-0 flex-col overflow-y-auto border-r border-border bg-muted/30 p-5">
+          <div className="space-y-5">
             <FieldGroup label="Title">
               <Input
                 value={project.title}
-                onChange={(e) => {
-                  const title = e.target.value;
-                  update("title", title);
+                onChange={(event) => {
+                  updateProject("title", event.target.value);
                 }}
-                placeholder="Project title"
-                className="text-sm"
               />
             </FieldGroup>
 
-            {/* Storage path (read-only) */}
-            <div className="flex items-center gap-1.5 rounded-md bg-muted px-2.5 py-1.5">
-              <FolderOpen className="size-3.5 shrink-0 text-muted-foreground" />
-              <span className="truncate text-[11px] text-muted-foreground">
-                {project.storagePath || "auto-created on first upload"}
-              </span>
-              {project.storagePath && (
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="ml-auto size-6 shrink-0"
-                  onClick={refreshFromStorage}
-                  disabled={refreshing}
-                  title="Refresh from Storage"
-                >
-                  {refreshing ? (
-                    <LoaderCircle className="size-3 animate-spin" />
-                  ) : (
-                    <RefreshClockwise className="size-3" />
-                  )}
-                </Button>
-              )}
+            <div className="grid grid-cols-2 gap-3">
+              <FieldGroup label="Category">
+                <Input
+                  value={project.category}
+                  onChange={(event) => updateProject("category", event.target.value)}
+                />
+              </FieldGroup>
+              <FieldGroup label="Year">
+                <Input
+                  value={project.year}
+                  onChange={(event) => updateProject("year", event.target.value)}
+                />
+              </FieldGroup>
             </div>
 
-            <Separator />
+            <FieldGroup label="Tags">
+              <Input
+                value={project.tags.join(", ")}
+                onChange={(event) =>
+                  updateProject(
+                    "tags",
+                    event.target.value
+                      .split(",")
+                      .map((tag) => tag.trim())
+                      .filter(Boolean)
+                  )
+                }
+                placeholder="UI, Dashboard, Fintech"
+              />
+            </FieldGroup>
 
-            {/* Cover Image */}
-            <FieldGroup label="Cover Image">
-              <p className="text-[10px] text-muted-foreground">
-                Shown on the portfolio card
-              </p>
-              {project.coverImageKey ? (
-                <div className="relative mt-1.5 overflow-hidden rounded-lg border border-border">
-                  <img
-                    src={project.coverImageKey}
-                    alt="Cover"
-                    className="aspect-[16/10] w-full object-cover"
-                  />
-                  <Badge className="absolute left-1.5 top-1.5 text-[9px]">
-                    <Star className="mr-0.5 size-2.5" />
-                    Cover
-                  </Badge>
-                </div>
-              ) : (
-                <div className="mt-1.5 flex items-center justify-center rounded-lg border border-dashed border-border py-6">
-                  <span className="text-[10px] text-muted-foreground">
-                    No cover — click star on an image block
-                  </span>
-                </div>
-              )}
+            <FieldGroup label="Description">
+              <textarea
+                value={project.description}
+                onChange={(event) => updateProject("description", event.target.value)}
+                className="min-h-32 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
+                placeholder="Project summary shown under the title."
+              />
+            </FieldGroup>
+
+            <FieldGroup label="Slug">
+              <div className="rounded-md border border-border bg-background px-3 py-2 text-xs text-muted-foreground">
+                {project.slug}
+              </div>
             </FieldGroup>
 
             <Separator />
 
-            {/* Folder images (thumbnails) */}
-            {folderImages.length > 0 && (
-              <FieldGroup label={`Images (${folderImages.length})`}>
-                <div className="mt-1 grid grid-cols-3 gap-1.5">
-                  {folderImages.map((img, idx) => {
-                    const isInBlocks = project.contentBlocks.some(
-                      (b) => b.type === "image" && (b.url === img.url || b.key === img.key)
-                    );
-                    return (
-                      <button
-                        key={img.key + idx}
-                        type="button"
-                        onClick={() => !isInBlocks && addExistingImageToBlocks(img)}
-                        className={`group/thumb relative overflow-hidden rounded border transition-all ${
-                          isInBlocks
-                            ? "border-primary/30 opacity-50"
-                            : "border-border hover:border-primary/50"
-                        }`}
-                        title={isInBlocks ? "Already in blocks" : `Add "${img.name}" to content`}
-                        disabled={isInBlocks}
-                      >
-                        <img
-                          src={img.url}
-                          alt={img.name}
-                          className="aspect-square w-full object-cover"
-                        />
-                        {!isInBlocks && (
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover/thumb:opacity-100">
-                            <Plus className="size-4 text-white" />
-                          </div>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </FieldGroup>
-            )}
-          </div>
+            <div className="grid grid-cols-2 gap-3">
+              <PreviewCard
+                label="Thumbnail"
+                imageUrl={selectedCardAsset?.src || project.cardImageUrl}
+              />
+              <PreviewCard
+                label="Cover"
+                imageUrl={selectedCoverAsset?.src || project.coverImageUrl}
+              />
+            </div>
 
-          {/* Delete project — pinned to bottom */}
-          <div className="mt-6 border-t border-border pt-4">
+            <Button
+              size="sm"
+              variant="outline"
+              className="w-full gap-1.5"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+            >
+              {uploading ? (
+                <LoaderCircle className="size-4 animate-spin" />
+              ) : (
+                <CloudUpload className="size-4" />
+              )}
+              {uploading ? "Uploading…" : "Upload Images"}
+            </Button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/avif"
+              multiple
+              className="hidden"
+              onChange={(event) => void handleUpload(event.target.files)}
+            />
+
             <Button
               variant="ghost"
-              className="w-full gap-1.5 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive"
+              className="w-full gap-1.5 text-destructive hover:bg-destructive/10 hover:text-destructive"
               onClick={async () => {
-                if (!confirm("Delete this project and all its images? This cannot be undone.")) return;
-                // Delete from Firebase Storage
-                if (project.storagePath) {
-                  await deleteStorageFolder(project.storagePath);
-                }
-                // Delete from Firestore
-                try {
-                  await deleteProjectFromFirestore(project.id);
-                } catch (err) {
-                  console.error("Failed to delete from Firestore:", err);
-                }
-                // Delete from localStorage
-                const projects = loadProjects().filter((p) => p.id !== project.id);
-                saveProjects(projects);
+                if (!confirm("Delete this project from the repo?")) return;
+                await deleteProjectFromFirestore(project.id);
                 navigate("/admin");
               }}
             >
-              <Trash className="size-3.5" />
+              <Trash className="size-4" />
               Delete Project
             </Button>
           </div>
         </aside>
 
-        {/* ════════════════════════════════════════════
-            RIGHT — Content blocks (Dribbble-style)
-            ════════════════════════════════════════════ */}
         <main className="flex-1 overflow-y-auto bg-background">
-          <div className="mx-auto max-w-3xl p-8">
-            {/* Block toolbar */}
-            <div className="mb-6 flex items-center gap-2">
-              <span className="text-xs font-medium text-muted-foreground">
-                Insert Block
-              </span>
-              <div className="flex gap-1.5">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="gap-1.5 text-xs"
-                  onClick={addTextBlock}
-                >
-                  <TextFormat className="size-3.5" />
-                  Text
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="gap-1.5 text-xs"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={uploading}
-                >
-                  {uploading ? (
-                    <LoaderCircle className="size-3.5 animate-spin" />
-                  ) : (
-                    <CloudUpload className="size-3.5" />
-                  )}
-                  Upload Image
-                </Button>
-              </div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                multiple
-                className="hidden"
-                onChange={(e) => handleFileUpload(e.target.files)}
-              />
-            </div>
-
-            {/* Content blocks */}
-            {project.contentBlocks.length === 0 ? (
-              <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border py-20">
-                <div className="flex size-16 items-center justify-center rounded-2xl bg-muted">
-                  <Image className="size-7 text-muted-foreground/40" />
+          <div className="mx-auto max-w-4xl space-y-10 p-8">
+            <section className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-base font-medium text-foreground">Project Images</h2>
+                  <p className="text-sm text-muted-foreground">
+                    Reorder gallery images, choose the cover, and set the card thumbnail.
+                  </p>
                 </div>
-                <p className="mt-4 text-sm font-medium text-foreground">
-                  Start building your project post
-                </p>
-                <p className="mt-1 max-w-xs text-center text-xs text-muted-foreground">
-                  Add image and text blocks to create a Dribbble-style project showcase.
-                  Upload images or add text descriptions.
-                </p>
-                <div className="mt-5 flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="gap-1.5"
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    <CloudUpload className="size-4" />
-                    Upload Images
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="gap-1.5"
-                    onClick={addTextBlock}
-                  >
+              </div>
+
+              {galleryAssets.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-border px-6 py-12 text-center">
+                  <p className="text-sm font-medium text-foreground">No images yet</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Upload a few still images to start building this project.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {galleryAssets.map((asset, index) => (
+                    <div key={asset.id} className="rounded-2xl border border-border p-4">
+                      <div className="grid grid-cols-[140px_minmax(0,1fr)] gap-4">
+                        <div className="overflow-hidden rounded-xl border border-border bg-muted/30">
+                          <img src={asset.src} alt="" className="aspect-[16/10] w-full object-cover" />
+                        </div>
+
+                        <div className="space-y-3">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <Badge variant="secondary">
+                              {String(index + 1).padStart(2, "0")}
+                            </Badge>
+                            {project.coverAssetId === asset.id && (
+                              <Badge variant="default" className="gap-1">
+                                <Star className="size-3" />
+                                Cover
+                              </Badge>
+                            )}
+                            {project.cardAssetId === asset.id && (
+                              <Badge variant="outline">Thumbnail</Badge>
+                            )}
+                          </div>
+
+                          <div className="flex flex-wrap gap-2">
+                            <Button size="sm" variant="outline" onClick={() => moveGalleryAsset(asset.id, -1)} disabled={index === 0}>
+                              Move Up
+                            </Button>
+                            <Button size="sm" variant="outline" onClick={() => moveGalleryAsset(asset.id, 1)} disabled={index === galleryAssets.length - 1}>
+                              Move Down
+                            </Button>
+                            <Button size="sm" variant="outline" onClick={() => setAssetAsCover(asset.id)}>
+                              Set as Cover
+                            </Button>
+                            <Button size="sm" variant="outline" onClick={() => setAssetAsThumbnail(asset.id)}>
+                              Set as Thumbnail
+                            </Button>
+                            <Button size="sm" variant="outline" onClick={() => addImageBlock(asset.id)}>
+                              Add to Story
+                            </Button>
+                            <Button size="sm" variant="ghost" className="text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => void removeAsset(asset.id)}>
+                              Remove
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            <section className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-base font-medium text-foreground">Story Content</h2>
+                  <p className="text-sm text-muted-foreground">
+                    Add text and image blocks in the order you want them to appear.
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline" className="gap-1.5" onClick={addTextBlock}>
                     <TextFormat className="size-4" />
-                    Add Text
+                    Text Block
+                  </Button>
+                  <Button size="sm" variant="outline" className="gap-1.5" onClick={() => fileInputRef.current?.click()}>
+                    <Plus className="size-4" />
+                    Upload More
                   </Button>
                 </div>
               </div>
-            ) : (
-              <div className="space-y-4">
-                {project.contentBlocks.map((block, idx) => (
-                  <ContentBlockEditor
-                    key={block.id}
-                    block={block}
-                    index={idx}
-                    total={project.contentBlocks.length}
-                    isCover={block.type === "image" && project.coverImageKey === block.url}
-                    onSetCover={(url) => update("coverImageKey", url)}
-                    onRemove={() => removeBlock(block.id)}
-                    onMoveUp={() => moveBlock(block.id, "up")}
-                    onMoveDown={() => moveBlock(block.id, "down")}
-                    onUpdateContent={(content) => updateBlockContent(block.id, content)}
-                    onUpdateCaption={(caption) => updateBlockCaption(block.id, caption)}
-                  />
-                ))}
 
-                {/* Add more blocks */}
-                <div className="flex items-center justify-center gap-2 py-4">
-                  <div className="h-px flex-1 bg-border" />
-                  <div className="flex gap-1.5">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="gap-1.5 text-xs text-muted-foreground"
-                      onClick={addTextBlock}
-                    >
-                      <Plus className="size-3" />
-                      Text
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="gap-1.5 text-xs text-muted-foreground"
-                      onClick={() => fileInputRef.current?.click()}
-                    >
-                      <Plus className="size-3" />
-                      Image
-                    </Button>
-                  </div>
-                  <div className="h-px flex-1 bg-border" />
+              {project.blocks.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-border px-6 py-12 text-center">
+                  <p className="text-sm font-medium text-foreground">No story blocks yet</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Add text or attach one of your uploaded images to the story flow.
+                  </p>
                 </div>
-              </div>
-            )}
+              ) : (
+                <div className="space-y-4">
+                  {project.blocks.map((block, index) => {
+                    const imageAsset = block.type === "image"
+                      ? project.assets.find((asset) => asset.id === block.assetId)
+                      : null;
+
+                    return (
+                      <div key={block.id} className="rounded-2xl border border-border p-4">
+                        <div className="mb-3 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="secondary">
+                              {block.type === "text" ? "Text" : "Image"}
+                            </Badge>
+                            <span className="text-xs text-muted-foreground">
+                              {String(index + 1).padStart(2, "0")}
+                            </span>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button size="sm" variant="outline" onClick={() => moveBlock(block.id, -1)} disabled={index === 0}>
+                              Up
+                            </Button>
+                            <Button size="sm" variant="outline" onClick={() => moveBlock(block.id, 1)} disabled={index === project.blocks.length - 1}>
+                              Down
+                            </Button>
+                            <Button size="sm" variant="ghost" className="text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => removeBlock(block.id)}>
+                              Remove
+                            </Button>
+                          </div>
+                        </div>
+
+                        {block.type === "text" ? (
+                          <Suspense
+                            fallback={(
+                              <div className="flex min-h-[200px] items-center justify-center rounded-lg border border-border bg-background text-sm text-muted-foreground">
+                                Loading editor…
+                              </div>
+                            )}
+                          >
+                            <LazyRichTextEditor
+                              content={block.html}
+                              onChange={(html) => updateBlock(block.id, (current) => ({ ...current, html }))}
+                              placeholder="Enter your text here..."
+                            />
+                          </Suspense>
+                        ) : imageAsset ? (
+                          <div className="space-y-3">
+                            <div className="overflow-hidden rounded-xl border border-border bg-muted/30">
+                              <img src={imageAsset.src} alt="" className="w-full object-cover" />
+                            </div>
+                            <Input
+                              value={block.caption ?? ""}
+                              onChange={(event) =>
+                                updateBlock(block.id, (current) => ({
+                                  ...current,
+                                  caption: event.target.value,
+                                }))
+                              }
+                              placeholder="Add a caption"
+                            />
+                          </div>
+                        ) : (
+                          <div className="rounded-xl border border-dashed border-border px-4 py-6 text-sm text-muted-foreground">
+                            This image asset no longer exists.
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </section>
           </div>
         </main>
       </div>
     </>
   );
 }
-
-// ── Content Block Editor Component ──
-
-function ContentBlockEditor({
-  block,
-  index,
-  total,
-  isCover,
-  onSetCover,
-  onRemove,
-  onMoveUp,
-  onMoveDown,
-  onUpdateContent,
-  onUpdateCaption,
-}: {
-  block: ContentBlock;
-  index: number;
-  total: number;
-  isCover: boolean;
-  onSetCover: (url: string) => void;
-  onRemove: () => void;
-  onMoveUp: () => void;
-  onMoveDown: () => void;
-  onUpdateContent: (content: string) => void;
-  onUpdateCaption: (caption: string) => void;
-}) {
-  const [hovered, setHovered] = useState(false);
-
-  return (
-    <div
-      className="group relative"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      {/* Block controls — floating right side */}
-      <div
-        className={`absolute -right-12 top-1 z-10 flex flex-col gap-0.5 transition-opacity ${
-          hovered ? "opacity-100" : "opacity-0"
-        }`}
-      >
-        <button
-          type="button"
-          onClick={onMoveUp}
-          disabled={index === 0}
-          className="flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-30"
-          title="Move up"
-        >
-          <ChevronUp className="size-3.5" />
-        </button>
-        <button
-          type="button"
-          onClick={onMoveDown}
-          disabled={index === total - 1}
-          className="flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-30"
-          title="Move down"
-        >
-          <ChevronDown className="size-3.5" />
-        </button>
-        {block.type === "image" && (
-          <button
-            type="button"
-            onClick={() => onSetCover(block.url)}
-            className={`flex size-7 items-center justify-center rounded-md transition-colors ${
-              isCover
-                ? "text-amber-500"
-                : "text-muted-foreground hover:bg-accent hover:text-amber-500"
-            }`}
-            title={isCover ? "Current cover" : "Set as cover"}
-          >
-            <Star className={`size-3.5 ${isCover ? "fill-current" : ""}`} />
-          </button>
-        )}
-        <button
-          type="button"
-          onClick={onRemove}
-          className="flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-          title="Remove block"
-        >
-          <Trash className="size-3.5" />
-        </button>
-      </div>
-
-      {/* Block content */}
-      {block.type === "image" ? (
-        <div className="overflow-hidden rounded-xl border border-border/50">
-          <img
-            src={block.url}
-            alt={block.caption || "Project image"}
-            className="w-full"
-            style={{ minHeight: 100 }}
-          />
-          {/* Caption */}
-          <div className="border-t border-border/30 px-4 py-2">
-            <input
-              type="text"
-              value={block.caption || ""}
-              onChange={(e) => onUpdateCaption(e.target.value)}
-              placeholder="Add a caption..."
-              className="w-full bg-transparent text-xs text-muted-foreground placeholder:text-muted-foreground/40 focus:outline-none"
-            />
-          </div>
-        </div>
-      ) : (
-        <div className="rounded-xl border border-border/50">
-          <RichTextEditor
-            content={block.content}
-            onChange={onUpdateContent}
-            placeholder="Enter your text here..."
-          />
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ── Helpers ──
 
 function FieldGroup({
   label,
@@ -743,11 +566,34 @@ function FieldGroup({
   children: React.ReactNode;
 }) {
   return (
-    <div className="space-y-1">
+    <div className="space-y-1.5">
       <label className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
         {label}
       </label>
       {children}
+    </div>
+  );
+}
+
+function PreviewCard({
+  label,
+  imageUrl,
+}: {
+  label: string;
+  imageUrl?: string;
+}) {
+  return (
+    <div className="space-y-2">
+      <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+        {label}
+      </span>
+      <div className="overflow-hidden rounded-xl border border-border bg-background">
+        {imageUrl ? (
+          <img src={imageUrl} alt="" className="aspect-[16/10] w-full object-cover" />
+        ) : (
+          <div className="aspect-[16/10] bg-muted/40" />
+        )}
+      </div>
     </div>
   );
 }

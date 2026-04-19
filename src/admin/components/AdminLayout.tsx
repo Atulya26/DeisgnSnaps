@@ -78,7 +78,7 @@ export function AdminLayout() {
           {/* Signed-in user */}
           {user && (
             <div className="truncate px-2 text-[10px] text-muted-foreground/60">
-              {user.email}
+              @{user.login}
             </div>
           )}
 

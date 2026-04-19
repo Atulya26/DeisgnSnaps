@@ -1,0 +1,44 @@
+{
+  "id": "dribbble-shot-20224517",
+  "slug": "landing-page-origin-dashboard-dribbble-shot-20224517",
+  "title": "Landing Page | Origin Dashboard",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/landing-page-origin-dashboard-dribbble-shot-20224517/card.webp",
+  "coverImageUrl": "/portfolio/projects/landing-page-origin-dashboard-dribbble-shot-20224517/cover.webp",
+  "sortOrder": 51,
+  "status": "published",
+  "description": "Landing page for Origin Website. Origin is a convenient tool for users to keep track of their multiple cards and manage their spending.\n\nDo let me know what your think !",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:31:52.069Z",
+  "createdAt": "2026-04-19T06:31:52.069Z",
+  "coverAssetId": "cover",
+  "cardAssetId": "card",
+  "assets": [
+    {
+      "id": "card",
+      "kind": "image",
+      "role": "card",
+      "src": "/portfolio/projects/landing-page-origin-dashboard-dribbble-shot-20224517/card.webp"
+    },
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/landing-page-origin-dashboard-dribbble-shot-20224517/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/landing-page-origin-dashboard-dribbble-shot-20224517/gallery-01.webp"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "text-description-20224517",
+      "type": "text",
+      "html": "<h2>Overview</h2><p>Landing page for Origin Website. Origin is a convenient tool for users to keep track of their multiple cards and manage their spending.</p><p>Do let me know what your think !</p>"
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "id": "dribbble-shot-22157142",
+  "slug": "lourve-museum-concept-dribbble-shot-22157142",
+  "title": "Lourve Museum Concept",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/lourve-museum-concept-dribbble-shot-22157142/card.webp",
+  "coverImageUrl": "/portfolio/projects/lourve-museum-concept-dribbble-shot-22157142/cover.webp",
+  "sortOrder": 29,
+  "status": "published",
+  "description": "",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:30:40.374Z",
+  "gallery": [
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/lourve-museum-concept-dribbble-shot-22157142/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/lourve-museum-concept-dribbble-shot-22157142/gallery-01.webp"
+    },
+    {
+      "id": "gallery-02",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/lourve-museum-concept-dribbble-shot-22157142/gallery-02.webp"
+    },
+    {
+      "id": "gallery-03",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/lourve-museum-concept-dribbble-shot-22157142/gallery-03.webp"
+    },
+    {
+      "id": "gallery-04",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/lourve-museum-concept-dribbble-shot-22157142/gallery-04.webp"
+    }
+  ],
+  "blocks": []
+}

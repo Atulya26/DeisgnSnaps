@@ -1,0 +1,44 @@
+{
+  "id": "dribbble-shot-18471746",
+  "slug": "messaging-app-dribbble-shot-18471746",
+  "title": "Messaging App",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/messaging-app-dribbble-shot-18471746/card.webp",
+  "coverImageUrl": "/portfolio/projects/messaging-app-dribbble-shot-18471746/cover.webp",
+  "sortOrder": 89,
+  "status": "published",
+  "description": "Hello, everyone!\n\nThis is an idea for a messaging app I recently created.\n\nIn recent months, I've used a number of messaging applications, and many of them lack fundamental user experience.\n\nPlease let me know what you think!",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:33:11.793Z",
+  "createdAt": "2026-04-19T06:33:11.793Z",
+  "coverAssetId": "cover",
+  "cardAssetId": "card",
+  "assets": [
+    {
+      "id": "card",
+      "kind": "image",
+      "role": "card",
+      "src": "/portfolio/projects/messaging-app-dribbble-shot-18471746/card.webp"
+    },
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/messaging-app-dribbble-shot-18471746/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/messaging-app-dribbble-shot-18471746/gallery-01.webp"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "text-description-18471746",
+      "type": "text",
+      "html": "<h2>Overview</h2><p>Hello, everyone!</p><p>This is an idea for a messaging app I recently created.</p><p>In recent months, I&#39;ve used a number of messaging applications, and many of them lack fundamental user experience.</p><p>Please let me know what you think!</p>"
+    }
+  ]
+}

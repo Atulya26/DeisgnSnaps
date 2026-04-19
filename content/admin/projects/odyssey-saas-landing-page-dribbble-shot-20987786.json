@@ -1,0 +1,68 @@
+{
+  "id": "dribbble-shot-20987786",
+  "slug": "odyssey-saas-landing-page-dribbble-shot-20987786",
+  "title": "Odyssey - SaaS Landing Page",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/odyssey-saas-landing-page-dribbble-shot-20987786/card.webp",
+  "coverImageUrl": "/portfolio/projects/odyssey-saas-landing-page-dribbble-shot-20987786/cover.webp",
+  "sortOrder": 41,
+  "status": "published",
+  "description": "",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:31:25.826Z",
+  "createdAt": "2026-04-19T06:31:25.826Z",
+  "coverAssetId": "cover",
+  "cardAssetId": "card",
+  "assets": [
+    {
+      "id": "card",
+      "kind": "image",
+      "role": "card",
+      "src": "/portfolio/projects/odyssey-saas-landing-page-dribbble-shot-20987786/card.webp"
+    },
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/odyssey-saas-landing-page-dribbble-shot-20987786/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/odyssey-saas-landing-page-dribbble-shot-20987786/gallery-01.webp"
+    },
+    {
+      "id": "gallery-02",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/odyssey-saas-landing-page-dribbble-shot-20987786/gallery-02.webp"
+    },
+    {
+      "id": "gallery-03",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/odyssey-saas-landing-page-dribbble-shot-20987786/gallery-03.webp"
+    },
+    {
+      "id": "gallery-04",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/odyssey-saas-landing-page-dribbble-shot-20987786/gallery-04.webp"
+    },
+    {
+      "id": "gallery-05",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/odyssey-saas-landing-page-dribbble-shot-20987786/gallery-05.webp"
+    },
+    {
+      "id": "gallery-06",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/odyssey-saas-landing-page-dribbble-shot-20987786/gallery-06.webp"
+    }
+  ],
+  "blocks": []
+}

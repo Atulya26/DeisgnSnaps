@@ -1,0 +1,44 @@
+{
+  "id": "dribbble-shot-18380780",
+  "slug": "jobnxt-get-your-dream-job-dribbble-shot-18380780",
+  "title": "Jobnxt - Get your dream job.",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/jobnxt-get-your-dream-job-dribbble-shot-18380780/card.webp",
+  "coverImageUrl": "/portfolio/projects/jobnxt-get-your-dream-job-dribbble-shot-18380780/cover.webp",
+  "sortOrder": 93,
+  "status": "published",
+  "description": "Hello, everyone!\n\nJobnxt is an app that searches hundreds of job vacancies and always presents the user with the most carefully curated selection of options. The app considers each user's skill and accomplishments and gives them the best results possible.\n\nLet me know what you guys think!",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:33:24.722Z",
+  "createdAt": "2026-04-19T06:33:24.722Z",
+  "coverAssetId": "cover",
+  "cardAssetId": "card",
+  "assets": [
+    {
+      "id": "card",
+      "kind": "image",
+      "role": "card",
+      "src": "/portfolio/projects/jobnxt-get-your-dream-job-dribbble-shot-18380780/card.webp"
+    },
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/jobnxt-get-your-dream-job-dribbble-shot-18380780/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/jobnxt-get-your-dream-job-dribbble-shot-18380780/gallery-01.webp"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "text-description-18380780",
+      "type": "text",
+      "html": "<h2>Overview</h2><p>Hello, everyone!</p><p>Jobnxt is an app that searches hundreds of job vacancies and always presents the user with the most carefully curated selection of options. The app considers each user&#39;s skill and accomplishments and gives them the best results possible.</p><p>Let me know what you guys think!</p>"
+    }
+  ]
+}

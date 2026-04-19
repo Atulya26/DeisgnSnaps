@@ -1,0 +1,53 @@
+{
+  "id": "dribbble-shot-22757609",
+  "slug": "serenity-studio-website-dribbble-shot-22757609",
+  "title": "Serenity Studio Website",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/serenity-studio-website-dribbble-shot-22757609/card.webp",
+  "coverImageUrl": "/portfolio/projects/serenity-studio-website-dribbble-shot-22757609/cover.webp",
+  "sortOrder": 10,
+  "status": "published",
+  "description": "Serenity Studio is your sanctuary for mindful movement and holistic well-being, offering diverse classes, experienced instructors, and a welcoming community to elevate your yoga journey.\n\nThis is my exploration for its website.\n\nDo let me know 💬 what you think !\n\nPress\"L\" to Like ❤️ the Post.",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:28:34.578Z",
+  "gallery": [
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/serenity-studio-website-dribbble-shot-22757609/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/serenity-studio-website-dribbble-shot-22757609/gallery-01.webp"
+    },
+    {
+      "id": "gallery-02",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/serenity-studio-website-dribbble-shot-22757609/gallery-02.webp"
+    },
+    {
+      "id": "gallery-03",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/serenity-studio-website-dribbble-shot-22757609/gallery-03.webp"
+    },
+    {
+      "id": "gallery-04",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/serenity-studio-website-dribbble-shot-22757609/gallery-04.webp"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "text-description-22757609",
+      "type": "text",
+      "html": "<h2>Overview</h2><p>Serenity Studio is your sanctuary for mindful movement and holistic well-being, offering diverse classes, experienced instructors, and a welcoming community to elevate your yoga journey.</p><p>This is my exploration for its website.</p><p>Do let me know 💬 what you think !</p><p>Press&quot;L&quot; to Like ❤️ the Post.</p>"
+    }
+  ]
+}

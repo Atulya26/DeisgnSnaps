@@ -1,0 +1,41 @@
+{
+  "id": "dribbble-shot-22521040",
+  "slug": "arch-website-v2-dribbble-shot-22521040",
+  "title": "Arch. Website V2",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/arch-website-v2-dribbble-shot-22521040/card.webp",
+  "coverImageUrl": "/portfolio/projects/arch-website-v2-dribbble-shot-22521040/cover.webp",
+  "sortOrder": 18,
+  "status": "published",
+  "description": "Hi everybody\n\nThis is my exploration of an interior firm website\n\nDo let me know 💬 what you think !\n\nPress\"L\" to Like ❤️ the Post.",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:29:13.134Z",
+  "gallery": [
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/arch-website-v2-dribbble-shot-22521040/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/arch-website-v2-dribbble-shot-22521040/gallery-01.webp"
+    },
+    {
+      "id": "gallery-02",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/arch-website-v2-dribbble-shot-22521040/gallery-02.webp"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "text-description-22521040",
+      "type": "text",
+      "html": "<h2>Overview</h2><p>Hi everybody</p><p>This is my exploration of an interior firm website</p><p>Do let me know 💬 what you think !</p><p>Press&quot;L&quot; to Like ❤️ the Post.</p>"
+    }
+  ]
+}

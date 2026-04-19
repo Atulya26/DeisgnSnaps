@@ -1,0 +1,44 @@
+{
+  "id": "dribbble-shot-19580876",
+  "slug": "daily-ui-design-challenge-countdown-timer-day-014-dribbble-shot-19580876",
+  "title": "Daily UI Design Challenge | Countdown Timer | Day 014",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/daily-ui-design-challenge-countdown-timer-day-014-dribbble-shot-19580876/card.webp",
+  "coverImageUrl": "/portfolio/projects/daily-ui-design-challenge-countdown-timer-day-014-dribbble-shot-19580876/cover.webp",
+  "sortOrder": 70,
+  "status": "published",
+  "description": "Hey, This is my take on Daily UI challenge #014\n\nCountdown Timer\n\nDo let me know what you think about it.\n\nThanks!",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:32:34.762Z",
+  "createdAt": "2026-04-19T06:32:34.762Z",
+  "coverAssetId": "cover",
+  "cardAssetId": "card",
+  "assets": [
+    {
+      "id": "card",
+      "kind": "image",
+      "role": "card",
+      "src": "/portfolio/projects/daily-ui-design-challenge-countdown-timer-day-014-dribbble-shot-19580876/card.webp"
+    },
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/daily-ui-design-challenge-countdown-timer-day-014-dribbble-shot-19580876/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/daily-ui-design-challenge-countdown-timer-day-014-dribbble-shot-19580876/gallery-01.webp"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "text-description-19580876",
+      "type": "text",
+      "html": "<h2>Overview</h2><p>Hey, This is my take on Daily UI challenge #014</p><p>Countdown Timer</p><p>Do let me know what you think about it.</p><p>Thanks!</p>"
+    }
+  ]
+}

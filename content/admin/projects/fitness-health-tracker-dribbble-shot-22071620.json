@@ -1,0 +1,56 @@
+{
+  "id": "dribbble-shot-22071620",
+  "slug": "fitness-health-tracker-dribbble-shot-22071620",
+  "title": "Fitness & Health Tracker",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/fitness-health-tracker-dribbble-shot-22071620/card.webp",
+  "coverImageUrl": "/portfolio/projects/fitness-health-tracker-dribbble-shot-22071620/cover.webp",
+  "sortOrder": 33,
+  "status": "published",
+  "description": "I recently made an app to track fitness and health.\n\nTried to give it a dark feel.\n\nPlease let me know what you think.",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:30:54.806Z",
+  "createdAt": "2026-04-19T06:30:54.806Z",
+  "coverAssetId": "cover",
+  "cardAssetId": "card",
+  "assets": [
+    {
+      "id": "card",
+      "kind": "image",
+      "role": "card",
+      "src": "/portfolio/projects/fitness-health-tracker-dribbble-shot-22071620/card.webp"
+    },
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/fitness-health-tracker-dribbble-shot-22071620/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/fitness-health-tracker-dribbble-shot-22071620/gallery-01.webp"
+    },
+    {
+      "id": "gallery-02",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/fitness-health-tracker-dribbble-shot-22071620/gallery-02.webp"
+    },
+    {
+      "id": "gallery-03",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/fitness-health-tracker-dribbble-shot-22071620/gallery-03.webp"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "text-description-22071620",
+      "type": "text",
+      "html": "<h2>Overview</h2><p>I recently made an app to track fitness and health.</p><p>Tried to give it a dark feel.</p><p>Please let me know what you think.</p>"
+    }
+  ]
+}

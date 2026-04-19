@@ -1,0 +1,35 @@
+{
+  "id": "dribbble-shot-18615318",
+  "slug": "arc-buy-and-rent-houses-dribbble-shot-18615318",
+  "title": "Arc - Buy and Rent Houses",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/arc-buy-and-rent-houses-dribbble-shot-18615318/card.webp",
+  "coverImageUrl": "/portfolio/projects/arc-buy-and-rent-houses-dribbble-shot-18615318/cover.webp",
+  "sortOrder": 86,
+  "status": "published",
+  "description": "Hey everyone !\n\nArc is a platform that makes it incredibly simple to buy and rent homes, apartments, and commercial spaces.\n\nCompare all of the information quickly to determine the best option for you.\n\nLet me know what you guys think!",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:33:03.545Z",
+  "gallery": [
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/arc-buy-and-rent-houses-dribbble-shot-18615318/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/arc-buy-and-rent-houses-dribbble-shot-18615318/gallery-01.webp"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "text-description-18615318",
+      "type": "text",
+      "html": "<h2>Overview</h2><p>Hey everyone !</p><p>Arc is a platform that makes it incredibly simple to buy and rent homes, apartments, and commercial spaces.</p><p>Compare all of the information quickly to determine the best option for you.</p><p>Let me know what you guys think!</p>"
+    }
+  ]
+}

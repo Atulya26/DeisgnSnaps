@@ -15,27 +15,39 @@ const TOOLBAR_HEIGHT = 64;
 const TITLE_BAR_HEIGHT = 56;
 
 // Stack replica dimensions (used in Phase 1 pile-up)
-const STACK_W = 220;
-const STACK_H = 150;
+const STACK_W = 264;
+const STACK_TITLE_H = 36;
+const STACK_IMAGE_H = 176;
+const STACK_H = STACK_IMAGE_H + STACK_TITLE_H;
+const STACK_CARD_COUNT = 8;
+
+function hexToRgba(hex: string, alpha: number) {
+  const match = hex.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
+  if (!match) return `rgba(0, 0, 0, ${alpha})`;
+  const r = parseInt(match[1], 16);
+  const g = parseInt(match[2], 16);
+  const b = parseInt(match[3], 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
 
 /**
- * Boot Sequence — "Big wordmark + card stack → scatter"
+ * Boot Sequence — centered stack + ambient shader field → scatter
  *
- * Two moments, one frame:
- *   • Upper third: huge "Atulya" wordmark + tagline (identity).
- *   • Lower third: rapid pile-up of ~12 project cards (the work).
- * Both co-exist during the hold beat — the viewer sees WHO + WHAT before
- * the cards scatter out to their final canvas positions and the wordmark
- * fades up and away. Pixel-perfect handoff preserved.
+ * The stack stays as the hero, dead-center. "Atulya" sits behind it as part
+ * of the composition, with soft shader-like light and shadow around the
+ * center so the loader feels atmospheric without changing the home cards.
  */
 export function BootSequence({ projects, onComplete }: BootSequenceProps) {
-  const { theme, colors } = useTheme();
+  const { theme, colors, animationConfig, dotGridConfig } = useTheme();
   const overlayRef = useRef<HTMLDivElement>(null);
   const stackCardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const scatterCardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const scatterGroupRef = useRef<HTMLDivElement>(null);
   const wordmarkRef = useRef<HTMLDivElement>(null);
-  const taglineRef = useRef<HTMLDivElement>(null);
+  const ambientPrimaryRef = useRef<HTMLDivElement>(null);
+  const ambientSecondaryRef = useRef<HTMLDivElement>(null);
+  const centerGlowRef = useRef<HTMLDivElement>(null);
+  const stackShadowRef = useRef<HTMLDivElement>(null);
 
   const setStackRef = useCallback((el: HTMLDivElement | null, idx: number) => {
     stackCardRefs.current[idx] = el;
@@ -44,10 +56,10 @@ export function BootSequence({ projects, onComplete }: BootSequenceProps) {
     scatterCardRefs.current[idx] = el;
   }, []);
 
-  // Stack phase uses a shuffled slice of up to 12 projects
+  // Stack phase uses a smaller shuffled slice so the loader stays light.
   const stackCards = useMemo(() => {
     const shuffled = [...projects].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, Math.min(12, projects.length));
+    return shuffled.slice(0, Math.min(STACK_CARD_COUNT, projects.length));
   }, [projects]);
 
   // Scatter screen positions — shared with InfiniteCanvas's initial camera so
@@ -71,8 +83,13 @@ export function BootSequence({ projects, onComplete }: BootSequenceProps) {
   useEffect(() => {
     const overlay = overlayRef.current;
     const wordmark = wordmarkRef.current;
-    const tagline = taglineRef.current;
-    if (!overlay || !wordmark || !tagline) return;
+    const ambientPrimary = ambientPrimaryRef.current;
+    const ambientSecondary = ambientSecondaryRef.current;
+    const centerGlow = centerGlowRef.current;
+    const stackShadow = stackShadowRef.current;
+    if (!overlay || !wordmark || !ambientPrimary || !ambientSecondary || !centerGlow || !stackShadow) {
+      return;
+    }
 
     const stackEls = stackCardRefs.current.filter(Boolean) as HTMLDivElement[];
     const scatterEls = scatterCardRefs.current.filter(Boolean) as HTMLDivElement[];
@@ -82,19 +99,21 @@ export function BootSequence({ projects, onComplete }: BootSequenceProps) {
     const cx = vw / 2;
     const cy = vh / 2;
 
-    // Stack pile anchored in the lower third, well clear of the wordmark block.
-    const stackCenterY = vh * 0.7;
+    const stackCenterY = cy;
 
     // ── Initial states ─────────────────────────────────────────────
-    gsap.set(wordmark, { opacity: 0, y: 36, scale: 1.02, filter: "blur(6px)" });
-    gsap.set(tagline, { opacity: 0, y: 14 });
+    gsap.set(wordmark, { opacity: 0, y: 18, scale: 0.94, filter: "blur(10px)" });
+    gsap.set(ambientPrimary, { opacity: 0, scale: 1.16, x: -72, y: -40 });
+    gsap.set(ambientSecondary, { opacity: 0, scale: 1.08, x: 62, y: 36 });
+    gsap.set(centerGlow, { opacity: 0, scale: 0.78 });
+    gsap.set(stackShadow, { opacity: 0, scale: 0.82 });
 
     stackEls.forEach((card) => {
       gsap.set(card, {
         x: cx - STACK_W / 2,
         y: stackCenterY - STACK_H / 2,
         opacity: 0,
-        scale: 0.6,
+        scale: 0.68,
         rotation: 0,
         transformOrigin: "center center",
       });
@@ -119,26 +138,61 @@ export function BootSequence({ projects, onComplete }: BootSequenceProps) {
 
     const tl = gsap.timeline({ onComplete: () => onComplete() });
 
-    // Phase 1: HERO wordmark reveals (blur → focus)
+    // Phase 1: ambient shader field and centered identity reveal.
+    tl.to(
+      ambientPrimary,
+      {
+        opacity: theme === "light" ? 0.95 : 0.78,
+        scale: 1,
+        x: 0,
+        y: 0,
+        duration: 0.95,
+        ease: "power2.out",
+      },
+      0
+    );
+    tl.to(
+      ambientSecondary,
+      {
+        opacity: theme === "light" ? 0.72 : 0.6,
+        scale: 1,
+        x: 0,
+        y: 0,
+        duration: 1.1,
+        ease: "power2.out",
+      },
+      0.04
+    );
+    tl.to(
+      centerGlow,
+      { opacity: 1, scale: 1, duration: 0.85, ease: "power2.out" },
+      0.08
+    );
+    tl.to(
+      stackShadow,
+      { opacity: 1, scale: 1, duration: 0.65, ease: "power2.out" },
+      0.18
+    );
     tl.to(
       wordmark,
-      { opacity: 1, y: 0, scale: 1, filter: "blur(0px)", duration: 0.85, ease: "power3.out" },
-      0.15
-    );
-    tl.to(
-      tagline,
-      { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" },
-      0.5
+      {
+        opacity: theme === "light" ? 0.24 : 0.34,
+        y: 0,
+        scale: 1,
+        filter: "blur(0px)",
+        duration: 0.9,
+        ease: "power3.out",
+      },
+      0.16
     );
 
-    // Phase 2: Card stack rapid-fire pile-up (runs in parallel with wordmark
-    // reveal — so the viewer sees identity + work building at once).
+    // Phase 2: centered card stack rapid-fire pile-up.
     const STACK_INTERVAL = 0.055;
-    const stackPhaseStart = 0.35;
+    const stackPhaseStart = 0.24;
     stackEls.forEach((card, i) => {
-      const rot = (Math.random() - 0.5) * 16;
-      const ox = (Math.random() - 0.5) * 12;
-      const oy = (Math.random() - 0.5) * 10;
+      const rot = (Math.random() - 0.5) * 18;
+      const ox = (Math.random() - 0.5) * 16;
+      const oy = (Math.random() - 0.5) * 12;
       tl.to(
         card,
         {
@@ -154,13 +208,42 @@ export function BootSequence({ projects, onComplete }: BootSequenceProps) {
       );
     });
 
-    // Phase 3: Hold — both wordmark and stack sit together for a beat.
-    const holdEnd = Math.max(1.25, stackPhaseStart + stackEls.length * STACK_INTERVAL + 0.45);
+    tl.to(
+      ambientPrimary,
+      { x: 34, y: -16, duration: 1.1, ease: "sine.inOut" },
+      stackPhaseStart + 0.2
+    );
+    tl.to(
+      ambientSecondary,
+      { x: -28, y: 18, duration: 1.1, ease: "sine.inOut" },
+      stackPhaseStart + 0.28
+    );
 
-    // Phase 4: Stack scatters to canvas positions; wordmark fades up.
+    // Phase 3: centered hold.
+    const holdEnd = Math.max(1.18, stackPhaseStart + stackEls.length * STACK_INTERVAL + 0.52);
+
+    // Phase 4: stack scatters to canvas positions; identity and shades dissolve.
     const scatterStart = holdEnd;
-    tl.to(wordmark, { opacity: 0, y: -28, scale: 0.92, duration: 0.5, ease: "power2.in" }, scatterStart);
-    tl.to(tagline, { opacity: 0, y: -12, duration: 0.35, ease: "power2.in" }, scatterStart);
+    tl.to(
+      wordmark,
+      { opacity: 0, y: -8, scale: 1.03, filter: "blur(12px)", duration: 0.45, ease: "power2.in" },
+      scatterStart
+    );
+    tl.to(
+      centerGlow,
+      { opacity: 0, scale: 1.16, duration: 0.5, ease: "power2.inOut" },
+      scatterStart
+    );
+    tl.to(
+      stackShadow,
+      { opacity: 0, scale: 1.08, duration: 0.35, ease: "power2.in" },
+      scatterStart
+    );
+    tl.to(
+      [ambientPrimary, ambientSecondary],
+      { opacity: 0, scale: 1.14, duration: 0.55, ease: "power2.inOut" },
+      scatterStart + 0.03
+    );
 
     // Fade the stack cards out so they don't overlap the scatter replicas.
     stackEls.forEach((card) => {
@@ -207,17 +290,31 @@ export function BootSequence({ projects, onComplete }: BootSequenceProps) {
     return () => {
       tl.kill();
     };
-  }, [projects, scatterPositions, onComplete]);
+  }, [onComplete, projects, scatterPositions, theme]);
 
   // Theme-synced colors
   const bgColor = theme === "light" ? "#FFFFFF" : "#0E0E0E";
-  const cardBg = theme === "light" ? "#FFFFFF" : "#1E1E1E";
-  const cardBorder = theme === "light" ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.06)";
-  const textColor = theme === "light" ? "#0A0A0A" : "#F1F1F1";
-  const mutedColor = theme === "light" ? "rgba(0,0,0,0.45)" : "rgba(255,255,255,0.45)";
-  const cardShadow = theme === "light"
-    ? "0 1px 2px rgba(0,0,0,0.04), 0 6px 18px rgba(0,0,0,0.05)"
-    : "0 1px 2px rgba(0,0,0,0.3), 0 4px 16px rgba(0,0,0,0.2)";
+  const accentColor =
+    theme === "light" ? dotGridConfig.lightActiveColor : dotGridConfig.darkActiveColor;
+  const cardBg = colors.cardBg;
+  const cardBorder = theme === "light" ? "rgba(0,0,0,0.04)" : "rgba(255,255,255,0.04)";
+  const textColor = colors.text;
+  const mutedColor = colors.textMuted;
+  const cardShadow = colors.cardShadow;
+  const ambientPrimaryGradient = `radial-gradient(circle at 50% 50%, ${hexToRgba(accentColor, theme === "light" ? 0.2 : 0.28)} 0%, ${hexToRgba(accentColor, theme === "light" ? 0.08 : 0.14)} 42%, transparent 72%)`;
+  const ambientSecondaryGradient =
+    theme === "light"
+      ? "radial-gradient(circle at 50% 50%, rgba(255, 219, 196, 0.58) 0%, rgba(255, 238, 228, 0.3) 38%, transparent 72%)"
+      : "radial-gradient(circle at 50% 50%, rgba(149, 157, 255, 0.16) 0%, rgba(64, 72, 132, 0.1) 40%, transparent 72%)";
+  const centerGlowGradient =
+    theme === "light"
+      ? `radial-gradient(circle at 50% 50%, rgba(255,255,255,0.98) 0%, ${hexToRgba(accentColor, 0.08)} 34%, transparent 72%)`
+      : `radial-gradient(circle at 50% 50%, rgba(255,255,255,0.08) 0%, ${hexToRgba(accentColor, 0.12)} 34%, transparent 72%)`;
+  const shadowGradient =
+    theme === "light"
+      ? "radial-gradient(circle at 50% 50%, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0.05) 46%, transparent 78%)"
+      : "radial-gradient(circle at 50% 50%, rgba(0,0,0,0.42) 0%, rgba(0,0,0,0.16) 48%, transparent 82%)";
+  const wordmarkGradient = `linear-gradient(90deg, ${hexToRgba(textColor, 0.9)} 0%, ${hexToRgba(accentColor, theme === "light" ? 0.95 : 0.88)} 50%, ${hexToRgba(textColor, 0.9)} 100%)`;
 
   return (
     <div
@@ -225,46 +322,105 @@ export function BootSequence({ projects, onComplete }: BootSequenceProps) {
       className="fixed inset-0 z-[100] overflow-hidden"
       style={{ backgroundColor: bgColor }}
     >
-      {/* ── HERO: huge "Atulya" wordmark anchored to the upper third ── */}
       <div
-        className="pointer-events-none absolute inset-x-0 z-20 flex flex-col items-center px-6"
-        style={{ top: "22vh" }}
-      >
+        className="pointer-events-none absolute inset-0 z-[1]"
+        style={{
+          background:
+            theme === "light"
+              ? "radial-gradient(circle at 50% 50%, rgba(255,255,255,1) 0%, rgba(251,251,252,1) 66%, rgba(244,244,246,1) 100%)"
+              : "radial-gradient(circle at 50% 50%, rgba(25,25,28,1) 0%, rgba(16,16,18,1) 62%, rgba(10,10,12,1) 100%)",
+        }}
+      />
+
+      <div className="pointer-events-none absolute inset-0 z-[2] flex items-center justify-center">
+        <div
+          ref={ambientPrimaryRef}
+          className="absolute"
+          style={{
+            width: "min(72vw, 920px)",
+            height: "min(60vw, 760px)",
+            borderRadius: "999px",
+            background: ambientPrimaryGradient,
+            filter: `blur(${theme === "light" ? 22 : 34}px)`,
+            mixBlendMode: theme === "light" ? "multiply" : "screen",
+          }}
+        />
+        <div
+          ref={ambientSecondaryRef}
+          className="absolute"
+          style={{
+            width: "min(58vw, 760px)",
+            height: "min(44vw, 540px)",
+            borderRadius: "999px",
+            background: ambientSecondaryGradient,
+            filter: `blur(${theme === "light" ? 28 : 36}px)`,
+            mixBlendMode: theme === "light" ? "multiply" : "screen",
+          }}
+        />
+        <div
+          ref={centerGlowRef}
+          className="absolute"
+          style={{
+            width: "min(42vw, 520px)",
+            height: "min(42vw, 520px)",
+            borderRadius: "999px",
+            background: centerGlowGradient,
+            filter: `blur(${theme === "light" ? 12 : 22}px)`,
+          }}
+        />
         <div
           ref={wordmarkRef}
-          style={{ willChange: "transform, opacity, filter" }}
+          style={{
+            willChange: "transform, opacity, filter",
+            paddingBottom: "0.16em",
+            WebkitMaskImage: "linear-gradient(90deg, transparent 0%, black 14%, black 86%, transparent 100%)",
+            maskImage: "linear-gradient(90deg, transparent 0%, black 14%, black 86%, transparent 100%)",
+          }}
         >
           <span
             style={{
               fontFamily: "'Inter', sans-serif",
-              fontSize: "clamp(84px, 15vw, 200px)",
-              fontWeight: 800,
-              color: textColor,
-              letterSpacing: "-0.05em",
-              lineHeight: 0.95,
+              fontSize: "clamp(144px, 22vw, 304px)",
+              fontWeight: 780,
+              letterSpacing: "-0.07em",
+              lineHeight: 1.02,
               display: "block",
+              whiteSpace: "nowrap",
+              backgroundImage: wordmarkGradient,
+              WebkitBackgroundClip: "text",
+              backgroundClip: "text",
+              color: "transparent",
             }}
           >
             Atulya
           </span>
         </div>
-
-        <div ref={taglineRef} className="mt-5 text-center">
-          <span
-            style={{
-              fontFamily: "'Inter', sans-serif",
-              fontSize: 17,
-              fontWeight: 500,
-              color: mutedColor,
-              letterSpacing: "-0.005em",
-            }}
-          >
-            Design portfolio — crafted pixel by pixel.
-          </span>
-        </div>
+        <div
+          ref={stackShadowRef}
+          className="absolute"
+          style={{
+            width: "min(34vw, 430px)",
+            height: "min(8vw, 96px)",
+            marginTop: STACK_H * 0.78,
+            borderRadius: "999px",
+            background: shadowGradient,
+            filter: "blur(16px)",
+          }}
+        />
       </div>
 
-      {/* ── Stack replicas (Phase 2) — piled at lower-third ── */}
+      {/* Centered stack composition */}
+      <div
+        className="pointer-events-none absolute inset-0 z-[3]"
+        style={{
+          background:
+            theme === "light"
+              ? "linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.12) 45%, rgba(255,255,255,0) 100%)"
+              : "linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.03) 45%, rgba(255,255,255,0) 100%)",
+        }}
+      />
+
+      {/* ── Stack replicas (Phase 2) — centered hero pile ── */}
       {stackCards.map((project, idx) => (
         <div
           key={`stack-${project.id}-${idx}`}
@@ -273,7 +429,7 @@ export function BootSequence({ projects, onComplete }: BootSequenceProps) {
           style={{
             width: STACK_W,
             height: STACK_H,
-            borderRadius: 12,
+            borderRadius: animationConfig.cardBorderRadius,
             backgroundColor: cardBg,
             border: `1px solid ${cardBorder}`,
             boxShadow: cardShadow,
@@ -281,34 +437,59 @@ export function BootSequence({ projects, onComplete }: BootSequenceProps) {
             zIndex: 25 + idx,
           }}
         >
-          <img
-            src={project.imageUrl}
-            alt=""
-            loading={idx < 4 ? "eager" : "lazy"}
-            decoding="async"
-            {...({ fetchpriority: idx < 4 ? "high" : "low" } as Record<string, string>)}
-            className="h-full w-full object-cover"
-            style={{ pointerEvents: "none" }}
-          />
           <div
-            className="absolute inset-x-0 bottom-0 px-3 py-2"
             style={{
-              background: theme === "light"
-                ? "linear-gradient(transparent, rgba(255,255,255,0.94))"
-                : "linear-gradient(transparent, rgba(0,0,0,0.82))",
+              height: STACK_IMAGE_H,
+              overflow: "hidden",
+              backgroundColor: colors.imageBg,
+            }}
+          >
+            <img
+              src={project.cardImageUrl}
+              alt=""
+              loading={idx < 4 ? "eager" : "lazy"}
+              decoding="async"
+              {...({ fetchpriority: idx < 4 ? "high" : "low" } as Record<string, string>)}
+              className="h-full w-full object-cover"
+              style={{ pointerEvents: "none" }}
+            />
+          </div>
+          <div
+            className="flex items-center justify-between gap-3 px-4"
+            style={{
+              backgroundColor: cardBg,
+              height: STACK_TITLE_H,
+              paddingTop: 10,
+              paddingBottom: 10,
             }}
           >
             <span
+              className="truncate"
               style={{
-                fontFamily: "'Inter', sans-serif",
-                fontSize: 12,
-                fontWeight: 600,
+                fontSize: 13,
                 color: textColor,
-                letterSpacing: "-0.01em",
+                lineHeight: 1.15,
+                fontWeight: 600,
+                letterSpacing: "-0.02em",
+                fontFamily: "'Inter', sans-serif",
               }}
             >
               {project.title}
             </span>
+            {project.category && (
+              <span
+                className="shrink-0"
+                style={{
+                  fontSize: 9,
+                  fontWeight: 500,
+                  color: mutedColor,
+                  letterSpacing: "-0.005em",
+                  fontFamily: "'Inter', sans-serif",
+                }}
+              >
+                {project.category}
+              </span>
+            )}
           </div>
         </div>
       ))}
@@ -317,7 +498,7 @@ export function BootSequence({ projects, onComplete }: BootSequenceProps) {
              Wrapped in a group so Phase 5 can pull back 1.08 → 1.0. ── */}
       <div
         ref={scatterGroupRef}
-        className="absolute inset-0"
+        className="absolute inset-0 z-[12]"
         style={{ willChange: "transform" }}
       >
         {projects.map((project, idx) => {
@@ -346,7 +527,7 @@ export function BootSequence({ projects, onComplete }: BootSequenceProps) {
                 }}
               >
                 <img
-                  src={project.imageUrl}
+                  src={project.cardImageUrl}
                   alt=""
                   loading="lazy"
                   decoding="async"

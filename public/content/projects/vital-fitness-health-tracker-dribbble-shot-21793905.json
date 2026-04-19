@@ -1,0 +1,65 @@
+{
+  "id": "dribbble-shot-21793905",
+  "slug": "vital-fitness-health-tracker-dribbble-shot-21793905",
+  "title": "Vital - Fitness & Health Tracker",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/vital-fitness-health-tracker-dribbble-shot-21793905/card.webp",
+  "coverImageUrl": "/portfolio/projects/vital-fitness-health-tracker-dribbble-shot-21793905/cover.webp",
+  "sortOrder": 38,
+  "status": "published",
+  "description": "",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:31:16.890Z",
+  "gallery": [
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/vital-fitness-health-tracker-dribbble-shot-21793905/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/vital-fitness-health-tracker-dribbble-shot-21793905/gallery-01.webp"
+    },
+    {
+      "id": "gallery-02",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/vital-fitness-health-tracker-dribbble-shot-21793905/gallery-02.webp"
+    },
+    {
+      "id": "gallery-03",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/vital-fitness-health-tracker-dribbble-shot-21793905/gallery-03.webp"
+    },
+    {
+      "id": "gallery-04",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/vital-fitness-health-tracker-dribbble-shot-21793905/gallery-04.webp"
+    },
+    {
+      "id": "gallery-05",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/vital-fitness-health-tracker-dribbble-shot-21793905/gallery-05.webp"
+    },
+    {
+      "id": "gallery-06",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/vital-fitness-health-tracker-dribbble-shot-21793905/gallery-06.webp"
+    },
+    {
+      "id": "gallery-07",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/vital-fitness-health-tracker-dribbble-shot-21793905/gallery-07.webp"
+    }
+  ],
+  "blocks": []
+}

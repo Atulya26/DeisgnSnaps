@@ -1,0 +1,56 @@
+{
+  "id": "dribbble-shot-22063458",
+  "slug": "zenflow-hr-management-dashboard-dribbble-shot-22063458",
+  "title": "Zenflow - HR Management Dashboard",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/zenflow-hr-management-dashboard-dribbble-shot-22063458/card.webp",
+  "coverImageUrl": "/portfolio/projects/zenflow-hr-management-dashboard-dribbble-shot-22063458/cover.webp",
+  "sortOrder": 34,
+  "status": "published",
+  "description": "",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:30:57.967Z",
+  "createdAt": "2026-04-19T06:30:57.967Z",
+  "coverAssetId": "cover",
+  "cardAssetId": "card",
+  "assets": [
+    {
+      "id": "card",
+      "kind": "image",
+      "role": "card",
+      "src": "/portfolio/projects/zenflow-hr-management-dashboard-dribbble-shot-22063458/card.webp"
+    },
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/zenflow-hr-management-dashboard-dribbble-shot-22063458/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/zenflow-hr-management-dashboard-dribbble-shot-22063458/gallery-01.webp"
+    },
+    {
+      "id": "gallery-02",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/zenflow-hr-management-dashboard-dribbble-shot-22063458/gallery-02.webp"
+    },
+    {
+      "id": "gallery-03",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/zenflow-hr-management-dashboard-dribbble-shot-22063458/gallery-03.webp"
+    },
+    {
+      "id": "gallery-04",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/zenflow-hr-management-dashboard-dribbble-shot-22063458/gallery-04.webp"
+    }
+  ],
+  "blocks": []
+}

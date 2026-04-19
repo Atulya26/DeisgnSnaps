@@ -1,0 +1,35 @@
+{
+  "id": "dribbble-shot-19819443",
+  "slug": "daily-ui-design-challenge-search-day-22-dribbble-shot-19819443",
+  "title": "Daily UI Design Challenge | Search | Day 22",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/daily-ui-design-challenge-search-day-22-dribbble-shot-19819443/card.webp",
+  "coverImageUrl": "/portfolio/projects/daily-ui-design-challenge-search-day-22-dribbble-shot-19819443/cover.webp",
+  "sortOrder": 61,
+  "status": "published",
+  "description": "Hey, This is my take on Daily UI challenge #022\n\nSearch Command\n\nDo let me know what you think about it.\n\nThanks!",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:32:18.247Z",
+  "gallery": [
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/daily-ui-design-challenge-search-day-22-dribbble-shot-19819443/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/daily-ui-design-challenge-search-day-22-dribbble-shot-19819443/gallery-01.webp"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "text-description-19819443",
+      "type": "text",
+      "html": "<h2>Overview</h2><p>Hey, This is my take on Daily UI challenge #022</p><p>Search Command</p><p>Do let me know what you think about it.</p><p>Thanks!</p>"
+    }
+  ]
+}

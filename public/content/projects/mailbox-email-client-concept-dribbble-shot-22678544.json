@@ -1,0 +1,35 @@
+{
+  "id": "dribbble-shot-22678544",
+  "slug": "mailbox-email-client-concept-dribbble-shot-22678544",
+  "title": "Mailbox - Email Client Concept",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/mailbox-email-client-concept-dribbble-shot-22678544/card.webp",
+  "coverImageUrl": "/portfolio/projects/mailbox-email-client-concept-dribbble-shot-22678544/cover.webp",
+  "sortOrder": 11,
+  "status": "published",
+  "description": "",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:28:36.780Z",
+  "gallery": [
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/mailbox-email-client-concept-dribbble-shot-22678544/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/mailbox-email-client-concept-dribbble-shot-22678544/gallery-01.webp"
+    },
+    {
+      "id": "gallery-02",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/mailbox-email-client-concept-dribbble-shot-22678544/gallery-02.webp"
+    }
+  ],
+  "blocks": []
+}

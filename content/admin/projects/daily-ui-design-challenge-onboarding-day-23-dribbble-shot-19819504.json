@@ -1,0 +1,44 @@
+{
+  "id": "dribbble-shot-19819504",
+  "slug": "daily-ui-design-challenge-onboarding-day-23-dribbble-shot-19819504",
+  "title": "Daily UI Design Challenge | Onboarding | Day 23",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/daily-ui-design-challenge-onboarding-day-23-dribbble-shot-19819504/card.webp",
+  "coverImageUrl": "/portfolio/projects/daily-ui-design-challenge-onboarding-day-23-dribbble-shot-19819504/cover.webp",
+  "sortOrder": 60,
+  "status": "published",
+  "description": "Hey, This is my take on Daily UI challenge #023\n\nOnboarding\n\nDo let me know what you think about it.\n\nThanks!",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:32:16.405Z",
+  "createdAt": "2026-04-19T06:32:16.405Z",
+  "coverAssetId": "cover",
+  "cardAssetId": "card",
+  "assets": [
+    {
+      "id": "card",
+      "kind": "image",
+      "role": "card",
+      "src": "/portfolio/projects/daily-ui-design-challenge-onboarding-day-23-dribbble-shot-19819504/card.webp"
+    },
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/daily-ui-design-challenge-onboarding-day-23-dribbble-shot-19819504/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/daily-ui-design-challenge-onboarding-day-23-dribbble-shot-19819504/gallery-01.webp"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "text-description-19819504",
+      "type": "text",
+      "html": "<h2>Overview</h2><p>Hey, This is my take on Daily UI challenge #023</p><p>Onboarding</p><p>Do let me know what you think about it.</p><p>Thanks!</p>"
+    }
+  ]
+}

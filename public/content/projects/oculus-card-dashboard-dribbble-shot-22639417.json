@@ -1,0 +1,41 @@
+{
+  "id": "dribbble-shot-22639417",
+  "slug": "oculus-card-dashboard-dribbble-shot-22639417",
+  "title": "Oculus - Card Dashboard",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/oculus-card-dashboard-dribbble-shot-22639417/card.webp",
+  "coverImageUrl": "/portfolio/projects/oculus-card-dashboard-dribbble-shot-22639417/cover.webp",
+  "sortOrder": 13,
+  "status": "published",
+  "description": "",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:28:42.376Z",
+  "gallery": [
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/oculus-card-dashboard-dribbble-shot-22639417/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/oculus-card-dashboard-dribbble-shot-22639417/gallery-01.webp"
+    },
+    {
+      "id": "gallery-02",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/oculus-card-dashboard-dribbble-shot-22639417/gallery-02.webp"
+    },
+    {
+      "id": "gallery-03",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/oculus-card-dashboard-dribbble-shot-22639417/gallery-03.webp"
+    }
+  ],
+  "blocks": []
+}

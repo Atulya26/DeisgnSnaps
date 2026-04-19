@@ -1,0 +1,44 @@
+{
+  "id": "dribbble-shot-23168492",
+  "slug": "bento-features-grid-dribbble-shot-23168492",
+  "title": "Bento Features Grid",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/bento-features-grid-dribbble-shot-23168492/card.webp",
+  "coverImageUrl": "/portfolio/projects/bento-features-grid-dribbble-shot-23168492/cover.webp",
+  "sortOrder": 6,
+  "status": "published",
+  "description": "Hey Dribbble! Recently created a features grid AI based writing website. Made using elements from Align UI.\n\nDo let me know 💬 what you think !\n\nPress\"L\" to Like ❤️ the Post.",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:28:25.510Z",
+  "createdAt": "2026-04-19T06:28:25.510Z",
+  "coverAssetId": "cover",
+  "cardAssetId": "card",
+  "assets": [
+    {
+      "id": "card",
+      "kind": "image",
+      "role": "card",
+      "src": "/portfolio/projects/bento-features-grid-dribbble-shot-23168492/card.webp"
+    },
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/bento-features-grid-dribbble-shot-23168492/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/bento-features-grid-dribbble-shot-23168492/gallery-01.webp"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "text-description-23168492",
+      "type": "text",
+      "html": "<h2>Overview</h2><p>Hey Dribbble! Recently created a features grid AI based writing website. Made using elements from Align UI.</p><p>Do let me know 💬 what you think !</p><p>Press&quot;L&quot; to Like ❤️ the Post.</p>"
+    }
+  ]
+}

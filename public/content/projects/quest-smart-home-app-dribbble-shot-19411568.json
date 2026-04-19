@@ -1,0 +1,35 @@
+{
+  "id": "dribbble-shot-19411568",
+  "slug": "quest-smart-home-app-dribbble-shot-19411568",
+  "title": "Quest - Smart Home App",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/quest-smart-home-app-dribbble-shot-19411568/card.webp",
+  "coverImageUrl": "/portfolio/projects/quest-smart-home-app-dribbble-shot-19411568/cover.webp",
+  "sortOrder": 84,
+  "status": "published",
+  "description": "Hello everyone!\n\nQuest is a smart home app that allows users to manage all of their smart home devices from a single app.\n\nUsers may take control of all of their devices and manage them conveniently.\n\nLet me know what you guys think!",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:32:58.200Z",
+  "gallery": [
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/quest-smart-home-app-dribbble-shot-19411568/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/quest-smart-home-app-dribbble-shot-19411568/gallery-01.webp"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "text-description-19411568",
+      "type": "text",
+      "html": "<h2>Overview</h2><p>Hello everyone!</p><p>Quest is a smart home app that allows users to manage all of their smart home devices from a single app.</p><p>Users may take control of all of their devices and manage them conveniently.</p><p>Let me know what you guys think!</p>"
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "id": "dribbble-shot-20282039",
+  "slug": "quest-smart-home-dashboard-dribbble-shot-20282039",
+  "title": "Quest - Smart Home Dashboard",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/quest-smart-home-dashboard-dribbble-shot-20282039/card.webp",
+  "coverImageUrl": "/portfolio/projects/quest-smart-home-dashboard-dribbble-shot-20282039/cover.webp",
+  "sortOrder": 48,
+  "status": "published",
+  "description": "Hello everyone!\n\nQuest is a smart home app that allows users to manage all of their smart home devices from a single app.\n\nUsers may take control of all of their devices and manage them conveniently.\n\nLet me know what you guys think!",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:31:45.659Z",
+  "createdAt": "2026-04-19T06:31:45.659Z",
+  "coverAssetId": "cover",
+  "cardAssetId": "card",
+  "assets": [
+    {
+      "id": "card",
+      "kind": "image",
+      "role": "card",
+      "src": "/portfolio/projects/quest-smart-home-dashboard-dribbble-shot-20282039/card.webp"
+    },
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/quest-smart-home-dashboard-dribbble-shot-20282039/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/quest-smart-home-dashboard-dribbble-shot-20282039/gallery-01.webp"
+    },
+    {
+      "id": "gallery-02",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/quest-smart-home-dashboard-dribbble-shot-20282039/gallery-02.webp"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "text-description-20282039",
+      "type": "text",
+      "html": "<h2>Overview</h2><p>Hello everyone!</p><p>Quest is a smart home app that allows users to manage all of their smart home devices from a single app.</p><p>Users may take control of all of their devices and manage them conveniently.</p><p>Let me know what you guys think!</p>"
+    }
+  ]
+}

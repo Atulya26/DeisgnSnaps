@@ -1,0 +1,74 @@
+{
+  "id": "dribbble-shot-22233960",
+  "slug": "vision-arc-studio-folio-dribbble-shot-22233960",
+  "title": "Vision Arc Studio FOLIO",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/vision-arc-studio-folio-dribbble-shot-22233960/card.webp",
+  "coverImageUrl": "/portfolio/projects/vision-arc-studio-folio-dribbble-shot-22233960/cover.webp",
+  "sortOrder": 26,
+  "status": "published",
+  "description": "",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:30:24.106Z",
+  "createdAt": "2026-04-19T06:30:24.106Z",
+  "coverAssetId": "cover",
+  "cardAssetId": "card",
+  "assets": [
+    {
+      "id": "card",
+      "kind": "image",
+      "role": "card",
+      "src": "/portfolio/projects/vision-arc-studio-folio-dribbble-shot-22233960/card.webp"
+    },
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/vision-arc-studio-folio-dribbble-shot-22233960/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/vision-arc-studio-folio-dribbble-shot-22233960/gallery-01.webp"
+    },
+    {
+      "id": "gallery-02",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/vision-arc-studio-folio-dribbble-shot-22233960/gallery-02.webp"
+    },
+    {
+      "id": "gallery-03",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/vision-arc-studio-folio-dribbble-shot-22233960/gallery-03.webp"
+    },
+    {
+      "id": "gallery-04",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/vision-arc-studio-folio-dribbble-shot-22233960/gallery-04.webp"
+    },
+    {
+      "id": "gallery-05",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/vision-arc-studio-folio-dribbble-shot-22233960/gallery-05.webp"
+    },
+    {
+      "id": "gallery-06",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/vision-arc-studio-folio-dribbble-shot-22233960/gallery-06.webp"
+    },
+    {
+      "id": "gallery-07",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/vision-arc-studio-folio-dribbble-shot-22233960/gallery-07.webp"
+    }
+  ],
+  "blocks": []
+}

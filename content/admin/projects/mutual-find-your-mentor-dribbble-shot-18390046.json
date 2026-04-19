@@ -1,0 +1,44 @@
+{
+  "id": "dribbble-shot-18390046",
+  "slug": "mutual-find-your-mentor-dribbble-shot-18390046",
+  "title": "Mutual - Find your mentor",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/mutual-find-your-mentor-dribbble-shot-18390046/card.webp",
+  "coverImageUrl": "/portfolio/projects/mutual-find-your-mentor-dribbble-shot-18390046/cover.webp",
+  "sortOrder": 91,
+  "status": "published",
+  "description": "Hey everyone !\n\nMutual is a mentoring app that brings together a variety of mentees and mentors under one roof. The app allows mentees to connect with experts in various industries and mentors to share their expertise in a variety of ways. The program also offers a community for users to help them discover what they're looking for and a platform for mentors to create lectures or clips and share them with a broader audience.\n\nLet me know what you guys think!",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:33:16.684Z",
+  "createdAt": "2026-04-19T06:33:16.684Z",
+  "coverAssetId": "cover",
+  "cardAssetId": "card",
+  "assets": [
+    {
+      "id": "card",
+      "kind": "image",
+      "role": "card",
+      "src": "/portfolio/projects/mutual-find-your-mentor-dribbble-shot-18390046/card.webp"
+    },
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/mutual-find-your-mentor-dribbble-shot-18390046/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/mutual-find-your-mentor-dribbble-shot-18390046/gallery-01.webp"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "text-description-18390046",
+      "type": "text",
+      "html": "<h2>Overview</h2><p>Hey everyone !</p><p>Mutual is a mentoring app that brings together a variety of mentees and mentors under one roof. The app allows mentees to connect with experts in various industries and mentors to share their expertise in a variety of ways. The program also offers a community for users to help them discover what they&#39;re looking for and a platform for mentors to create lectures or clips and share them with a broader audience.</p><p>Let me know what you guys think!</p>"
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "id": "dribbble-shot-22758523",
+  "slug": "food-recipe-mobile-app-dribbble-shot-22758523",
+  "title": "Food Recipe Mobile App",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/food-recipe-mobile-app-dribbble-shot-22758523/card.webp",
+  "coverImageUrl": "/portfolio/projects/food-recipe-mobile-app-dribbble-shot-22758523/cover.webp",
+  "sortOrder": 9,
+  "status": "published",
+  "description": "Hi everybody\n\nThis is my exploration of Food Recipe App",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:28:31.334Z",
+  "createdAt": "2026-04-19T06:28:31.334Z",
+  "coverAssetId": "cover",
+  "cardAssetId": "card",
+  "assets": [
+    {
+      "id": "card",
+      "kind": "image",
+      "role": "card",
+      "src": "/portfolio/projects/food-recipe-mobile-app-dribbble-shot-22758523/card.webp"
+    },
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/food-recipe-mobile-app-dribbble-shot-22758523/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/food-recipe-mobile-app-dribbble-shot-22758523/gallery-01.webp"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "text-description-22758523",
+      "type": "text",
+      "html": "<h2>Overview</h2><p>Hi everybody</p><p>This is my exploration of Food Recipe App</p>"
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "id": "dribbble-shot-19627180",
+  "slug": "octane-social-media-analytics-dribbble-shot-19627180",
+  "title": "Octane - Social Media Analytics",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/octane-social-media-analytics-dribbble-shot-19627180/card.webp",
+  "coverImageUrl": "/portfolio/projects/octane-social-media-analytics-dribbble-shot-19627180/cover.webp",
+  "sortOrder": 65,
+  "status": "published",
+  "description": "Hey everyone !\n\nOctane is a social media analytics app that delivers user stats for individual social media accounts.Users may sign in using their own social accounts, and Octane will let you monitor their social media accounts in real time and with precision, including interaction, subscriber or follower count, and audience analytics.It may be used by any individual, social media developer, or corporation to increase their exposure.\n\nLet me know what you guys think!",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:32:25.947Z",
+  "createdAt": "2026-04-19T06:32:25.947Z",
+  "coverAssetId": "cover",
+  "cardAssetId": "card",
+  "assets": [
+    {
+      "id": "card",
+      "kind": "image",
+      "role": "card",
+      "src": "/portfolio/projects/octane-social-media-analytics-dribbble-shot-19627180/card.webp"
+    },
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/octane-social-media-analytics-dribbble-shot-19627180/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/octane-social-media-analytics-dribbble-shot-19627180/gallery-01.webp"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "text-description-19627180",
+      "type": "text",
+      "html": "<h2>Overview</h2><p>Hey everyone !</p><p>Octane is a social media analytics app that delivers user stats for individual social media accounts.Users may sign in using their own social accounts, and Octane will let you monitor their social media accounts in real time and with precision, including interaction, subscriber or follower count, and audience analytics.It may be used by any individual, social media developer, or corporation to increase their exposure.</p><p>Let me know what you guys think!</p>"
+    }
+  ]
+}

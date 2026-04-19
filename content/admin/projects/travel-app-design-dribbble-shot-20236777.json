@@ -1,0 +1,44 @@
+{
+  "id": "dribbble-shot-20236777",
+  "slug": "travel-app-design-dribbble-shot-20236777",
+  "title": "Travel App Design 🛫",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/travel-app-design-dribbble-shot-20236777/card.webp",
+  "coverImageUrl": "/portfolio/projects/travel-app-design-dribbble-shot-20236777/cover.webp",
+  "sortOrder": 50,
+  "status": "published",
+  "description": "Made a quick design for a travel app. Users are given the ability to book tickets and explore various travel destinations for them.\n\nLet me know what you think about this !",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:31:50.446Z",
+  "createdAt": "2026-04-19T06:31:50.446Z",
+  "coverAssetId": "cover",
+  "cardAssetId": "card",
+  "assets": [
+    {
+      "id": "card",
+      "kind": "image",
+      "role": "card",
+      "src": "/portfolio/projects/travel-app-design-dribbble-shot-20236777/card.webp"
+    },
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/travel-app-design-dribbble-shot-20236777/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/travel-app-design-dribbble-shot-20236777/gallery-01.webp"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "text-description-20236777",
+      "type": "text",
+      "html": "<h2>Overview</h2><p>Made a quick design for a travel app. Users are given the ability to book tickets and explore various travel destinations for them.</p><p>Let me know what you think about this !</p>"
+    }
+  ]
+}

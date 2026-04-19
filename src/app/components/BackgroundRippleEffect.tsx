@@ -1,528 +1,397 @@
 "use client";
-import React, { useRef, useEffect, useCallback, useMemo } from "react";
-import { gsap } from "gsap";
-import { InertiaPlugin } from "gsap/InertiaPlugin";
+
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { useTheme } from "./ThemeContext";
 
-gsap.registerPlugin(InertiaPlugin);
-
-/**
- * Infinite-canvas dot grid with proximity glow and physics push.
- *
- * Uses GSAP InertiaPlugin for natural throw-and-decelerate physics.
- * Dots fill the viewport and tile infinitely with the camera.
- * - Mouse proximity: dots near cursor change color (base → active gradient)
- * - Fast mouse movement: nearby dots get pushed via InertiaPlugin
- * - Click: shockwave pushes dots outward via InertiaPlugin
- * - All rendered on canvas, zero DOM overhead
- */
+interface RipplePulse {
+  x: number;
+  y: number;
+  startTime: number;
+  durationMs: number;
+  strength: number;
+  radius: number;
+}
 
 function hexToRgb(hex: string) {
-  const m = hex.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
-  if (!m) return { r: 0, g: 0, b: 0 };
+  const match = hex.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
+  if (!match) return { r: 0, g: 0, b: 0 };
   return {
-    r: parseInt(m[1], 16),
-    g: parseInt(m[2], 16),
-    b: parseInt(m[3], 16),
+    r: parseInt(match[1], 16),
+    g: parseInt(match[2], 16),
+    b: parseInt(match[3], 16),
   };
 }
 
-interface PushedDot {
-  xOffset: number;
-  yOffset: number;
-  _inertiaApplied: boolean;
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
 }
 
-export const BackgroundRippleEffect = React.memo(
-  ({
-    cellSize = 40,
+function easeOutCubic(value: number) {
+  return 1 - Math.pow(1 - value, 3);
+}
+
+export const BackgroundRippleEffect = React.memo(function BackgroundRippleEffect({
+  cellSize = 40,
+  cameraRef,
+  zoomRef,
+}: {
+  cellSize?: number;
+  cameraRef: React.MutableRefObject<{ x: number; y: number }>;
+  zoomRef: React.MutableRefObject<number>;
+}) {
+  const { theme, dotGridConfig } = useTheme();
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const pointerRef = useRef({
+    x: -9999,
+    y: -9999,
+    inCanvas: false,
+  });
+  const pointerSampleRef = useRef({
+    x: -9999,
+    y: -9999,
+    time: 0,
+  });
+  const ripplesRef = useRef<RipplePulse[]>([]);
+  const lastRippleAtRef = useRef(0);
+  const lastDrawnRef = useRef({
+    x: Number.NaN,
+    y: Number.NaN,
+    z: Number.NaN,
+    px: Number.NaN,
+    py: Number.NaN,
+    inCanvas: false,
+    rippleCount: -1,
+  });
+  const rafIdRef = useRef(0);
+
+  const dotSize = dotGridConfig.dotSize;
+  const proximity = dotGridConfig.proximity;
+  const speedTrigger = dotGridConfig.speedTrigger;
+  const shockRadius = dotGridConfig.shockRadius;
+  const shockStrength = dotGridConfig.shockStrength;
+  const maxSpeed = Math.max(speedTrigger + 1, dotGridConfig.maxSpeed);
+  const resistance = dotGridConfig.resistance;
+  const returnDurationMs = dotGridConfig.returnDuration * 1000;
+  const baseColorHex =
+    theme === "dark" ? dotGridConfig.darkBaseColor : dotGridConfig.lightBaseColor;
+  const activeColorHex =
+    theme === "dark" ? dotGridConfig.darkActiveColor : dotGridConfig.lightActiveColor;
+  const baseRgb = useMemo(() => hexToRgb(baseColorHex), [baseColorHex]);
+  const activeRgb = useMemo(() => hexToRgb(activeColorHex), [activeColorHex]);
+  const dotGap = Math.max(cellSize, dotGridConfig.gap + dotSize);
+
+  const circlePath = useMemo(() => {
+    if (typeof window === "undefined") return null;
+    const path = new Path2D();
+    path.arc(0, 0, dotSize / 2, 0, Math.PI * 2);
+    return path;
+  }, [dotSize]);
+
+  const pruneRipples = useCallback((now: number) => {
+    ripplesRef.current = ripplesRef.current.filter(
+      (ripple) => now - ripple.startTime < ripple.durationMs
+    );
+  }, []);
+
+  const spawnRipple = useCallback(
+    (x: number, y: number, strength: number) => {
+      const now = performance.now();
+      const normalizedStrength = clamp(strength, 0.2, 1.6);
+      ripplesRef.current = [
+        ...ripplesRef.current.slice(-2),
+        {
+          x,
+          y,
+          startTime: now,
+          durationMs: returnDurationMs,
+          strength: normalizedStrength,
+          radius: shockRadius,
+        },
+      ];
+      lastRippleAtRef.current = now;
+    },
+    [returnDurationMs, shockRadius]
+  );
+
+  const draw = useCallback((now = performance.now()) => {
+    const canvas = canvasRef.current;
+    if (!canvas || !circlePath) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    const width = canvas.clientWidth;
+    const height = canvas.clientHeight;
+
+    if (canvas.width !== width * dpr || canvas.height !== height * dpr) {
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+    }
+
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, width, height);
+
+    const cam = cameraRef.current;
+    const zoom = zoomRef.current;
+    const scaledGap = dotGap * zoom;
+
+    const rawOffsetX = -cam.x * zoom;
+    const rawOffsetY = -cam.y * zoom;
+    const offsetX = ((rawOffsetX % scaledGap) + scaledGap) % scaledGap;
+    const offsetY = ((rawOffsetY % scaledGap) + scaledGap) % scaledGap;
+
+    const pointer = pointerRef.current;
+    const proximitySq = proximity * proximity;
+    const baseTransformScale = dpr * zoom;
+    const rippleWaveWidth = Math.max(dotGap * 0.8, shockRadius * 0.18);
+    const resistanceFactor = clamp(1 - resistance / 3600, 0.22, 1);
+
+    pruneRipples(now);
+    const activeRipples = ripplesRef.current;
+
+    for (let screenX = offsetX; screenX <= width + scaledGap; screenX += scaledGap) {
+      for (let screenY = offsetY; screenY <= height + scaledGap; screenY += scaledGap) {
+        const dx = screenX - pointer.x;
+        const dy = screenY - pointer.y;
+        const distanceSq = dx * dx + dy * dy;
+
+        let colorMix = 0;
+        let displacementX = 0;
+        let displacementY = 0;
+        let sizeBoost = 0;
+
+        if (pointer.inCanvas && distanceSq <= proximitySq) {
+          const distance = Math.sqrt(distanceSq);
+          const hoverStrength = Math.pow(1 - distance / proximity, 1.35);
+          colorMix = Math.max(colorMix, hoverStrength);
+          sizeBoost = Math.max(sizeBoost, hoverStrength * 0.42);
+        }
+
+        for (const ripple of activeRipples) {
+          const progress = clamp((now - ripple.startTime) / ripple.durationMs, 0, 1);
+          if (progress >= 1) continue;
+
+          const rippleDx = screenX - ripple.x;
+          const rippleDy = screenY - ripple.y;
+          const rippleDistance = Math.hypot(rippleDx, rippleDy);
+          const rippleRadius = ripple.radius * easeOutCubic(progress);
+          const ringDelta = Math.abs(rippleDistance - rippleRadius);
+          if (ringDelta > rippleWaveWidth) continue;
+
+          const ringStrength = 1 - ringDelta / rippleWaveWidth;
+          const envelope = 1 - progress;
+          const pulse = ringStrength * ringStrength * envelope * ripple.strength * resistanceFactor;
+          const centerGlowRadius = rippleWaveWidth * 0.68;
+          const centerGlow =
+            rippleDistance <= centerGlowRadius
+              ? Math.pow(1 - rippleDistance / centerGlowRadius, 2) *
+                envelope *
+                ripple.strength *
+                0.45
+              : 0;
+
+          colorMix = Math.max(colorMix, pulse * 1.15, centerGlow);
+          sizeBoost = Math.max(
+            sizeBoost,
+            pulse * (0.52 + shockStrength * 0.055) + centerGlow * 0.35
+          );
+
+          if (rippleDistance > 0.001) {
+            const displacement =
+              pulse * Math.min(9, 1.1 + shockStrength * 0.42);
+            displacementX += (rippleDx / rippleDistance) * displacement;
+            displacementY += (rippleDy / rippleDistance) * displacement;
+          }
+        }
+
+        const mix = clamp(colorMix, 0, 1);
+        const r = Math.round(baseRgb.r + (activeRgb.r - baseRgb.r) * mix);
+        const g = Math.round(baseRgb.g + (activeRgb.g - baseRgb.g) * mix);
+        const b = Math.round(baseRgb.b + (activeRgb.b - baseRgb.b) * mix);
+        const scaleBoost = 1 + clamp(sizeBoost, 0, 1.15);
+        ctx.setTransform(
+          baseTransformScale * scaleBoost,
+          0,
+          0,
+          baseTransformScale * scaleBoost,
+          (screenX + displacementX) * dpr,
+          (screenY + displacementY) * dpr
+        );
+        ctx.fillStyle = `rgb(${r},${g},${b})`;
+        ctx.fill(circlePath);
+      }
+    }
+
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }, [
+    activeRgb.b,
+    activeRgb.g,
+    activeRgb.r,
+    baseRgb.b,
+    baseRgb.g,
+    baseRgb.r,
     cameraRef,
+    circlePath,
+    dotGap,
+    proximity,
+    pruneRipples,
+    resistance,
+    shockRadius,
+    shockStrength,
     zoomRef,
-  }: {
-    cellSize?: number;
-    cameraRef: React.MutableRefObject<{ x: number; y: number }>;
-    zoomRef: React.MutableRefObject<number>;
-  }) => {
-    const { theme, colors, dotGridConfig } = useTheme();
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-    const themeRef = useRef({ theme, colors });
-    themeRef.current = { theme, colors };
+  ]);
 
-    // Read config from context
-    const {
-      dotSize: DOT_SIZE,
-      gap: GAP,
-      proximity: PROXIMITY,
-      speedTrigger: SPEED_TRIGGER,
-      shockRadius: SHOCK_RADIUS,
-      shockStrength: SHOCK_STRENGTH,
-      maxSpeed: MAX_SPEED,
-      resistance: RESISTANCE,
-      returnDuration: RETURN_DURATION,
-    } = dotGridConfig;
+  const tick = useCallback(() => {
+    if (typeof document !== "undefined" && document.hidden) {
+      rafIdRef.current = requestAnimationFrame(tick);
+      return;
+    }
 
-    // Dot grid spacing in world space
-    const dotGap = DOT_SIZE + GAP;
+    const cam = cameraRef.current;
+    const zoom = zoomRef.current;
+    const pointer = pointerRef.current;
+    const last = lastDrawnRef.current;
+    const now = performance.now();
 
-    // Pointer state
-    const pointerRef = useRef({
-      x: -9999,
-      y: -9999,
-      vx: 0,
-      vy: 0,
-      speed: 0,
-      lastTime: 0,
-      lastX: 0,
-      lastY: 0,
-      inCanvas: false,
-    });
+    pruneRipples(now);
+    const rippleCount = ripplesRef.current.length;
 
-    // Dots that have been pushed (sparse — only dots currently animating)
-    const pushedDots = useRef(new Map<string, PushedDot>());
+    const cameraMoved =
+      Math.abs(cam.x - last.x) > 0.01 ||
+      Math.abs(cam.y - last.y) > 0.01 ||
+      Math.abs(zoom - last.z) > 0.0001;
+    const pointerMoved =
+      Math.abs(pointer.x - last.px) > 0.5 ||
+      Math.abs(pointer.y - last.py) > 0.5 ||
+      pointer.inCanvas !== last.inCanvas;
+    const ripplesActive = rippleCount > 0;
 
-    // Pre-compute circle path (rebuild when dotSize changes)
-    const circlePath = useMemo(() => {
-      if (typeof window === "undefined") return null;
-      const p = new Path2D();
-      p.arc(0, 0, DOT_SIZE / 2, 0, Math.PI * 2);
-      return p;
-    }, [DOT_SIZE]);
+    if (cameraMoved || pointerMoved || ripplesActive || rippleCount !== last.rippleCount) {
+      draw(now);
+      last.x = cam.x;
+      last.y = cam.y;
+      last.z = zoom;
+      last.px = pointer.x;
+      last.py = pointer.y;
+      last.inCanvas = pointer.inCanvas;
+      last.rippleCount = rippleCount;
+    }
 
-    // Theme-derived colors from dotGridConfig
-    const baseColorHex = useMemo(
-      () => (theme === "dark" ? dotGridConfig.darkBaseColor : dotGridConfig.lightBaseColor),
-      [theme, dotGridConfig.darkBaseColor, dotGridConfig.lightBaseColor]
-    );
-    const activeColorHex = useMemo(
-      () => (theme === "dark" ? dotGridConfig.darkActiveColor : dotGridConfig.lightActiveColor),
-      [theme, dotGridConfig.darkActiveColor, dotGridConfig.lightActiveColor]
-    );
-    const baseRgb = useMemo(() => hexToRgb(baseColorHex), [baseColorHex]);
-    const activeRgb = useMemo(() => hexToRgb(activeColorHex), [activeColorHex]);
+    rafIdRef.current = requestAnimationFrame(tick);
+  }, [cameraRef, draw, pruneRipples, zoomRef]);
 
-    // Refs so draw/handlers can read latest values without stale closures
-    const colorsRefLocal = useRef({ baseRgb, activeRgb, baseColorHex });
-    colorsRefLocal.current = { baseRgb, activeRgb, baseColorHex };
+  useEffect(() => {
+    draw();
+  }, [draw]);
 
-    const configRef = useRef({
-      DOT_SIZE, GAP, PROXIMITY, SPEED_TRIGGER, SHOCK_RADIUS,
-      SHOCK_STRENGTH, MAX_SPEED, RESISTANCE, RETURN_DURATION, dotGap,
-    });
-    configRef.current = {
-      DOT_SIZE, GAP, PROXIMITY, SPEED_TRIGGER, SHOCK_RADIUS,
-      SHOCK_STRENGTH, MAX_SPEED, RESISTANCE, RETURN_DURATION, dotGap,
+  useEffect(() => {
+    rafIdRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafIdRef.current);
+  }, [tick]);
+
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (!document.hidden) {
+        draw();
+      }
     };
 
-    // Animation
-    const rafId = useRef(0);
-    const running = useRef(false);
-    // Track last-drawn camera + pointer state so we can skip redraws when
-    // nothing visibly changed. Pointer fields let us idle during hover-still.
-    const lastDrawnCamera = useRef({
-      x: -9999,
-      y: -9999,
-      z: -1,
-      px: -9999,
-      py: -9999,
-      pIn: false,
-    });
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => document.removeEventListener("visibilitychange", handleVisibility);
+  }, [draw]);
 
-    const draw = useCallback(() => {
-      const canvas = canvasRef.current;
-      if (!canvas || !circlePath) return;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
+  useEffect(() => {
+    const handleResize = () => draw();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [draw]);
 
-      const dpr = window.devicePixelRatio || 1;
-      const w = canvas.clientWidth;
-      const h = canvas.clientHeight;
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const container = canvas?.parentElement;
+    if (!canvas || !container) return;
 
-      if (canvas.width !== w * dpr || canvas.height !== h * dpr) {
-        canvas.width = w * dpr;
-        canvas.height = h * dpr;
-      }
+    const handleMove = (event: PointerEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      const nextX = event.clientX - rect.left;
+      const nextY = event.clientY - rect.top;
+      const now = performance.now();
+      const previous = pointerSampleRef.current;
 
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.clearRect(0, 0, w, h);
+      if (previous.time > 0) {
+        const dt = Math.max(16, now - previous.time);
+        const dx = nextX - previous.x;
+        const dy = nextY - previous.y;
+        const speed = (Math.hypot(dx, dy) / dt) * 1000;
+        const normalizedSpeed = clamp(
+          (speed - speedTrigger) / (maxSpeed - speedTrigger),
+          0,
+          1
+        );
+        const cooldown = clamp(230 - resistance * 0.04, 70, 230);
 
-      const cam = cameraRef.current;
-      const z = zoomRef.current;
-      const cfg = configRef.current;
-      const scaledGap = cfg.dotGap * z;
-
-      // Grid offset for infinite tiling
-      const rawOffsetX = -cam.x * z;
-      const rawOffsetY = -cam.y * z;
-      const offsetX = ((rawOffsetX % scaledGap) + scaledGap) % scaledGap;
-      const offsetY = ((rawOffsetY % scaledGap) + scaledGap) % scaledGap;
-
-      const startCol = Math.floor(cam.x / cfg.dotGap);
-      const startRow = Math.floor(cam.y / cfg.dotGap);
-
-      const { baseRgb: bRgb, activeRgb: aRgb, baseColorHex: bHex } = colorsRefLocal.current;
-      const ptr = pointerRef.current;
-      const proxSq = cfg.PROXIMITY * cfg.PROXIMITY;
-      const pushed = pushedDots.current;
-
-      // Hoist the zoom into the transform so we can skip save/translate/scale/
-      // restore per dot. Each dot becomes 1 setTransform + 1 fill — ~2.5× fewer
-      // canvas API calls per frame on 100–250 visible dots.
-      const T = dpr * z;
-
-      let colIdx = 0;
-      for (let sx = offsetX; sx <= w + scaledGap; sx += scaledGap) {
-        let rowIdx = 0;
-        const worldCol = startCol + colIdx;
-
-        for (let sy = offsetY; sy <= h + scaledGap; sy += scaledGap) {
-          const worldRow = startRow + rowIdx;
-
-          const restX = sx;
-          const restY = sy;
-
-          const key = `${worldCol},${worldRow}`;
-          const pushData = pushed.get(key);
-          const ox = pushData ? pushData.xOffset * z : 0;
-          const oy = pushData ? pushData.yOffset * z : 0;
-
-          const drawX = restX + ox;
-          const drawY = restY + oy;
-
-          const dx = restX - ptr.x;
-          const dy = restY - ptr.y;
-          const dsq = dx * dx + dy * dy;
-
-          let fillStyle = bHex;
-          if (ptr.inCanvas && dsq <= proxSq) {
-            const dist = Math.sqrt(dsq);
-            const t = 1 - dist / cfg.PROXIMITY;
-            const r = Math.round(bRgb.r + (aRgb.r - bRgb.r) * t);
-            const g = Math.round(bRgb.g + (aRgb.g - bRgb.g) * t);
-            const b = Math.round(bRgb.b + (aRgb.b - bRgb.b) * t);
-            fillStyle = `rgb(${r},${g},${b})`;
-          }
-
-          ctx.setTransform(T, 0, 0, T, drawX * dpr, drawY * dpr);
-          ctx.fillStyle = fillStyle;
-          ctx.fill(circlePath);
-
-          rowIdx++;
-        }
-        colIdx++;
-      }
-
-      // Restore to the baseline transform so any follow-up clearRect / resize
-      // sees a plain (dpr, 0, 0, dpr) matrix.
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    }, [cameraRef, zoomRef, circlePath]);
-
-    // Main loop — only redraws when camera moved or pushed dots are animating
-    const tick = useCallback(() => {
-      // Skip entirely when tab is hidden — no CPU burn on backgrounded tabs.
-      if (typeof document !== "undefined" && document.hidden) {
-        rafId.current = requestAnimationFrame(tick);
-        return;
-      }
-
-      const cam = cameraRef.current;
-      const z = zoomRef.current;
-      const last = lastDrawnCamera.current;
-      const pushed = pushedDots.current;
-      const hasPushed = pushed.size > 0;
-      const ptr = pointerRef.current;
-
-      const cameraMoved =
-        Math.abs(cam.x - last.x) > 0.01 ||
-        Math.abs(cam.y - last.y) > 0.01 ||
-        Math.abs(z - last.z) > 0.0001;
-
-      // Also check whether the pointer actually moved since the last draw —
-      // before, hovering a still cursor over the canvas re-drew every single
-      // tick (60–120×/sec) even though proximity color depended only on the
-      // pointer position, which hadn't changed.
-      const pointerMoved =
-        Math.abs(ptr.x - last.px) > 0.5 ||
-        Math.abs(ptr.y - last.py) > 0.5 ||
-        ptr.inCanvas !== last.pIn;
-
-      if (cameraMoved || hasPushed || (ptr.inCanvas && pointerMoved)) {
-        draw();
-        last.x = cam.x;
-        last.y = cam.y;
-        last.z = z;
-        last.px = ptr.x;
-        last.py = ptr.y;
-        last.pIn = ptr.inCanvas;
-      }
-
-      // Clean up finished push animations
-      for (const [key, data] of pushed) {
-        if (!data._inertiaApplied && Math.abs(data.xOffset) < 0.01 && Math.abs(data.yOffset) < 0.01) {
-          pushed.delete(key);
+        if (
+          normalizedSpeed > 0.12 &&
+          now - lastRippleAtRef.current >= cooldown
+        ) {
+          spawnRipple(nextX, nextY, 0.75 + normalizedSpeed);
         }
       }
 
-      rafId.current = requestAnimationFrame(tick);
-    }, [draw, cameraRef, zoomRef]);
-
-    // Lifecycle
-    useEffect(() => {
-      if (!running.current) {
-        running.current = true;
-        draw();
-        rafId.current = requestAnimationFrame(tick);
-      }
-      return () => {
-        running.current = false;
-        cancelAnimationFrame(rafId.current);
-      };
-    }, [tick, draw]);
-
-    // Redraw once when returning to the tab so the grid is correct before the next real frame.
-    useEffect(() => {
-      const onVisible = () => {
-        if (!document.hidden) draw();
-      };
-      document.addEventListener("visibilitychange", onVisible);
-      return () => document.removeEventListener("visibilitychange", onVisible);
-    }, [draw]);
-
-    useEffect(() => {
-      draw();
-    }, [theme, draw]);
-
-    useEffect(() => {
-      const handleResize = () => draw();
-      window.addEventListener("resize", handleResize);
-      return () => window.removeEventListener("resize", handleResize);
-    }, [draw]);
-
-    // ── Mouse tracking + InertiaPlugin physics push ──
-    useEffect(() => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const container = canvas.parentElement;
-      if (!container) return;
-
-      const handleMove = (e: MouseEvent) => {
-        const now = performance.now();
-        const pr = pointerRef.current;
-        const rect = canvas.getBoundingClientRect();
-        const cfg = configRef.current;
-
-        const dt = pr.lastTime ? now - pr.lastTime : 16;
-        const dxScreen = e.clientX - pr.lastX;
-        const dyScreen = e.clientY - pr.lastY;
-
-        let vx = (dxScreen / dt) * 1000;
-        let vy = (dyScreen / dt) * 1000;
-        let speed = Math.hypot(vx, vy);
-        if (speed > cfg.MAX_SPEED) {
-          const scale = cfg.MAX_SPEED / speed;
-          vx *= scale;
-          vy *= scale;
-          speed = cfg.MAX_SPEED;
-        }
-
-        pr.lastTime = now;
-        pr.lastX = e.clientX;
-        pr.lastY = e.clientY;
-        pr.vx = vx;
-        pr.vy = vy;
-        pr.speed = speed;
-        pr.x = e.clientX - rect.left;
-        pr.y = e.clientY - rect.top;
-        pr.inCanvas = true;
-
-        // Push dots on fast movement using InertiaPlugin
-        if (speed > cfg.SPEED_TRIGGER) {
-          const cam = cameraRef.current;
-          const z = zoomRef.current;
-          const scaledGap = cfg.dotGap * z;
-
-          const rawOffsetX = -cam.x * z;
-          const rawOffsetY = -cam.y * z;
-          const offsetX = ((rawOffsetX % scaledGap) + scaledGap) % scaledGap;
-          const offsetY = ((rawOffsetY % scaledGap) + scaledGap) % scaledGap;
-          const startCol = Math.floor(cam.x / cfg.dotGap);
-          const startRow = Math.floor(cam.y / cfg.dotGap);
-
-          const pushed = pushedDots.current;
-
-          let colIdx = 0;
-          for (let sx = offsetX; sx <= rect.width + scaledGap; sx += scaledGap) {
-            let rowIdx = 0;
-            const worldCol = startCol + colIdx;
-
-            for (let sy = offsetY; sy <= rect.height + scaledGap; sy += scaledGap) {
-              const worldRow = startRow + rowIdx;
-              const dist = Math.hypot(sx - pr.x, sy - pr.y);
-
-              if (dist < cfg.PROXIMITY && !pushed.get(`${worldCol},${worldRow}`)?._inertiaApplied) {
-                const key = `${worldCol},${worldRow}`;
-                let data = pushed.get(key);
-
-                if (!data) {
-                  data = { xOffset: 0, yOffset: 0, _inertiaApplied: false };
-                  pushed.set(key, data);
-                }
-
-                data._inertiaApplied = true;
-                gsap.killTweensOf(data);
-
-                // Exact React Bits formula: raw displacement + tiny velocity influence
-                const pushX = (sx - pr.x) + vx * 0.005;
-                const pushY = (sy - pr.y) + vy * 0.005;
-
-                gsap.to(data, {
-                  inertia: {
-                    xOffset: pushX,
-                    yOffset: pushY,
-                    resistance: cfg.RESISTANCE,
-                  },
-                  onComplete: () => {
-                    gsap.to(data!, {
-                      xOffset: 0,
-                      yOffset: 0,
-                      duration: configRef.current.RETURN_DURATION,
-                      ease: "elastic.out(1,0.75)",
-                    });
-                    data!._inertiaApplied = false;
-                  },
-                });
-              }
-              rowIdx++;
-            }
-            colIdx++;
-          }
-        }
+      pointerSampleRef.current = {
+        x: nextX,
+        y: nextY,
+        time: now,
       };
 
-      const handleClick = (e: MouseEvent) => {
-        const rect = canvas.getBoundingClientRect();
-        const cx = e.clientX - rect.left;
-        const cy = e.clientY - rect.top;
-        const cfg = configRef.current;
+      pointerRef.current.x = nextX;
+      pointerRef.current.y = nextY;
+      pointerRef.current.inCanvas = true;
+    };
 
-        const cam = cameraRef.current;
-        const z = zoomRef.current;
-        const scaledGap = cfg.dotGap * z;
-
-        const rawOffsetX = -cam.x * z;
-        const rawOffsetY = -cam.y * z;
-        const offsetX = ((rawOffsetX % scaledGap) + scaledGap) % scaledGap;
-        const offsetY = ((rawOffsetY % scaledGap) + scaledGap) % scaledGap;
-        const startCol = Math.floor(cam.x / cfg.dotGap);
-        const startRow = Math.floor(cam.y / cfg.dotGap);
-
-        const pushed = pushedDots.current;
-
-        let colIdx = 0;
-        for (let sx = offsetX; sx <= rect.width + scaledGap; sx += scaledGap) {
-          let rowIdx = 0;
-          const worldCol = startCol + colIdx;
-
-          for (let sy = offsetY; sy <= rect.height + scaledGap; sy += scaledGap) {
-            const worldRow = startRow + rowIdx;
-            const dist = Math.hypot(sx - cx, sy - cy);
-
-            if (dist < cfg.SHOCK_RADIUS && !pushed.get(`${worldCol},${worldRow}`)?._inertiaApplied) {
-              const key = `${worldCol},${worldRow}`;
-              let data = pushed.get(key);
-
-              if (!data) {
-                data = { xOffset: 0, yOffset: 0, _inertiaApplied: false };
-                pushed.set(key, data);
-              }
-
-              data._inertiaApplied = true;
-              gsap.killTweensOf(data);
-
-              // Exact React Bits formula: raw displacement * shockStrength * falloff
-              const falloff = Math.max(0, 1 - dist / cfg.SHOCK_RADIUS);
-              const pushX = (sx - cx) * cfg.SHOCK_STRENGTH * falloff;
-              const pushY = (sy - cy) * cfg.SHOCK_STRENGTH * falloff;
-
-              gsap.to(data, {
-                inertia: {
-                  xOffset: pushX,
-                  yOffset: pushY,
-                  resistance: cfg.RESISTANCE,
-                },
-                onComplete: () => {
-                  gsap.to(data!, {
-                    xOffset: 0,
-                    yOffset: 0,
-                    duration: configRef.current.RETURN_DURATION,
-                    ease: "elastic.out(1,0.75)",
-                  });
-                  data!._inertiaApplied = false;
-                },
-              });
-            }
-            rowIdx++;
-          }
-          colIdx++;
-        }
+    const handlePointerDown = (event: PointerEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+      pointerRef.current.x = x;
+      pointerRef.current.y = y;
+      pointerRef.current.inCanvas = true;
+      pointerSampleRef.current = {
+        x,
+        y,
+        time: performance.now(),
       };
+      spawnRipple(x, y, 1.25 + shockStrength * 0.06);
+    };
 
-      const handleLeave = () => {
-        pointerRef.current.inCanvas = false;
-        pointerRef.current.x = -9999;
-        pointerRef.current.y = -9999;
+    const handleLeave = () => {
+      pointerRef.current.x = -9999;
+      pointerRef.current.y = -9999;
+      pointerRef.current.inCanvas = false;
+      pointerSampleRef.current = {
+        x: -9999,
+        y: -9999,
+        time: 0,
       };
+    };
 
-      // Track drag to suppress click shockwave after dragging
-      let mouseDownPos = { x: 0, y: 0 };
-      const handleMouseDown = (e: MouseEvent) => {
-        mouseDownPos = { x: e.clientX, y: e.clientY };
-      };
+    container.addEventListener("pointermove", handleMove, { passive: true });
+    container.addEventListener("pointerdown", handlePointerDown, { passive: true });
+    container.addEventListener("pointerleave", handleLeave);
+    container.addEventListener("pointercancel", handleLeave);
+    return () => {
+      container.removeEventListener("pointermove", handleMove);
+      container.removeEventListener("pointerdown", handlePointerDown);
+      container.removeEventListener("pointerleave", handleLeave);
+      container.removeEventListener("pointercancel", handleLeave);
+    };
+  }, [maxSpeed, resistance, shockStrength, spawnRipple, speedTrigger]);
 
-      // Throttle mousemove to ~20fps for physics (draw runs at 60fps)
-      let lastMoveCall = 0;
-      const throttledMove = (e: MouseEvent) => {
-        const now = performance.now();
-        if (now - lastMoveCall >= 50) {
-          lastMoveCall = now;
-          handleMove(e);
-        } else {
-          // Still update pointer position for proximity color (just skip physics)
-          const rect = canvas.getBoundingClientRect();
-          pointerRef.current.x = e.clientX - rect.left;
-          pointerRef.current.y = e.clientY - rect.top;
-          pointerRef.current.inCanvas = true;
-        }
-      };
-
-      const guardedClick = (e: MouseEvent) => {
-        // Only fire shockwave for genuine clicks, not after drags
-        const dx = Math.abs(e.clientX - mouseDownPos.x);
-        const dy = Math.abs(e.clientY - mouseDownPos.y);
-        if (dx > 5 || dy > 5) return;
-        handleClick(e);
-      };
-
-      container.addEventListener("mousedown", handleMouseDown, { passive: true });
-      container.addEventListener("mousemove", throttledMove, { passive: true });
-      container.addEventListener("mouseleave", handleLeave);
-      container.addEventListener("click", guardedClick);
-
-      return () => {
-        container.removeEventListener("mousedown", handleMouseDown);
-        container.removeEventListener("mousemove", throttledMove);
-        container.removeEventListener("mouseleave", handleLeave);
-        container.removeEventListener("click", guardedClick);
-      };
-    }, [cameraRef, zoomRef]);
-
-    return (
-      <canvas
-        ref={canvasRef}
-        className="pointer-events-none absolute inset-0"
-        style={{ width: "100%", height: "100%" }}
-      />
-    );
-  }
-);
-
-BackgroundRippleEffect.displayName = "BackgroundRippleEffect";
+  return (
+    <canvas
+      ref={canvasRef}
+      className="pointer-events-none absolute inset-0"
+      style={{ width: "100%", height: "100%" }}
+    />
+  );
+});

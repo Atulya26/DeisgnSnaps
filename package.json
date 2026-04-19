@@ -6,6 +6,8 @@
   "scripts": {
     "build": "vite build",
     "dev": "vite",
+    "migrate:content": "node scripts/migrate-portfolio-content.mjs && node scripts/generate-search-index.mjs",
+    "generate:search-index": "node scripts/generate-search-index.mjs",
     "sync:dribbble": "node scripts/sync-dribbble.mjs",
     "sync:dribbble:local": "node scripts/sync-dribbble-local.mjs",
     "sync:dribbble:public": "node scripts/sync-dribbble-public.mjs",

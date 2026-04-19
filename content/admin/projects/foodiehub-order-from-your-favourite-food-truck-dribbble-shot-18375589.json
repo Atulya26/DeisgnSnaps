@@ -1,0 +1,44 @@
+{
+  "id": "dribbble-shot-18375589",
+  "slug": "foodiehub-order-from-your-favourite-food-truck-dribbble-shot-18375589",
+  "title": "FoodieHub - Order from your favourite food truck",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/foodiehub-order-from-your-favourite-food-truck-dribbble-shot-18375589/card.webp",
+  "coverImageUrl": "/portfolio/projects/foodiehub-order-from-your-favourite-food-truck-dribbble-shot-18375589/cover.webp",
+  "sortOrder": 94,
+  "status": "published",
+  "description": "Hello, everyone!\n\nFoodieHub is an app that brings together all of the city's food trucks on one platform. Users may order their favorite food from any of their favorite food trucks and pick it up whenever convenient for them.\n\nLet me know what you guys think!\n\nEditEdit shot detailsDelete",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:33:27.765Z",
+  "createdAt": "2026-04-19T06:33:27.765Z",
+  "coverAssetId": "cover",
+  "cardAssetId": "card",
+  "assets": [
+    {
+      "id": "card",
+      "kind": "image",
+      "role": "card",
+      "src": "/portfolio/projects/foodiehub-order-from-your-favourite-food-truck-dribbble-shot-18375589/card.webp"
+    },
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/foodiehub-order-from-your-favourite-food-truck-dribbble-shot-18375589/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/foodiehub-order-from-your-favourite-food-truck-dribbble-shot-18375589/gallery-01.webp"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "text-description-18375589",
+      "type": "text",
+      "html": "<h2>Overview</h2><p>Hello, everyone!</p><p>FoodieHub is an app that brings together all of the city&#39;s food trucks on one platform. Users may order their favorite food from any of their favorite food trucks and pick it up whenever convenient for them.</p><p>Let me know what you guys think!</p><p>EditEdit shot detailsDelete</p>"
+    }
+  ]
+}

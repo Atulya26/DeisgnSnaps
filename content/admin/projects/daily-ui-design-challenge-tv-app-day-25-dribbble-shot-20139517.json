@@ -1,0 +1,44 @@
+{
+  "id": "dribbble-shot-20139517",
+  "slug": "daily-ui-design-challenge-tv-app-day-25-dribbble-shot-20139517",
+  "title": "Daily UI Design Challenge | TV App | Day 25",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/daily-ui-design-challenge-tv-app-day-25-dribbble-shot-20139517/card.webp",
+  "coverImageUrl": "/portfolio/projects/daily-ui-design-challenge-tv-app-day-25-dribbble-shot-20139517/cover.webp",
+  "sortOrder": 58,
+  "status": "published",
+  "description": "Hey, This is my take on Daily UI challenge #025\n\nTv App\n\nDo let me know what you think about it.\n\nThanks!",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:32:10.845Z",
+  "createdAt": "2026-04-19T06:32:10.845Z",
+  "coverAssetId": "cover",
+  "cardAssetId": "card",
+  "assets": [
+    {
+      "id": "card",
+      "kind": "image",
+      "role": "card",
+      "src": "/portfolio/projects/daily-ui-design-challenge-tv-app-day-25-dribbble-shot-20139517/card.webp"
+    },
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/daily-ui-design-challenge-tv-app-day-25-dribbble-shot-20139517/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/daily-ui-design-challenge-tv-app-day-25-dribbble-shot-20139517/gallery-01.webp"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "text-description-20139517",
+      "type": "text",
+      "html": "<h2>Overview</h2><p>Hey, This is my take on Daily UI challenge #025</p><p>Tv App</p><p>Do let me know what you think about it.</p><p>Thanks!</p>"
+    }
+  ]
+}

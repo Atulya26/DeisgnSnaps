@@ -1,0 +1,35 @@
+{
+  "id": "dribbble-shot-19533339",
+  "slug": "daily-ui-design-challenge-flash-message-day-011-dribbble-shot-19533339",
+  "title": "Daily UI Design Challenge | Flash Message | Day 011",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/daily-ui-design-challenge-flash-message-day-011-dribbble-shot-19533339/card.webp",
+  "coverImageUrl": "/portfolio/projects/daily-ui-design-challenge-flash-message-day-011-dribbble-shot-19533339/cover.webp",
+  "sortOrder": 73,
+  "status": "published",
+  "description": "Hey, This is my take on Daily UI challenge #011\n\nFlash Message - Success & Error\n\nDo let me know what you think about it.\n\nThanks!",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:32:39.382Z",
+  "gallery": [
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/daily-ui-design-challenge-flash-message-day-011-dribbble-shot-19533339/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/daily-ui-design-challenge-flash-message-day-011-dribbble-shot-19533339/gallery-01.webp"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "text-description-19533339",
+      "type": "text",
+      "html": "<h2>Overview</h2><p>Hey, This is my take on Daily UI challenge #011</p><p>Flash Message - Success &amp; Error</p><p>Do let me know what you think about it.</p><p>Thanks!</p>"
+    }
+  ]
+}

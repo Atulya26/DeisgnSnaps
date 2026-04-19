@@ -1,0 +1,62 @@
+{
+  "id": "dribbble-shot-20984790",
+  "slug": "odyssey-finance-dashboard-dribbble-shot-20984790",
+  "title": "Odyssey - Finance Dashboard  💳",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/odyssey-finance-dashboard-dribbble-shot-20984790/card.webp",
+  "coverImageUrl": "/portfolio/projects/odyssey-finance-dashboard-dribbble-shot-20984790/cover.webp",
+  "sortOrder": 42,
+  "status": "published",
+  "description": "Odyssey is a new fintech dashboard with its user-friendly interface. Users can easily navigate through their spending and transactions data from multiple websites, gaining valuable insights into their financial habits. The dashboard provides clear and concise visualizations of data, making it easy to identify trends and patterns in spending behavior. Odyssey offers a seamless and intuitive experience for users looking to manage their finances in one centralized location.\n\nLet me know what you think about it !!",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:31:28.971Z",
+  "createdAt": "2026-04-19T06:31:28.971Z",
+  "coverAssetId": "cover",
+  "cardAssetId": "card",
+  "assets": [
+    {
+      "id": "card",
+      "kind": "image",
+      "role": "card",
+      "src": "/portfolio/projects/odyssey-finance-dashboard-dribbble-shot-20984790/card.webp"
+    },
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/odyssey-finance-dashboard-dribbble-shot-20984790/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/odyssey-finance-dashboard-dribbble-shot-20984790/gallery-01.webp"
+    },
+    {
+      "id": "gallery-02",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/odyssey-finance-dashboard-dribbble-shot-20984790/gallery-02.webp"
+    },
+    {
+      "id": "gallery-03",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/odyssey-finance-dashboard-dribbble-shot-20984790/gallery-03.webp"
+    },
+    {
+      "id": "gallery-04",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/odyssey-finance-dashboard-dribbble-shot-20984790/gallery-04.webp"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "text-description-20984790",
+      "type": "text",
+      "html": "<h2>Overview</h2><p>Odyssey is a new fintech dashboard with its user-friendly interface. Users can easily navigate through their spending and transactions data from multiple websites, gaining valuable insights into their financial habits. The dashboard provides clear and concise visualizations of data, making it easy to identify trends and patterns in spending behavior. Odyssey offers a seamless and intuitive experience for users looking to manage their finances in one centralized location.</p><p>Let me know what you think about it !!</p>"
+    }
+  ]
+}

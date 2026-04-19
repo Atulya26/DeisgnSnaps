@@ -1,0 +1,47 @@
+{
+  "id": "dribbble-shot-19831881",
+  "slug": "daily-ui-design-challenge-boarding-pass-day-24-dribbble-shot-19831881",
+  "title": "Daily UI Design Challenge |Boarding Pass | Day 24",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/daily-ui-design-challenge-boarding-pass-day-24-dribbble-shot-19831881/card.webp",
+  "coverImageUrl": "/portfolio/projects/daily-ui-design-challenge-boarding-pass-day-24-dribbble-shot-19831881/cover.webp",
+  "sortOrder": 59,
+  "status": "published",
+  "description": "",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:32:14.462Z",
+  "gallery": [
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/daily-ui-design-challenge-boarding-pass-day-24-dribbble-shot-19831881/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/daily-ui-design-challenge-boarding-pass-day-24-dribbble-shot-19831881/gallery-01.webp"
+    },
+    {
+      "id": "gallery-02",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/daily-ui-design-challenge-boarding-pass-day-24-dribbble-shot-19831881/gallery-02.webp"
+    },
+    {
+      "id": "gallery-03",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/daily-ui-design-challenge-boarding-pass-day-24-dribbble-shot-19831881/gallery-03.webp"
+    },
+    {
+      "id": "gallery-04",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/daily-ui-design-challenge-boarding-pass-day-24-dribbble-shot-19831881/gallery-04.webp"
+    }
+  ],
+  "blocks": []
+}

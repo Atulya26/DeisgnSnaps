@@ -1,0 +1,71 @@
+{
+  "id": "dribbble-shot-22420180",
+  "slug": "visionblend-ai-3d-tool-dribbble-shot-22420180",
+  "title": "VisionBlend - AI 3D Tool ✏️",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/visionblend-ai-3d-tool-dribbble-shot-22420180/card.webp",
+  "coverImageUrl": "/portfolio/projects/visionblend-ai-3d-tool-dribbble-shot-22420180/cover.webp",
+  "sortOrder": 20,
+  "status": "published",
+  "description": "",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:29:42.918Z",
+  "gallery": [
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/visionblend-ai-3d-tool-dribbble-shot-22420180/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/visionblend-ai-3d-tool-dribbble-shot-22420180/gallery-01.webp"
+    },
+    {
+      "id": "gallery-02",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/visionblend-ai-3d-tool-dribbble-shot-22420180/gallery-02.webp"
+    },
+    {
+      "id": "gallery-03",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/visionblend-ai-3d-tool-dribbble-shot-22420180/gallery-03.webp"
+    },
+    {
+      "id": "gallery-04",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/visionblend-ai-3d-tool-dribbble-shot-22420180/gallery-04.webp"
+    },
+    {
+      "id": "gallery-05",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/visionblend-ai-3d-tool-dribbble-shot-22420180/gallery-05.webp"
+    },
+    {
+      "id": "gallery-06",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/visionblend-ai-3d-tool-dribbble-shot-22420180/gallery-06.webp"
+    },
+    {
+      "id": "gallery-07",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/visionblend-ai-3d-tool-dribbble-shot-22420180/gallery-07.webp"
+    },
+    {
+      "id": "gallery-08",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/visionblend-ai-3d-tool-dribbble-shot-22420180/gallery-08.webp"
+    }
+  ],
+  "blocks": []
+}

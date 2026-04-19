@@ -1,0 +1,35 @@
+{
+  "id": "dribbble-shot-18522231",
+  "slug": "furnituraa-online-furniture-store-dribbble-shot-18522231",
+  "title": "Furnituraa - Online Furniture Store",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/furnituraa-online-furniture-store-dribbble-shot-18522231/card.webp",
+  "coverImageUrl": "/portfolio/projects/furnituraa-online-furniture-store-dribbble-shot-18522231/cover.webp",
+  "sortOrder": 88,
+  "status": "published",
+  "description": "Hey everyone !\n\nFurnituraa is an online furniture business that prides itself on offering high-quality items and services to its customers.\n\nThe user interface for their website's home page is seen above.\n\nLet me know what you guys think!",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:33:09.373Z",
+  "gallery": [
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/furnituraa-online-furniture-store-dribbble-shot-18522231/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/furnituraa-online-furniture-store-dribbble-shot-18522231/gallery-01.webp"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "text-description-18522231",
+      "type": "text",
+      "html": "<h2>Overview</h2><p>Hey everyone !</p><p>Furnituraa is an online furniture business that prides itself on offering high-quality items and services to its customers.</p><p>The user interface for their website&#39;s home page is seen above.</p><p>Let me know what you guys think!</p>"
+    }
+  ]
+}

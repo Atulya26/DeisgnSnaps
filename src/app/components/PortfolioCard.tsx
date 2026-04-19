@@ -108,7 +108,7 @@ function PortfolioCardImpl({ project, onOpen, skipAnimation, index = 0 }: Portfo
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           >
             <ImageWithFallback
-              src={project.imageUrl}
+              src={project.cardImageUrl}
               alt={project.title}
               className="h-full w-full object-cover"
               decoding="async"
@@ -208,4 +208,93 @@ export const PortfolioCard = memo(PortfolioCardImpl, (prev, next) => {
     prev.skipAnimation === next.skipAnimation &&
     prev.index === next.index
   );
+});
+
+interface PortfolioCardReplicaProps {
+  project: Project;
+}
+
+function PortfolioCardReplicaImpl({ project }: PortfolioCardReplicaProps) {
+  const { theme, colors, animationConfig } = useTheme();
+
+  return (
+    <div
+      className="absolute"
+      style={{
+        left: project.x,
+        top: project.y,
+        width: project.width,
+      }}
+      aria-hidden="true"
+    >
+      <div
+        className="relative overflow-hidden"
+        style={{
+          borderRadius: animationConfig.cardBorderRadius,
+          backgroundColor: colors.cardBg,
+          boxShadow: colors.cardShadow,
+          border: `1px solid ${theme === "light" ? "rgba(0,0,0,0.04)" : "rgba(255,255,255,0.04)"}`,
+        }}
+      >
+        <div
+          className="relative overflow-hidden"
+          style={{
+            height: project.height,
+            backgroundColor: colors.imageBg,
+          }}
+        >
+          <ImageWithFallback
+            src={project.cardImageUrl}
+            alt=""
+            className="h-full w-full object-cover"
+            decoding="async"
+            loading="lazy"
+            {...({ fetchpriority: "low" } as Record<string, string>)}
+          />
+        </div>
+
+        <div
+          className="flex items-center justify-between gap-4 px-6"
+          style={{
+            backgroundColor: colors.cardBg,
+            paddingTop: 18,
+            paddingBottom: 18,
+          }}
+        >
+          <h3
+            className="truncate"
+            style={{
+              fontSize: 20,
+              color: colors.text,
+              lineHeight: 1.25,
+              fontWeight: 600,
+              letterSpacing: "-0.02em",
+              fontFamily: "'Inter', sans-serif",
+            }}
+          >
+            {project.title}
+          </h3>
+
+          {project.category && (
+            <span
+              className="shrink-0"
+              style={{
+                fontSize: 13,
+                fontWeight: 500,
+                color: colors.textMuted,
+                letterSpacing: "-0.005em",
+                fontFamily: "'Inter', sans-serif",
+              }}
+            >
+              {project.category}
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export const PortfolioCardReplica = memo(PortfolioCardReplicaImpl, (prev, next) => {
+  return prev.project === next.project;
 });

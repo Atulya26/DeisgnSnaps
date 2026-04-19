@@ -1,0 +1,44 @@
+{
+  "id": "dribbble-shot-18598583",
+  "slug": "upstake-digital-marketing-dribbble-shot-18598583",
+  "title": "Upstake - Digital Marketing",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/upstake-digital-marketing-dribbble-shot-18598583/card.webp",
+  "coverImageUrl": "/portfolio/projects/upstake-digital-marketing-dribbble-shot-18598583/cover.webp",
+  "sortOrder": 87,
+  "status": "published",
+  "description": "Hey everyone !\n\nUpstake is a digital marketing website that offers a variety of services including E-Commerce, SEO, Website Design, and Social Media Marketing.\n\nThe design is my interpretation of how a digital marketing website should look.\n\nLet me know what you guys think!",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:33:06.422Z",
+  "createdAt": "2026-04-19T06:33:06.422Z",
+  "coverAssetId": "cover",
+  "cardAssetId": "card",
+  "assets": [
+    {
+      "id": "card",
+      "kind": "image",
+      "role": "card",
+      "src": "/portfolio/projects/upstake-digital-marketing-dribbble-shot-18598583/card.webp"
+    },
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/upstake-digital-marketing-dribbble-shot-18598583/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/upstake-digital-marketing-dribbble-shot-18598583/gallery-01.webp"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "text-description-18598583",
+      "type": "text",
+      "html": "<h2>Overview</h2><p>Hey everyone !</p><p>Upstake is a digital marketing website that offers a variety of services including E-Commerce, SEO, Website Design, and Social Media Marketing.</p><p>The design is my interpretation of how a digital marketing website should look.</p><p>Let me know what you guys think!</p>"
+    }
+  ]
+}

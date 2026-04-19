@@ -1,0 +1,56 @@
+{
+  "id": "dribbble-shot-22499065",
+  "slug": "crypto-platform-concept-app-dribbble-shot-22499065",
+  "title": "Crypto Platform - Concept App",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/crypto-platform-concept-app-dribbble-shot-22499065/card.webp",
+  "coverImageUrl": "/portfolio/projects/crypto-platform-concept-app-dribbble-shot-22499065/cover.webp",
+  "sortOrder": 19,
+  "status": "published",
+  "description": "",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:29:18.227Z",
+  "createdAt": "2026-04-19T06:29:18.227Z",
+  "coverAssetId": "cover",
+  "cardAssetId": "card",
+  "assets": [
+    {
+      "id": "card",
+      "kind": "image",
+      "role": "card",
+      "src": "/portfolio/projects/crypto-platform-concept-app-dribbble-shot-22499065/card.webp"
+    },
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/crypto-platform-concept-app-dribbble-shot-22499065/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/crypto-platform-concept-app-dribbble-shot-22499065/gallery-01.webp"
+    },
+    {
+      "id": "gallery-02",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/crypto-platform-concept-app-dribbble-shot-22499065/gallery-02.webp"
+    },
+    {
+      "id": "gallery-03",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/crypto-platform-concept-app-dribbble-shot-22499065/gallery-03.webp"
+    },
+    {
+      "id": "gallery-04",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/crypto-platform-concept-app-dribbble-shot-22499065/gallery-04.webp"
+    }
+  ],
+  "blocks": []
+}

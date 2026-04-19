@@ -1,0 +1,71 @@
+{
+  "id": "dribbble-shot-22345228",
+  "slug": "dyson-link-dynamic-island-concept-dribbble-shot-22345228",
+  "title": "Dyson Link - Dynamic Island Concept",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/dyson-link-dynamic-island-concept-dribbble-shot-22345228/card.webp",
+  "coverImageUrl": "/portfolio/projects/dyson-link-dynamic-island-concept-dribbble-shot-22345228/cover.webp",
+  "sortOrder": 22,
+  "status": "published",
+  "description": "",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:29:55.235Z",
+  "gallery": [
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/dyson-link-dynamic-island-concept-dribbble-shot-22345228/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/dyson-link-dynamic-island-concept-dribbble-shot-22345228/gallery-01.webp"
+    },
+    {
+      "id": "gallery-02",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/dyson-link-dynamic-island-concept-dribbble-shot-22345228/gallery-02.webp"
+    },
+    {
+      "id": "gallery-03",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/dyson-link-dynamic-island-concept-dribbble-shot-22345228/gallery-03.webp"
+    },
+    {
+      "id": "gallery-04",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/dyson-link-dynamic-island-concept-dribbble-shot-22345228/gallery-04.webp"
+    },
+    {
+      "id": "gallery-05",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/dyson-link-dynamic-island-concept-dribbble-shot-22345228/gallery-05.webp"
+    },
+    {
+      "id": "gallery-06",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/dyson-link-dynamic-island-concept-dribbble-shot-22345228/gallery-06.webp"
+    },
+    {
+      "id": "gallery-07",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/dyson-link-dynamic-island-concept-dribbble-shot-22345228/gallery-07.webp"
+    },
+    {
+      "id": "gallery-08",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/dyson-link-dynamic-island-concept-dribbble-shot-22345228/gallery-08.webp"
+    }
+  ],
+  "blocks": []
+}

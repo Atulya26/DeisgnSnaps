@@ -1,0 +1,44 @@
+{
+  "id": "dribbble-shot-19459765",
+  "slug": "daily-ui-design-challenge-landing-page-day-03-dribbble-shot-19459765",
+  "title": "Daily UI Design Challenge | Landing Page | Day 03",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/daily-ui-design-challenge-landing-page-day-03-dribbble-shot-19459765/card.webp",
+  "coverImageUrl": "/portfolio/projects/daily-ui-design-challenge-landing-page-day-03-dribbble-shot-19459765/cover.webp",
+  "sortOrder": 81,
+  "status": "published",
+  "description": "Hey, This is my take on Daily UI challenge #03\n\nLanding Page for a furniture website\n\nDo let me know what you think about it.\n\nThanks!",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:32:52.621Z",
+  "createdAt": "2026-04-19T06:32:52.621Z",
+  "coverAssetId": "cover",
+  "cardAssetId": "card",
+  "assets": [
+    {
+      "id": "card",
+      "kind": "image",
+      "role": "card",
+      "src": "/portfolio/projects/daily-ui-design-challenge-landing-page-day-03-dribbble-shot-19459765/card.webp"
+    },
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/daily-ui-design-challenge-landing-page-day-03-dribbble-shot-19459765/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/daily-ui-design-challenge-landing-page-day-03-dribbble-shot-19459765/gallery-01.webp"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "text-description-19459765",
+      "type": "text",
+      "html": "<h2>Overview</h2><p>Hey, This is my take on Daily UI challenge #03</p><p>Landing Page for a furniture website</p><p>Do let me know what you think about it.</p><p>Thanks!</p>"
+    }
+  ]
+}

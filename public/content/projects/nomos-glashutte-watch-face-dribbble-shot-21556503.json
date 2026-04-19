@@ -1,0 +1,35 @@
+{
+  "id": "dribbble-shot-21556503",
+  "slug": "nomos-glashutte-watch-face-dribbble-shot-21556503",
+  "title": "NOMOS Glashütte Watch Face",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/nomos-glashutte-watch-face-dribbble-shot-21556503/card.webp",
+  "coverImageUrl": "/portfolio/projects/nomos-glashutte-watch-face-dribbble-shot-21556503/cover.webp",
+  "sortOrder": 39,
+  "status": "published",
+  "description": "",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:31:19.060Z",
+  "gallery": [
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/nomos-glashutte-watch-face-dribbble-shot-21556503/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/nomos-glashutte-watch-face-dribbble-shot-21556503/gallery-01.webp"
+    },
+    {
+      "id": "gallery-02",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/nomos-glashutte-watch-face-dribbble-shot-21556503/gallery-02.webp"
+    }
+  ],
+  "blocks": []
+}

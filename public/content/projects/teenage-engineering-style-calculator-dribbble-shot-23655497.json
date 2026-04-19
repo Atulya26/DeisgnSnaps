@@ -1,0 +1,53 @@
+{
+  "id": "dribbble-shot-23655497",
+  "slug": "teenage-engineering-style-calculator-dribbble-shot-23655497",
+  "title": "Teenage Engineering Style Calculator",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/teenage-engineering-style-calculator-dribbble-shot-23655497/card.webp",
+  "coverImageUrl": "/portfolio/projects/teenage-engineering-style-calculator-dribbble-shot-23655497/cover.webp",
+  "sortOrder": 3,
+  "status": "published",
+  "description": "",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:28:14.662Z",
+  "gallery": [
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/teenage-engineering-style-calculator-dribbble-shot-23655497/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/teenage-engineering-style-calculator-dribbble-shot-23655497/gallery-01.webp"
+    },
+    {
+      "id": "gallery-02",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/teenage-engineering-style-calculator-dribbble-shot-23655497/gallery-02.webp"
+    },
+    {
+      "id": "gallery-03",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/teenage-engineering-style-calculator-dribbble-shot-23655497/gallery-03.webp"
+    },
+    {
+      "id": "gallery-04",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/teenage-engineering-style-calculator-dribbble-shot-23655497/gallery-04.webp"
+    },
+    {
+      "id": "gallery-05",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/teenage-engineering-style-calculator-dribbble-shot-23655497/gallery-05.webp"
+    }
+  ],
+  "blocks": []
+}

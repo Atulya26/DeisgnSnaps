@@ -12,6 +12,7 @@ export function CustomCursor() {
   const smoothPos = useRef({ x: -100, y: -100 });
   const visible = useRef(false);
   const rafRef = useRef(0);
+  const running = useRef(false);
   const isPointer = useRef(false);
   const isPressed = useRef(false);
   const { theme } = useTheme();
@@ -28,34 +29,7 @@ export function CustomCursor() {
       return;
     }
 
-    const handleMove = (e: MouseEvent) => {
-      pos.current = { x: e.clientX, y: e.clientY };
-
-      if (!visible.current) {
-        visible.current = true;
-        smoothPos.current = { x: e.clientX, y: e.clientY };
-      }
-
-      const target = e.target as HTMLElement;
-      const clickable = target.closest(
-        "a, button, [role='button'], input, textarea, select, [tabindex]"
-      );
-      isPointer.current = !!clickable;
-    };
-
-    const handleLeave = () => {
-      visible.current = false;
-    };
-
-    const handleDown = () => {
-      isPressed.current = true;
-    };
-
-    const handleUp = () => {
-      isPressed.current = false;
-    };
-
-    const tick = () => {
+    const renderFrame = () => {
       const sp = smoothPos.current;
       const p = pos.current;
 
@@ -78,7 +52,6 @@ export function CustomCursor() {
         ring.style.width = `${size}px`;
         ring.style.height = `${size}px`;
 
-        // Adapt ring color to theme
         const isDark = themeRef.current === "dark";
         const baseColor = isDark ? "rgba(255, 255, 255," : "rgba(26, 26, 26,";
         ring.style.borderColor = isPointer.current
@@ -86,23 +59,84 @@ export function CustomCursor() {
           : `${baseColor}0.25)`;
       }
 
-      rafRef.current = requestAnimationFrame(tick);
+      const dx = Math.abs(p.x - sp.x);
+      const dy = Math.abs(p.y - sp.y);
+      const shouldKeepRunning =
+        visible.current ||
+        dx > 0.2 ||
+        dy > 0.2 ||
+        isPressed.current;
+
+      if (shouldKeepRunning) {
+        rafRef.current = requestAnimationFrame(renderFrame);
+      } else {
+        running.current = false;
+      }
+    };
+
+    const ensureLoop = () => {
+      if (running.current) return;
+      running.current = true;
+      rafRef.current = requestAnimationFrame(renderFrame);
+    };
+
+    const handleMove = (e: MouseEvent) => {
+      pos.current = { x: e.clientX, y: e.clientY };
+
+      if (!visible.current) {
+        visible.current = true;
+        smoothPos.current = { x: e.clientX, y: e.clientY };
+      }
+
+      const target = e.target as HTMLElement;
+      const clickable = target.closest(
+        "a, button, [role='button'], input, textarea, select, [tabindex]"
+      );
+      isPointer.current = !!clickable;
+      ensureLoop();
+    };
+
+    const handleLeave = () => {
+      visible.current = false;
+      ensureLoop();
+    };
+
+    const handleDown = () => {
+      isPressed.current = true;
+      ensureLoop();
+    };
+
+    const handleUp = () => {
+      isPressed.current = false;
+      ensureLoop();
     };
 
     document.addEventListener("mousemove", handleMove);
     document.addEventListener("mouseleave", handleLeave);
     document.addEventListener("mousedown", handleDown);
     document.addEventListener("mouseup", handleUp);
-    rafRef.current = requestAnimationFrame(tick);
+    ensureLoop();
 
     return () => {
       document.removeEventListener("mousemove", handleMove);
       document.removeEventListener("mouseleave", handleLeave);
       document.removeEventListener("mousedown", handleDown);
       document.removeEventListener("mouseup", handleUp);
+      running.current = false;
       cancelAnimationFrame(rafRef.current);
     };
   }, []);
+
+  useEffect(() => {
+    const ring = ringRef.current;
+    if (!ring) return;
+
+    const isDark = themeRef.current === "dark";
+    const baseColor = isDark ? "rgba(255, 255, 255," : "rgba(26, 26, 26,";
+    ring.style.borderColor = isPointer.current
+      ? `${baseColor}0.5)`
+      : `${baseColor}0.25)`;
+  }, [theme]);
 
   return (
     <div

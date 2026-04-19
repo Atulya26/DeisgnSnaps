@@ -1,0 +1,41 @@
+{
+  "id": "dribbble-shot-20198366",
+  "slug": "formula-1-app-dynamic-standing-dribbble-shot-20198366",
+  "title": "Formula 1 App - Dynamic Standing",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/formula-1-app-dynamic-standing-dribbble-shot-20198366/card.webp",
+  "coverImageUrl": "/portfolio/projects/formula-1-app-dynamic-standing-dribbble-shot-20198366/cover.webp",
+  "sortOrder": 53,
+  "status": "published",
+  "description": "Introducing the new F1 App feature for iPhone 14 pro series users: the Dynamic Island Standings View! With this innovative feature, you can quickly and easily check on the current driver standings with just a few taps. Simply force touch on the dynamic island to expand the view and see the live standings in greater detail.\n\nLet me know what you think of this concept.",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:32:00.438Z",
+  "gallery": [
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/formula-1-app-dynamic-standing-dribbble-shot-20198366/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/formula-1-app-dynamic-standing-dribbble-shot-20198366/gallery-01.webp"
+    },
+    {
+      "id": "gallery-02",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/formula-1-app-dynamic-standing-dribbble-shot-20198366/gallery-02.webp"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "text-description-20198366",
+      "type": "text",
+      "html": "<h2>Overview</h2><p>Introducing the new F1 App feature for iPhone 14 pro series users: the Dynamic Island Standings View! With this innovative feature, you can quickly and easily check on the current driver standings with just a few taps. Simply force touch on the dynamic island to expand the view and see the live standings in greater detail.</p><p>Let me know what you think of this concept.</p>"
+    }
+  ]
+}

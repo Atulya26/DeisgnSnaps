@@ -1,0 +1,44 @@
+{
+  "id": "dribbble-shot-19656041",
+  "slug": "daily-ui-design-challenge-leaderboard-day-019-dribbble-shot-19656041",
+  "title": "Daily UI Design Challenge | Leaderboard | Day 019",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/daily-ui-design-challenge-leaderboard-day-019-dribbble-shot-19656041/card.webp",
+  "coverImageUrl": "/portfolio/projects/daily-ui-design-challenge-leaderboard-day-019-dribbble-shot-19656041/cover.webp",
+  "sortOrder": 64,
+  "status": "published",
+  "description": "Hey, This is my take on Daily UI challenge #019\n\nLeaderboard\n\nDo let me know what you think about it.\n\nThanks!",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:32:23.983Z",
+  "createdAt": "2026-04-19T06:32:23.983Z",
+  "coverAssetId": "cover",
+  "cardAssetId": "card",
+  "assets": [
+    {
+      "id": "card",
+      "kind": "image",
+      "role": "card",
+      "src": "/portfolio/projects/daily-ui-design-challenge-leaderboard-day-019-dribbble-shot-19656041/card.webp"
+    },
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/daily-ui-design-challenge-leaderboard-day-019-dribbble-shot-19656041/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/daily-ui-design-challenge-leaderboard-day-019-dribbble-shot-19656041/gallery-01.webp"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "text-description-19656041",
+      "type": "text",
+      "html": "<h2>Overview</h2><p>Hey, This is my take on Daily UI challenge #019</p><p>Leaderboard</p><p>Do let me know what you think about it.</p><p>Thanks!</p>"
+    }
+  ]
+}

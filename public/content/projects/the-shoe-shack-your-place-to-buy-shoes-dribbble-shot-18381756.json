@@ -1,0 +1,35 @@
+{
+  "id": "dribbble-shot-18381756",
+  "slug": "the-shoe-shack-your-place-to-buy-shoes-dribbble-shot-18381756",
+  "title": "The Shoe Shack - Your place to buy shoes",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/the-shoe-shack-your-place-to-buy-shoes-dribbble-shot-18381756/card.webp",
+  "coverImageUrl": "/portfolio/projects/the-shoe-shack-your-place-to-buy-shoes-dribbble-shot-18381756/cover.webp",
+  "sortOrder": 92,
+  "status": "published",
+  "description": "Hello, everyone!\n\nThe Shoe Shack is a local shoe store with a website that allows customers to shop for their favourite shoes all in one place.\n\nLet me know what you guys think!",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:33:21.750Z",
+  "gallery": [
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/the-shoe-shack-your-place-to-buy-shoes-dribbble-shot-18381756/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/the-shoe-shack-your-place-to-buy-shoes-dribbble-shot-18381756/gallery-01.webp"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "text-description-18381756",
+      "type": "text",
+      "html": "<h2>Overview</h2><p>Hello, everyone!</p><p>The Shoe Shack is a local shoe store with a website that allows customers to shop for their favourite shoes all in one place.</p><p>Let me know what you guys think!</p>"
+    }
+  ]
+}

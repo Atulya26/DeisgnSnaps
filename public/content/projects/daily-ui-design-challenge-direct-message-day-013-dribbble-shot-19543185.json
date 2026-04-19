@@ -1,0 +1,35 @@
+{
+  "id": "dribbble-shot-19543185",
+  "slug": "daily-ui-design-challenge-direct-message-day-013-dribbble-shot-19543185",
+  "title": "Daily UI Design Challenge | Direct Message | Day 013",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/daily-ui-design-challenge-direct-message-day-013-dribbble-shot-19543185/card.webp",
+  "coverImageUrl": "/portfolio/projects/daily-ui-design-challenge-direct-message-day-013-dribbble-shot-19543185/cover.webp",
+  "sortOrder": 71,
+  "status": "published",
+  "description": "Hey, This is my take on Daily UI challenge #013\n\nDirect Message\n\nDo let me know what you think about it.\n\nThanks!",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:32:36.371Z",
+  "gallery": [
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/daily-ui-design-challenge-direct-message-day-013-dribbble-shot-19543185/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/daily-ui-design-challenge-direct-message-day-013-dribbble-shot-19543185/gallery-01.webp"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "text-description-19543185",
+      "type": "text",
+      "html": "<h2>Overview</h2><p>Hey, This is my take on Daily UI challenge #013</p><p>Direct Message</p><p>Do let me know what you think about it.</p><p>Thanks!</p>"
+    }
+  ]
+}

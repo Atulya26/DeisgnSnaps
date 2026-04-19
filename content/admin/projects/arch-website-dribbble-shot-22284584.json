@@ -1,0 +1,50 @@
+{
+  "id": "dribbble-shot-22284584",
+  "slug": "arch-website-dribbble-shot-22284584",
+  "title": "Arch. Website",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/arch-website-dribbble-shot-22284584/card.webp",
+  "coverImageUrl": "/portfolio/projects/arch-website-dribbble-shot-22284584/cover.webp",
+  "sortOrder": 23,
+  "status": "published",
+  "description": "Hi everybody\n\nThis is my exploration of an interior firm website\n\nDo let me know 💬 what you think !\n\nPress\"L\" to Like ❤️ the Post.",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:30:01.430Z",
+  "createdAt": "2026-04-19T06:30:01.430Z",
+  "coverAssetId": "cover",
+  "cardAssetId": "card",
+  "assets": [
+    {
+      "id": "card",
+      "kind": "image",
+      "role": "card",
+      "src": "/portfolio/projects/arch-website-dribbble-shot-22284584/card.webp"
+    },
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/arch-website-dribbble-shot-22284584/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/arch-website-dribbble-shot-22284584/gallery-01.webp"
+    },
+    {
+      "id": "gallery-02",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/arch-website-dribbble-shot-22284584/gallery-02.webp"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "text-description-22284584",
+      "type": "text",
+      "html": "<h2>Overview</h2><p>Hi everybody</p><p>This is my exploration of an interior firm website</p><p>Do let me know 💬 what you think !</p><p>Press&quot;L&quot; to Like ❤️ the Post.</p>"
+    }
+  ]
+}

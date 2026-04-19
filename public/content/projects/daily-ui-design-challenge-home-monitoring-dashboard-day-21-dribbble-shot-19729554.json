@@ -1,0 +1,35 @@
+{
+  "id": "dribbble-shot-19729554",
+  "slug": "daily-ui-design-challenge-home-monitoring-dashboard-day-21-dribbble-shot-19729554",
+  "title": "Daily UI Design Challenge | Home Monitoring Dashboard | Day 21",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/daily-ui-design-challenge-home-monitoring-dashboard-day-21-dribbble-shot-19729554/card.webp",
+  "coverImageUrl": "/portfolio/projects/daily-ui-design-challenge-home-monitoring-dashboard-day-21-dribbble-shot-19729554/cover.webp",
+  "sortOrder": 62,
+  "status": "published",
+  "description": "Hey, This is my take on Daily UI challenge #021\n\nHome Monitoring Dashboard\n\nDo let me know what you think about it.\n\nThanks!",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:32:20.146Z",
+  "gallery": [
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/daily-ui-design-challenge-home-monitoring-dashboard-day-21-dribbble-shot-19729554/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/daily-ui-design-challenge-home-monitoring-dashboard-day-21-dribbble-shot-19729554/gallery-01.webp"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "text-description-19729554",
+      "type": "text",
+      "html": "<h2>Overview</h2><p>Hey, This is my take on Daily UI challenge #021</p><p>Home Monitoring Dashboard</p><p>Do let me know what you think about it.</p><p>Thanks!</p>"
+    }
+  ]
+}

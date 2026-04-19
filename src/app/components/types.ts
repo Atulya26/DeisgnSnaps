@@ -1,36 +1,22 @@
-export interface ImageContentBlock {
-  type: "image";
-  id: string;
-  url: string;
-  key?: string;
-  caption?: string;
-}
+import type {
+  MediaAsset,
+  ProjectBlock,
+  ProjectDocument,
+  ProjectIndexEntry,
+} from "../../content/schema";
 
-export interface TextContentBlock {
-  type: "text";
-  id: string;
-  content: string;
-}
+export type { MediaAsset, ProjectBlock, ProjectDocument, ProjectIndexEntry };
 
-export type ContentBlock = ImageContentBlock | TextContentBlock;
-
-export interface Project {
-  id: string;
-  title: string;
-  category: string;
-  year: string;
-  /** Lightweight image used on the canvas and boot sequence */
-  imageUrl: string;
-  /** Full-quality primary image used in the project detail view */
-  coverImageUrl?: string;
-  description: string;
-  tags: string[];
+export interface CanvasProjectSummary extends ProjectIndexEntry {
   x: number;
   y: number;
-  width: number;
-  height: number;
-  /** Additional images shown in the project detail view */
+  imageUrl?: string;
+  description?: string;
+  tags?: string[];
   galleryImages?: string[];
-  /** Ordered content blocks for Dribbble-style detail view */
-  contentBlocks?: ContentBlock[];
+  contentBlocks?: ProjectBlock[];
 }
+
+export interface ResolvedCanvasProject extends CanvasProjectSummary, ProjectDocument {}
+
+export type Project = CanvasProjectSummary;

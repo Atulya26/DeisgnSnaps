@@ -1,0 +1,35 @@
+{
+  "id": "dribbble-shot-20479794",
+  "slug": "tres-chic-fashion-e-commerce-app-dribbble-shot-20479794",
+  "title": "Très Chic | Fashion E-commerce App",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/tres-chic-fashion-e-commerce-app-dribbble-shot-20479794/card.webp",
+  "coverImageUrl": "/portfolio/projects/tres-chic-fashion-e-commerce-app-dribbble-shot-20479794/cover.webp",
+  "sortOrder": 45,
+  "status": "published",
+  "description": "Introducing Très Chic, the ultimate fashion app for the stylish and trend-savvy. Discover the latest fashion trends, shop your favorite brands, and curate your own wardrobe with ease. With Très Chic, you'll always stay on top of the latest fashion and never miss a beat.\n\nDo let me know what you think about it !",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:31:38.607Z",
+  "gallery": [
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/tres-chic-fashion-e-commerce-app-dribbble-shot-20479794/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/tres-chic-fashion-e-commerce-app-dribbble-shot-20479794/gallery-01.webp"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "text-description-20479794",
+      "type": "text",
+      "html": "<h2>Overview</h2><p>Introducing Très Chic, the ultimate fashion app for the stylish and trend-savvy. Discover the latest fashion trends, shop your favorite brands, and curate your own wardrobe with ease. With Très Chic, you&#39;ll always stay on top of the latest fashion and never miss a beat.</p><p>Do let me know what you think about it !</p>"
+    }
+  ]
+}

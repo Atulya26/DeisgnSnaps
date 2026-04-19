@@ -1,0 +1,47 @@
+{
+  "id": "dribbble-shot-20214262",
+  "slug": "card-management-dashboard-dribbble-shot-20214262",
+  "title": "Card Management Dashboard",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/card-management-dashboard-dribbble-shot-20214262/card.webp",
+  "coverImageUrl": "/portfolio/projects/card-management-dashboard-dribbble-shot-20214262/cover.webp",
+  "sortOrder": 52,
+  "status": "published",
+  "description": "Card Management Dashboard is a powerful tool that allows you to add, manage, and track your cards. The intuitive interface and user-friendly design give you complete control over your cards and finances. Whether you're managing a single card or a whole portfolio, our dashboard has you covered.\n\nDo let me know what you think of this !!",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:31:55.477Z",
+  "gallery": [
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/card-management-dashboard-dribbble-shot-20214262/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/card-management-dashboard-dribbble-shot-20214262/gallery-01.webp"
+    },
+    {
+      "id": "gallery-02",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/card-management-dashboard-dribbble-shot-20214262/gallery-02.webp"
+    },
+    {
+      "id": "gallery-03",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/card-management-dashboard-dribbble-shot-20214262/gallery-03.webp"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "text-description-20214262",
+      "type": "text",
+      "html": "<h2>Overview</h2><p>Card Management Dashboard is a powerful tool that allows you to add, manage, and track your cards. The intuitive interface and user-friendly design give you complete control over your cards and finances. Whether you&#39;re managing a single card or a whole portfolio, our dashboard has you covered.</p><p>Do let me know what you think of this !!</p>"
+    }
+  ]
+}

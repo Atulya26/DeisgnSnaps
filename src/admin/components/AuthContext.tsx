@@ -14,18 +14,20 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { getSession, signInAdmin, signOutAdmin } from "../services/firebase";
+import { getSession, signOutAdmin, startGitHubSignIn } from "../services/firebase";
 
 // ─── Context ─────────────────────────────────────────────────────────────────
 
 interface User {
-  email: string;
+  login: string;
+  avatarUrl?: string;
+  name?: string;
 }
 
 interface AuthContextValue {
   user: User | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
+  signIn: () => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -58,13 +60,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const signIn = async (email: string, password: string) => {
-    const result = await signInAdmin(email, password);
-    if (result.ok) {
-      const session = await getSession();
-      setUser(session.authenticated && session.user ? session.user : null);
-    }
-    return result;
+  const signIn = async () => {
+    startGitHubSignIn();
   };
 
   const signOut = async () => {

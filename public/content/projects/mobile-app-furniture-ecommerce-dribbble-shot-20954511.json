@@ -1,0 +1,47 @@
+{
+  "id": "dribbble-shot-20954511",
+  "slug": "mobile-app-furniture-ecommerce-dribbble-shot-20954511",
+  "title": "Mobile App - Furniture Ecommerce",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/mobile-app-furniture-ecommerce-dribbble-shot-20954511/card.webp",
+  "coverImageUrl": "/portfolio/projects/mobile-app-furniture-ecommerce-dribbble-shot-20954511/cover.webp",
+  "sortOrder": 44,
+  "status": "published",
+  "description": "Introducing our brand new Furniture E-Commerce Mobile App - the one-stop destination for all your furniture needs!\n\nWith our app, you can easily browse through a vast collection of high-quality furniture products, ranging from contemporary to traditional designs, and everything in between.\n\nOur app is designed to provide a seamless and hassle-free shopping experience, with easy navigation and intuitive user interface.\n\nLet me know what you think about it!",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:31:37.049Z",
+  "gallery": [
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/mobile-app-furniture-ecommerce-dribbble-shot-20954511/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/mobile-app-furniture-ecommerce-dribbble-shot-20954511/gallery-01.webp"
+    },
+    {
+      "id": "gallery-02",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/mobile-app-furniture-ecommerce-dribbble-shot-20954511/gallery-02.webp"
+    },
+    {
+      "id": "gallery-03",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/mobile-app-furniture-ecommerce-dribbble-shot-20954511/gallery-03.webp"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "text-description-20954511",
+      "type": "text",
+      "html": "<h2>Overview</h2><p>Introducing our brand new Furniture E-Commerce Mobile App - the one-stop destination for all your furniture needs!</p><p>With our app, you can easily browse through a vast collection of high-quality furniture products, ranging from contemporary to traditional designs, and everything in between.</p><p>Our app is designed to provide a seamless and hassle-free shopping experience, with easy navigation and intuitive user interface.</p><p>Let me know what you think about it!</p>"
+    }
+  ]
+}

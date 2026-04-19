@@ -1,0 +1,44 @@
+{
+  "id": "dribbble-shot-19515820",
+  "slug": "daily-ui-design-challenge-share-day-010-dribbble-shot-19515820",
+  "title": "Daily UI Design Challenge | Share | Day 010",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/daily-ui-design-challenge-share-day-010-dribbble-shot-19515820/card.webp",
+  "coverImageUrl": "/portfolio/projects/daily-ui-design-challenge-share-day-010-dribbble-shot-19515820/cover.webp",
+  "sortOrder": 74,
+  "status": "published",
+  "description": "Hey, This is my take on Daily UI challenge #010\n\nShare Button\n\nDo let me know what you think about it.\n\nThanks!",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:32:41.077Z",
+  "createdAt": "2026-04-19T06:32:41.077Z",
+  "coverAssetId": "cover",
+  "cardAssetId": "card",
+  "assets": [
+    {
+      "id": "card",
+      "kind": "image",
+      "role": "card",
+      "src": "/portfolio/projects/daily-ui-design-challenge-share-day-010-dribbble-shot-19515820/card.webp"
+    },
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/daily-ui-design-challenge-share-day-010-dribbble-shot-19515820/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/daily-ui-design-challenge-share-day-010-dribbble-shot-19515820/gallery-01.webp"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "text-description-19515820",
+      "type": "text",
+      "html": "<h2>Overview</h2><p>Hey, This is my take on Daily UI challenge #010</p><p>Share Button</p><p>Do let me know what you think about it.</p><p>Thanks!</p>"
+    }
+  ]
+}

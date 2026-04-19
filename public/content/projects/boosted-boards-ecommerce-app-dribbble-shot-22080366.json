@@ -1,0 +1,35 @@
+{
+  "id": "dribbble-shot-22080366",
+  "slug": "boosted-boards-ecommerce-app-dribbble-shot-22080366",
+  "title": "Boosted Boards - Ecommerce App",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/boosted-boards-ecommerce-app-dribbble-shot-22080366/card.webp",
+  "coverImageUrl": "/portfolio/projects/boosted-boards-ecommerce-app-dribbble-shot-22080366/cover.webp",
+  "sortOrder": 32,
+  "status": "published",
+  "description": "",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:30:49.471Z",
+  "gallery": [
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/boosted-boards-ecommerce-app-dribbble-shot-22080366/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/boosted-boards-ecommerce-app-dribbble-shot-22080366/gallery-01.webp"
+    },
+    {
+      "id": "gallery-02",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/boosted-boards-ecommerce-app-dribbble-shot-22080366/gallery-02.webp"
+    }
+  ],
+  "blocks": []
+}

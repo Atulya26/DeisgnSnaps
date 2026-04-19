@@ -1,0 +1,44 @@
+{
+  "id": "dribbble-shot-22150430",
+  "slug": "weather-app-v2-dribbble-shot-22150430",
+  "title": "Weather App V.2",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/weather-app-v2-dribbble-shot-22150430/card.webp",
+  "coverImageUrl": "/portfolio/projects/weather-app-v2-dribbble-shot-22150430/cover.webp",
+  "sortOrder": 30,
+  "status": "published",
+  "description": "Recently i created a weather app with dark mode background. Today i recreated it with a light mode background. This app is created to check the forecast for your current location or search for a specific city. View hourly and weekly predictions, including temperature, precipitation, and more. Stay ahead of the weather and plan your day with confidence with our easy-to-use app.\n\nDo let me know what you think !",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:30:41.924Z",
+  "createdAt": "2026-04-19T06:30:41.924Z",
+  "coverAssetId": "cover",
+  "cardAssetId": "card",
+  "assets": [
+    {
+      "id": "card",
+      "kind": "image",
+      "role": "card",
+      "src": "/portfolio/projects/weather-app-v2-dribbble-shot-22150430/card.webp"
+    },
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/weather-app-v2-dribbble-shot-22150430/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/weather-app-v2-dribbble-shot-22150430/gallery-01.webp"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "text-description-22150430",
+      "type": "text",
+      "html": "<h2>Overview</h2><p>Recently i created a weather app with dark mode background. Today i recreated it with a light mode background. This app is created to check the forecast for your current location or search for a specific city. View hourly and weekly predictions, including temperature, precipitation, and more. Stay ahead of the weather and plan your day with confidence with our easy-to-use app.</p><p>Do let me know what you think !</p>"
+    }
+  ]
+}

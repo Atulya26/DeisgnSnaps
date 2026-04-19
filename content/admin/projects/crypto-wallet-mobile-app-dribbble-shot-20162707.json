@@ -1,0 +1,44 @@
+{
+  "id": "dribbble-shot-20162707",
+  "slug": "crypto-wallet-mobile-app-dribbble-shot-20162707",
+  "title": "Crypto wallet - Mobile app",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/crypto-wallet-mobile-app-dribbble-shot-20162707/card.webp",
+  "coverImageUrl": "/portfolio/projects/crypto-wallet-mobile-app-dribbble-shot-20162707/cover.webp",
+  "sortOrder": 55,
+  "status": "published",
+  "description": "Hey,\n\nAre you looking for some fresh perspective on your crypto wallet app's design? I'd love to hear your thoughts and offer my own insights!",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:32:05.108Z",
+  "createdAt": "2026-04-19T06:32:05.108Z",
+  "coverAssetId": "cover",
+  "cardAssetId": "card",
+  "assets": [
+    {
+      "id": "card",
+      "kind": "image",
+      "role": "card",
+      "src": "/portfolio/projects/crypto-wallet-mobile-app-dribbble-shot-20162707/card.webp"
+    },
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/crypto-wallet-mobile-app-dribbble-shot-20162707/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/crypto-wallet-mobile-app-dribbble-shot-20162707/gallery-01.webp"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "text-description-20162707",
+      "type": "text",
+      "html": "<h2>Overview</h2><p>Hey,</p><p>Are you looking for some fresh perspective on your crypto wallet app&#39;s design? I&#39;d love to hear your thoughts and offer my own insights!</p>"
+    }
+  ]
+}

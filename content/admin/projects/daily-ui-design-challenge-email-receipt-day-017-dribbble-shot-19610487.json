@@ -1,0 +1,44 @@
+{
+  "id": "dribbble-shot-19610487",
+  "slug": "daily-ui-design-challenge-email-receipt-day-017-dribbble-shot-19610487",
+  "title": "Daily UI Design Challenge | Email Receipt | Day 017",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/daily-ui-design-challenge-email-receipt-day-017-dribbble-shot-19610487/card.webp",
+  "coverImageUrl": "/portfolio/projects/daily-ui-design-challenge-email-receipt-day-017-dribbble-shot-19610487/cover.webp",
+  "sortOrder": 67,
+  "status": "published",
+  "description": "Hey, This is my take on Daily UI challenge #017\n\nEmail Receipt\n\nDo let me know what you think about it.\n\nThanks!",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:32:30.077Z",
+  "createdAt": "2026-04-19T06:32:30.077Z",
+  "coverAssetId": "cover",
+  "cardAssetId": "card",
+  "assets": [
+    {
+      "id": "card",
+      "kind": "image",
+      "role": "card",
+      "src": "/portfolio/projects/daily-ui-design-challenge-email-receipt-day-017-dribbble-shot-19610487/card.webp"
+    },
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/daily-ui-design-challenge-email-receipt-day-017-dribbble-shot-19610487/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/daily-ui-design-challenge-email-receipt-day-017-dribbble-shot-19610487/gallery-01.webp"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "text-description-19610487",
+      "type": "text",
+      "html": "<h2>Overview</h2><p>Hey, This is my take on Daily UI challenge #017</p><p>Email Receipt</p><p>Do let me know what you think about it.</p><p>Thanks!</p>"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "id": "dribbble-shot-19582729",
+  "slug": "daily-ui-design-challenge-popupoverlay-day-016-dribbble-shot-19582729",
+  "title": "Daily UI Design Challenge | Popup/Overlay | Day 016",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/daily-ui-design-challenge-popupoverlay-day-016-dribbble-shot-19582729/card.webp",
+  "coverImageUrl": "/portfolio/projects/daily-ui-design-challenge-popupoverlay-day-016-dribbble-shot-19582729/cover.webp",
+  "sortOrder": 68,
+  "status": "published",
+  "description": "Hey, This is my take on Daily UI challenge #016\n\nPopup/Overlay\n\nDo let me know what you think about it.\n\nThanks!",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:32:31.925Z",
+  "gallery": [
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/daily-ui-design-challenge-popupoverlay-day-016-dribbble-shot-19582729/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/daily-ui-design-challenge-popupoverlay-day-016-dribbble-shot-19582729/gallery-01.webp"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "text-description-19582729",
+      "type": "text",
+      "html": "<h2>Overview</h2><p>Hey, This is my take on Daily UI challenge #016</p><p>Popup/Overlay</p><p>Do let me know what you think about it.</p><p>Thanks!</p>"
+    }
+  ]
+}

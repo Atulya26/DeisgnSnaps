@@ -1,0 +1,41 @@
+{
+  "id": "dribbble-shot-20193058",
+  "slug": "origin-card-management-dashboard-dribbble-shot-20193058",
+  "title": "Origin - Card Management Dashboard",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/origin-card-management-dashboard-dribbble-shot-20193058/card.webp",
+  "coverImageUrl": "/portfolio/projects/origin-card-management-dashboard-dribbble-shot-20193058/cover.webp",
+  "sortOrder": 54,
+  "status": "published",
+  "description": "Origin is a convenient tool for users to keep track of their multiple cards and manage their spending. With this app, users can store all of their cards in one place and set limits for each individual card.\n\nThe dashboard also displays a record of all transactions made with the cards, making it easy for users to stay on top of their spending.\n\nWhether you have one card or multiple cards, the card management dashboard gives you the control you need to manage your finances effectively.\n\nI can't wait to hear your thoughts on the design!",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:32:03.170Z",
+  "gallery": [
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/origin-card-management-dashboard-dribbble-shot-20193058/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/origin-card-management-dashboard-dribbble-shot-20193058/gallery-01.webp"
+    },
+    {
+      "id": "gallery-02",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/origin-card-management-dashboard-dribbble-shot-20193058/gallery-02.webp"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "text-description-20193058",
+      "type": "text",
+      "html": "<h2>Overview</h2><p>Origin is a convenient tool for users to keep track of their multiple cards and manage their spending. With this app, users can store all of their cards in one place and set limits for each individual card.</p><p>The dashboard also displays a record of all transactions made with the cards, making it easy for users to stay on top of their spending.</p><p>Whether you have one card or multiple cards, the card management dashboard gives you the control you need to manage your finances effectively.</p><p>I can&#39;t wait to hear your thoughts on the design!</p>"
+    }
+  ]
+}

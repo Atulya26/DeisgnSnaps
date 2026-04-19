@@ -1,4 +1,18 @@
-import type { Project } from "./types";
+type LegacyProject = {
+  id: string;
+  title: string;
+  category: string;
+  year: string;
+  imageUrl: string;
+  coverImageUrl?: string;
+  description: string;
+  tags: string[];
+  galleryImages?: string[];
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
 
 // Temporary gallery placeholders so the project-detail interactions can be
 // exercised against both single-image and multi-image cases.
@@ -25,7 +39,7 @@ const placeholderDetailGalleries = {
   ],
 } as const;
 
-export const projects: Project[] = [
+export const projects: LegacyProject[] = [
   {
     id: "1",
     title: "Lumina App",

@@ -1,0 +1,44 @@
+{
+  "id": "dribbble-shot-19470909",
+  "slug": "daily-ui-design-challenge-settings-day-07-dribbble-shot-19470909",
+  "title": "Daily UI Design Challenge | Settings | Day 07",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/daily-ui-design-challenge-settings-day-07-dribbble-shot-19470909/card.webp",
+  "coverImageUrl": "/portfolio/projects/daily-ui-design-challenge-settings-day-07-dribbble-shot-19470909/cover.webp",
+  "sortOrder": 77,
+  "status": "published",
+  "description": "Hey, This is my take on Daily UI challenge #07\n\nSettings\n\nDo let me know what you think about it.\n\nThanks!",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:32:46.077Z",
+  "createdAt": "2026-04-19T06:32:46.077Z",
+  "coverAssetId": "cover",
+  "cardAssetId": "card",
+  "assets": [
+    {
+      "id": "card",
+      "kind": "image",
+      "role": "card",
+      "src": "/portfolio/projects/daily-ui-design-challenge-settings-day-07-dribbble-shot-19470909/card.webp"
+    },
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/daily-ui-design-challenge-settings-day-07-dribbble-shot-19470909/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/daily-ui-design-challenge-settings-day-07-dribbble-shot-19470909/gallery-01.webp"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "text-description-19470909",
+      "type": "text",
+      "html": "<h2>Overview</h2><p>Hey, This is my take on Daily UI challenge #07</p><p>Settings</p><p>Do let me know what you think about it.</p><p>Thanks!</p>"
+    }
+  ]
+}

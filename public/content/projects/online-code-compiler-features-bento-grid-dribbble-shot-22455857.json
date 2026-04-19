@@ -1,0 +1,53 @@
+{
+  "id": "dribbble-shot-22455857",
+  "slug": "online-code-compiler-features-bento-grid-dribbble-shot-22455857",
+  "title": "Online Code Compiler - Features Bento Grid",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/online-code-compiler-features-bento-grid-dribbble-shot-22455857/card.webp",
+  "coverImageUrl": "/portfolio/projects/online-code-compiler-features-bento-grid-dribbble-shot-22455857/cover.webp",
+  "sortOrder": 17,
+  "status": "published",
+  "description": "",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:29:00.334Z",
+  "gallery": [
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/online-code-compiler-features-bento-grid-dribbble-shot-22455857/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/online-code-compiler-features-bento-grid-dribbble-shot-22455857/gallery-01.webp"
+    },
+    {
+      "id": "gallery-02",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/online-code-compiler-features-bento-grid-dribbble-shot-22455857/gallery-02.webp"
+    },
+    {
+      "id": "gallery-03",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/online-code-compiler-features-bento-grid-dribbble-shot-22455857/gallery-03.webp"
+    },
+    {
+      "id": "gallery-04",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/online-code-compiler-features-bento-grid-dribbble-shot-22455857/gallery-04.webp"
+    },
+    {
+      "id": "gallery-05",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/online-code-compiler-features-bento-grid-dribbble-shot-22455857/gallery-05.webp"
+    }
+  ],
+  "blocks": []
+}

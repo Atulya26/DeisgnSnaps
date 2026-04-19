@@ -1,0 +1,56 @@
+{
+  "id": "dribbble-shot-22212066",
+  "slug": "onboarding-screens-illustrations-dribbble-shot-22212066",
+  "title": "Onboarding screens - Illustrations",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/onboarding-screens-illustrations-dribbble-shot-22212066/card.webp",
+  "coverImageUrl": "/portfolio/projects/onboarding-screens-illustrations-dribbble-shot-22212066/cover.webp",
+  "sortOrder": 27,
+  "status": "published",
+  "description": "",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:30:29.600Z",
+  "createdAt": "2026-04-19T06:30:29.600Z",
+  "coverAssetId": "cover",
+  "cardAssetId": "card",
+  "assets": [
+    {
+      "id": "card",
+      "kind": "image",
+      "role": "card",
+      "src": "/portfolio/projects/onboarding-screens-illustrations-dribbble-shot-22212066/card.webp"
+    },
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/onboarding-screens-illustrations-dribbble-shot-22212066/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/onboarding-screens-illustrations-dribbble-shot-22212066/gallery-01.webp"
+    },
+    {
+      "id": "gallery-02",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/onboarding-screens-illustrations-dribbble-shot-22212066/gallery-02.webp"
+    },
+    {
+      "id": "gallery-03",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/onboarding-screens-illustrations-dribbble-shot-22212066/gallery-03.webp"
+    },
+    {
+      "id": "gallery-04",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/onboarding-screens-illustrations-dribbble-shot-22212066/gallery-04.webp"
+    }
+  ],
+  "blocks": []
+}

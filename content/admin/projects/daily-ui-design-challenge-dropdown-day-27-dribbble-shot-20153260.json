@@ -1,0 +1,44 @@
+{
+  "id": "dribbble-shot-20153260",
+  "slug": "daily-ui-design-challenge-dropdown-day-27-dribbble-shot-20153260",
+  "title": "Daily UI Design Challenge | Dropdown | Day 27",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/daily-ui-design-challenge-dropdown-day-27-dribbble-shot-20153260/card.webp",
+  "coverImageUrl": "/portfolio/projects/daily-ui-design-challenge-dropdown-day-27-dribbble-shot-20153260/cover.webp",
+  "sortOrder": 56,
+  "status": "published",
+  "description": "Hey, This is my take on Daily UI challenge #025\n\nDropdown\n\nDo let me know what you think about it.\n\nThanks!",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:32:06.950Z",
+  "createdAt": "2026-04-19T06:32:06.950Z",
+  "coverAssetId": "cover",
+  "cardAssetId": "card",
+  "assets": [
+    {
+      "id": "card",
+      "kind": "image",
+      "role": "card",
+      "src": "/portfolio/projects/daily-ui-design-challenge-dropdown-day-27-dribbble-shot-20153260/card.webp"
+    },
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/daily-ui-design-challenge-dropdown-day-27-dribbble-shot-20153260/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/daily-ui-design-challenge-dropdown-day-27-dribbble-shot-20153260/gallery-01.webp"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "text-description-20153260",
+      "type": "text",
+      "html": "<h2>Overview</h2><p>Hey, This is my take on Daily UI challenge #025</p><p>Dropdown</p><p>Do let me know what you think about it.</p><p>Thanks!</p>"
+    }
+  ]
+}

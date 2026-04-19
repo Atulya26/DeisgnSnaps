@@ -1,0 +1,41 @@
+{
+  "id": "dribbble-shot-23934044",
+  "slug": "camera-app-interface-dribbble-shot-23934044",
+  "title": "Camera App Interface",
+  "category": "Dribbble",
+  "year": "2026",
+  "cardImageUrl": "/portfolio/projects/camera-app-interface-dribbble-shot-23934044/card.webp",
+  "coverImageUrl": "/portfolio/projects/camera-app-interface-dribbble-shot-23934044/cover.webp",
+  "sortOrder": 1,
+  "status": "published",
+  "description": "Tried to recreate a DSLR interface for the Camera App\n\nMade on Figma\n\nDo let me know 💬 what you think !\n\nPress\"L\" to Like ❤️ the Post.",
+  "tags": [],
+  "updatedAt": "2026-04-19T06:28:09.831Z",
+  "gallery": [
+    {
+      "id": "cover",
+      "kind": "image",
+      "role": "cover",
+      "src": "/portfolio/projects/camera-app-interface-dribbble-shot-23934044/cover.webp"
+    },
+    {
+      "id": "gallery-01",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/camera-app-interface-dribbble-shot-23934044/gallery-01.webp"
+    },
+    {
+      "id": "gallery-02",
+      "kind": "image",
+      "role": "gallery",
+      "src": "/portfolio/projects/camera-app-interface-dribbble-shot-23934044/gallery-02.webp"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "text-description-23934044",
+      "type": "text",
+      "html": "<h2>Overview</h2><p>Tried to recreate a DSLR interface for the Camera App</p><p>Made on Figma</p><p>Do let me know 💬 what you think !</p><p>Press&quot;L&quot; to Like ❤️ the Post.</p>"
+    }
+  ]
+}

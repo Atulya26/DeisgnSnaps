@@ -1,18 +1,27 @@
-import { useState } from "react";
+import { Suspense, lazy, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Moon, Sun, SettingsSliders } from "geist-icons";
+import { Search } from "lucide-react";
 import { springs } from "./animationConfig";
 import { useTheme } from "./ThemeContext";
-import { ThemeEditor } from "./ThemeEditor";
+
+const LazyThemeEditor = lazy(async () => {
+  const mod = await import("./ThemeEditor");
+  return { default: mod.ThemeEditor };
+});
 
 interface ToolbarProps {
   /** Accepted but unused — kept for API stability with App.tsx. */
   projectCount?: number;
+  onOpenSearch?: () => void;
+  onPrefetchSearch?: () => void;
 }
 
-export function Toolbar(_props: ToolbarProps) {
-  const { theme, colors, toggleTheme } = useTheme();
+export function Toolbar({ onOpenSearch, onPrefetchSearch }: ToolbarProps) {
+  const { theme, colors, toggleTheme, dotGridConfig } = useTheme();
   const [editorOpen, setEditorOpen] = useState(false);
+  const accentColor =
+    theme === "light" ? dotGridConfig.lightActiveColor : dotGridConfig.darkActiveColor;
 
   return (
     <>
@@ -52,6 +61,53 @@ export function Toolbar(_props: ToolbarProps) {
 
       {/* Right: Nav + controls */}
       <div className="flex items-center gap-1">
+        <motion.button
+          type="button"
+          onClick={onOpenSearch}
+          onMouseEnter={onPrefetchSearch}
+          onFocus={onPrefetchSearch}
+          className="mr-2 hidden items-center gap-3 rounded-full px-4 py-2 transition-all md:flex"
+          style={{
+            backgroundColor: theme === "light" ? "rgba(0,0,0,0.045)" : "rgba(255,255,255,0.055)",
+            border: `1px solid ${theme === "light" ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.07)"}`,
+          }}
+          whileHover={{
+            backgroundColor: theme === "light" ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.07)",
+            y: -1,
+          }}
+          initial={{ opacity: 0, y: -4 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, delay: 0.36 }}
+          aria-label="Open search"
+          title="Search (F)"
+        >
+          <Search size={15} color={accentColor} />
+          <span
+            style={{
+              fontSize: 14,
+              fontWeight: 500,
+              fontFamily: "'Inter', sans-serif",
+              color: colors.textSecondary,
+              letterSpacing: "-0.01em",
+            }}
+          >
+            Search archive
+          </span>
+          <span
+            className="rounded-full px-2 py-1"
+            style={{
+              fontSize: 11,
+              fontWeight: 700,
+              fontFamily: "'Inter', sans-serif",
+              color: colors.textMuted,
+              backgroundColor: theme === "light" ? "rgba(255,255,255,0.85)" : "rgba(0,0,0,0.26)",
+              border: `1px solid ${colors.border}`,
+            }}
+          >
+            F
+          </span>
+        </motion.button>
+
         {/* Nav links — uppercase editorial style */}
         {["About", "Contact"].map((label, i) => (
           <motion.button
@@ -76,6 +132,29 @@ export function Toolbar(_props: ToolbarProps) {
             {label}
           </motion.button>
         ))}
+
+        <motion.button
+          type="button"
+          onClick={onOpenSearch}
+          onMouseEnter={onPrefetchSearch}
+          onFocus={onPrefetchSearch}
+          className="flex items-center justify-center rounded-full transition-all active:scale-95 md:hidden"
+          style={{
+            width: 34,
+            height: 34,
+            backgroundColor: "transparent",
+          }}
+          whileHover={{
+            backgroundColor: theme === "light" ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.08)",
+          }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.56 }}
+          aria-label="Open search"
+          title="Search"
+        >
+          <Search size={15} color={colors.text} />
+        </motion.button>
 
         {/* Divider */}
         <div
@@ -158,7 +237,11 @@ export function Toolbar(_props: ToolbarProps) {
     </motion.header>
 
     {/* Theme Editor Panel */}
-    <ThemeEditor open={editorOpen} onClose={() => setEditorOpen(false)} />
+    {editorOpen && (
+      <Suspense fallback={null}>
+        <LazyThemeEditor open={editorOpen} onClose={() => setEditorOpen(false)} />
+      </Suspense>
+    )}
     </>
   );
 }
