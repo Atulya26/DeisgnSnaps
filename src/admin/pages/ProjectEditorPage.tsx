@@ -85,6 +85,8 @@ export function ProjectEditorPage() {
       const saved = await saveProjectToFirestore(syncProjectPreview(project));
       setProject(syncProjectPreview(saved));
       setLastSaved(new Date());
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Save failed");
     } finally {
       setIsSaving(false);
     }

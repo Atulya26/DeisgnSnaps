@@ -1,7 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { Readable } from "node:stream";
 
-function buildRequestFromNode(req: IncomingMessage) {
+async function buildRequestFromNode(req: IncomingMessage) {
   const origin = `https://${req.headers.host ?? "localhost"}`;
   const url = new URL(req.url ?? "/", origin);
   const headers = new Headers();
@@ -14,14 +13,17 @@ function buildRequestFromNode(req: IncomingMessage) {
     if (value) headers.append(key, value);
   }
 
-  const init: RequestInit & { duplex?: "half" } = {
+  const init: RequestInit = {
     method: req.method,
     headers,
   };
 
   if (req.method && !["GET", "HEAD"].includes(req.method)) {
-    init.body = Readable.toWeb(req) as BodyInit;
-    init.duplex = "half";
+    const chunks: Buffer[] = [];
+    for await (const chunk of req) {
+      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+    }
+    init.body = Buffer.concat(chunks);
   }
 
   return new Request(url, init);
@@ -54,7 +56,7 @@ async function sendNodeResponse(res: ServerResponse, response: Response) {
 export function createNodeApiHandler() {
   return async function handler(req: IncomingMessage, res: ServerResponse) {
     try {
-      const request = buildRequestFromNode(req);
+      const request = await buildRequestFromNode(req);
       const { default: adminApiHandler } = await import("../router.js");
       const response = await adminApiHandler(request);
       await sendNodeResponse(res, response);
