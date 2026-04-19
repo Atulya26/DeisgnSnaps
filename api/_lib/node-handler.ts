@@ -1,5 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { Readable } from "node:stream";
+import adminApiHandler from "../[...route].ts";
 
 function buildRequestFromNode(req: IncomingMessage) {
   const origin = `https://${req.headers.host ?? "localhost"}`;
@@ -12,12 +13,6 @@ function buildRequestFromNode(req: IncomingMessage) {
       continue;
     }
     if (value) headers.append(key, value);
-  }
-
-  const forwardedPath = url.searchParams.get("__pathname");
-  if (forwardedPath) {
-    url.pathname = forwardedPath;
-    url.searchParams.delete("__pathname");
   }
 
   const init: RequestInit & { duplex?: "half" } = {
@@ -61,16 +56,17 @@ export const config = {
   runtime: "nodejs",
 };
 
-export default async function handler(req: IncomingMessage, res: ServerResponse) {
-  try {
-    const request = buildRequestFromNode(req);
-    const { default: adminApiHandler } = await import("./[...route].ts");
-    const response = await adminApiHandler(request);
-    await sendNodeResponse(res, response);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Unexpected server bootstrap error";
-    res.statusCode = 500;
-    res.setHeader("Content-Type", "application/json; charset=utf-8");
-    res.end(JSON.stringify({ error: message }));
-  }
+export function createNodeApiHandler() {
+  return async function handler(req: IncomingMessage, res: ServerResponse) {
+    try {
+      const request = buildRequestFromNode(req);
+      const response = await adminApiHandler(request);
+      await sendNodeResponse(res, response);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unexpected server bootstrap error";
+      res.statusCode = 500;
+      res.setHeader("Content-Type", "application/json; charset=utf-8");
+      res.end(JSON.stringify({ error: message }));
+    }
+  };
 }
