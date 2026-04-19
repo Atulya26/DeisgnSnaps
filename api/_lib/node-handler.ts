@@ -51,10 +51,6 @@ async function sendNodeResponse(res: ServerResponse, response: Response) {
   res.end(body);
 }
 
-export const config = {
-  runtime: "nodejs",
-};
-
 export function createNodeApiHandler() {
   return async function handler(req: IncomingMessage, res: ServerResponse) {
     try {
