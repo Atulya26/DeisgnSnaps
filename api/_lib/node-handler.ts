@@ -1,6 +1,5 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { Readable } from "node:stream";
-import adminApiHandler from "../router.ts";
 
 function buildRequestFromNode(req: IncomingMessage) {
   const origin = `https://${req.headers.host ?? "localhost"}`;
@@ -60,6 +59,7 @@ export function createNodeApiHandler() {
   return async function handler(req: IncomingMessage, res: ServerResponse) {
     try {
       const request = buildRequestFromNode(req);
+      const { default: adminApiHandler } = await import("../router.ts");
       const response = await adminApiHandler(request);
       await sendNodeResponse(res, response);
     } catch (error) {
