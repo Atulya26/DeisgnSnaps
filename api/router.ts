@@ -1,4 +1,4 @@
-import type { AdminProjectDocument } from "../src/content/schema";
+import type { AdminProjectDocument } from "../src/content/schema.js";
 import {
   buildSearchIndexFile,
   buildProjectWriteSet,
@@ -8,21 +8,21 @@ import {
   normalizeProjectForWrite,
   readAdminIndex,
   readAdminProjectBySlug,
-} from "./_lib/content";
+} from "./_lib/content.js";
 import {
   commitFiles,
   getBinaryFileBase64,
   githubRequest,
   listDirectory,
   type GitHubRepoConfig,
-} from "./_lib/github";
+} from "./_lib/github.js";
 import {
   listLocalDirectory,
   readLocalAdminIndex,
   readLocalAdminProjectBySlug,
   readLocalBinaryBase64,
   writeLocalRepoFiles,
-} from "./_lib/local";
+} from "./_lib/local.js";
 import {
   buildSessionCookie,
   buildStateCookie,
@@ -32,7 +32,7 @@ import {
   readStateCookie,
   signToken,
   verifyToken,
-} from "./_lib/session";
+} from "./_lib/session.js";
 
 interface SessionPayload {
   login: string;

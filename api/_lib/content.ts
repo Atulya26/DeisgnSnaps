@@ -4,9 +4,9 @@ import type {
   ProjectDocument,
   ProjectIndexFile,
   ProjectSearchIndexFile,
-} from "../../src/content/schema";
-import { getJsonFile } from "./github";
-import type { GitHubRepoConfig } from "./github";
+} from "../../src/content/schema.js";
+import { getJsonFile } from "./github.js";
+import type { GitHubRepoConfig } from "./github.js";
 
 const ADMIN_INDEX_PATH = "content/admin/index.json";
 const ADMIN_PROJECTS_ROOT = "content/admin/projects";
