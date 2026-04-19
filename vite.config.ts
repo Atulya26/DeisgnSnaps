@@ -3,7 +3,7 @@ import path from 'path'
 import { Readable } from 'node:stream'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
-import adminApiHandler from './api/[...route].ts'
+import adminApiHandler from './api/router.ts'
 
 function buildRequestFromNode(req: import('node:http').IncomingMessage) {
   const origin = `http://${req.headers.host ?? '127.0.0.1:5173'}`

@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { Readable } from "node:stream";
-import adminApiHandler from "../[...route].ts";
+import adminApiHandler from "../router.ts";
 
 function buildRequestFromNode(req: IncomingMessage) {
   const origin = `https://${req.headers.host ?? "localhost"}`;
