@@ -213,20 +213,43 @@ export const PortfolioCard = memo(PortfolioCardImpl, (prev, next) => {
 
 interface PortfolioCardReplicaProps {
   project: Project;
+  onOpen?: (project: Project, rect: DOMRect) => void;
 }
 
-function PortfolioCardReplicaImpl({ project }: PortfolioCardReplicaProps) {
+function PortfolioCardReplicaImpl({ project, onOpen }: PortfolioCardReplicaProps) {
   const { theme, colors, animationConfig } = useTheme();
+  const cardRef = useRef<HTMLDivElement>(null);
+  const isInteractive = Boolean(onOpen);
+
+  const handleOpen = useCallback(() => {
+    if (!cardRef.current || !onOpen) return;
+    onOpen(project, cardRef.current.getBoundingClientRect());
+  }, [onOpen, project]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (!isInteractive) return;
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      handleOpen();
+    }
+  }, [handleOpen, isInteractive]);
 
   return (
     <div
+      ref={cardRef}
       className="absolute"
+      role={isInteractive ? "button" : undefined}
+      tabIndex={isInteractive ? 0 : undefined}
+      data-canvas-card={isInteractive ? "true" : undefined}
+      onClick={isInteractive ? handleOpen : undefined}
+      onKeyDown={isInteractive ? handleKeyDown : undefined}
       style={{
         left: project.x,
         top: project.y,
         width: project.width,
+        cursor: isInteractive ? "pointer" : undefined,
       }}
-      aria-hidden="true"
+      aria-hidden={isInteractive ? undefined : "true"}
     >
       <div
         className="relative overflow-hidden"
@@ -297,5 +320,5 @@ function PortfolioCardReplicaImpl({ project }: PortfolioCardReplicaProps) {
 }
 
 export const PortfolioCardReplica = memo(PortfolioCardReplicaImpl, (prev, next) => {
-  return prev.project === next.project;
+  return prev.project === next.project && prev.onOpen === next.onOpen;
 });
