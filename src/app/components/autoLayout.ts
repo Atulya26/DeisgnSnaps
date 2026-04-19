@@ -1,4 +1,5 @@
 import type { Project } from "./types";
+import { getHomeCardRenderedHeight } from "./cardMetrics";
 
 /**
  * Auto-layout engine for the infinite canvas.
@@ -96,7 +97,7 @@ export function getLayoutBounds(projects: Project[]) {
     if (p.x < minX) minX = p.x;
     if (p.y < minY) minY = p.y;
     if (p.x + p.width > maxX) maxX = p.x + p.width;
-    if (p.y + p.height > maxY) maxY = p.y + p.height;
+    if (p.y + getHomeCardRenderedHeight(p) > maxY) maxY = p.y + getHomeCardRenderedHeight(p);
   }
   return { minX, minY, maxX, maxY };
 }

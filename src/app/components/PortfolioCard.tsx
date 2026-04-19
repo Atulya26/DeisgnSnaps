@@ -1,4 +1,4 @@
-import { useState, useRef, memo } from "react";
+import { useCallback, useState, useRef, memo } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { ArrowUpRight } from "geist-icons";
 import type { Project } from "./types";
@@ -213,28 +213,64 @@ export const PortfolioCard = memo(PortfolioCardImpl, (prev, next) => {
 
 interface PortfolioCardReplicaProps {
   project: Project;
+  onOpen?: (project: Project, rect: DOMRect) => void;
 }
 
-function PortfolioCardReplicaImpl({ project }: PortfolioCardReplicaProps) {
+function PortfolioCardReplicaImpl({ project, onOpen }: PortfolioCardReplicaProps) {
+  const [isHovered, setIsHovered] = useState(false);
   const { theme, colors, animationConfig } = useTheme();
+  const cardRef = useRef<HTMLDivElement>(null);
+  const prefersReduced = useReducedMotion();
+  const isInteractive = Boolean(onOpen);
+  const showHoverState = isInteractive && isHovered;
+
+  const handleOpen = useCallback(() => {
+    if (!cardRef.current || !onOpen) return;
+    onOpen(project, cardRef.current.getBoundingClientRect());
+  }, [onOpen, project]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (!isInteractive) return;
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      handleOpen();
+    }
+  }, [handleOpen, isInteractive]);
 
   return (
     <div
+      ref={cardRef}
       className="absolute"
+      role={isInteractive ? "button" : undefined}
+      tabIndex={isInteractive ? 0 : undefined}
+      data-canvas-card={isInteractive ? "true" : undefined}
+      onClick={isInteractive ? handleOpen : undefined}
+      onKeyDown={isInteractive ? handleKeyDown : undefined}
+      onPointerEnter={isInteractive ? () => setIsHovered(true) : undefined}
+      onPointerLeave={isInteractive ? () => setIsHovered(false) : undefined}
+      onFocus={isInteractive ? () => setIsHovered(true) : undefined}
+      onBlur={isInteractive ? () => setIsHovered(false) : undefined}
       style={{
         left: project.x,
         top: project.y,
         width: project.width,
+        cursor: isInteractive ? "pointer" : undefined,
       }}
-      aria-hidden="true"
+      aria-hidden={isInteractive ? undefined : "true"}
     >
       <div
         className="relative overflow-hidden"
         style={{
           borderRadius: animationConfig.cardBorderRadius,
           backgroundColor: colors.cardBg,
-          boxShadow: colors.cardShadow,
-          border: `1px solid ${theme === "light" ? "rgba(0,0,0,0.04)" : "rgba(255,255,255,0.04)"}`,
+          boxShadow: showHoverState ? colors.cardShadowHover : colors.cardShadow,
+          border: `1px solid ${showHoverState
+            ? (theme === "light" ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.08)")
+            : (theme === "light" ? "rgba(0,0,0,0.04)" : "rgba(255,255,255,0.04)")}`,
+          transform: prefersReduced || !showHoverState
+            ? "translate3d(0, 0, 0)"
+            : `translate3d(0, ${-animationConfig.cardHoverLift}px, 0)`,
+          transition: "transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.35s cubic-bezier(0.22, 1, 0.36, 1)",
         }}
       >
         <div
@@ -251,7 +287,37 @@ function PortfolioCardReplicaImpl({ project }: PortfolioCardReplicaProps) {
             decoding="async"
             loading="lazy"
             {...({ fetchpriority: "low" } as Record<string, string>)}
+            style={{
+              transform: prefersReduced || !showHoverState ? "scale(1)" : `scale(${animationConfig.cardImageZoom})`,
+              transition: "transform 0.5s cubic-bezier(0.22, 1, 0.36, 1)",
+            }}
           />
+
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{
+              opacity: showHoverState ? 1 : 0,
+              transition: "opacity 0.3s ease",
+              background: "linear-gradient(to top, rgba(0,0,0,0.12) 0%, transparent 40%)",
+            }}
+          />
+
+          <div
+            className="pointer-events-none absolute right-3 top-3 flex items-center justify-center rounded-full"
+            style={{
+              width: 30,
+              height: 30,
+              backgroundColor: theme === "light" ? "rgba(255,255,255,0.92)" : "rgba(0,0,0,0.65)",
+              backdropFilter: "blur(8px)",
+              opacity: showHoverState ? 1 : 0,
+              transform: prefersReduced
+                ? "translate3d(0, 0, 0)"
+                : (showHoverState ? "translate3d(0, 0, 0) scale(1)" : "translate3d(0, 4px, 0) scale(0.8)"),
+              transition: "opacity 0.3s ease, transform 0.3s cubic-bezier(0.22, 1, 0.36, 1)",
+            }}
+          >
+            <ArrowUpRight size={14} color={colors.text} />
+          </div>
         </div>
 
         <div
@@ -297,5 +363,5 @@ function PortfolioCardReplicaImpl({ project }: PortfolioCardReplicaProps) {
 }
 
 export const PortfolioCardReplica = memo(PortfolioCardReplicaImpl, (prev, next) => {
-  return prev.project === next.project;
+  return prev.project === next.project && prev.onOpen === next.onOpen;
 });

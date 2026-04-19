@@ -13,6 +13,7 @@ import { ZoomControls } from "./ZoomControls";
 import { useTheme } from "./ThemeContext";
 import { BackgroundRippleEffect } from "./BackgroundRippleEffect";
 import { computeInitialCamera } from "./autoLayout";
+import { getHomeCardRenderedHeight } from "./cardMetrics";
 
 const TOOLBAR_OFFSET = 64; // must match Toolbar.tsx height — canvas pans under the translucent bar
 
@@ -170,7 +171,7 @@ export function InfiniteCanvas({
     [projects]
   );
   const tileH = useMemo(
-    () => Math.max(...projects.map((p) => p.y + p.height)) + TILE_PADDING,
+    () => Math.max(...projects.map((p) => p.y + getHomeCardRenderedHeight(p))) + TILE_PADDING,
     [projects]
   );
 
@@ -918,7 +919,6 @@ export function InfiniteCanvas({
         }}
       >
         {visibleTiles.map((tile) => {
-          const isOriginTile = tile.col === 0 && tile.row === 0;
           return (
             <div
               key={tile.key}
@@ -931,8 +931,9 @@ export function InfiniteCanvas({
                 contain: "strict",
               }}
             >
-              {projects.map((project, i) => (
-                isOriginTile ? (
+              {projects.map((project, i) => {
+                const isOriginTile = tile.col === 0 && tile.row === 0;
+                return isOriginTile ? (
                   <PortfolioCard
                     key={`${project.id}-${tile.key}`}
                     project={project}
@@ -944,9 +945,10 @@ export function InfiniteCanvas({
                   <PortfolioCardReplica
                     key={`${project.id}-${tile.key}`}
                     project={project}
+                    onOpen={handleCardOpen}
                   />
-                )
-              ))}
+                );
+              })}
             </div>
           );
         })}
