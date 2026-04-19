@@ -17,6 +17,8 @@ export interface AdminUser {
 export interface AdminSessionResponse {
   authenticated: boolean;
   user?: AdminUser;
+  authConfigured?: boolean;
+  mode?: "local" | "github";
 }
 
 export interface AdminProjectListItem extends ProjectIndexEntry {

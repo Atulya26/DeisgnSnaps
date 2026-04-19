@@ -9,11 +9,16 @@ import { Button } from "../../app/components/ui/button";
 import { useAuth } from "../components/AuthContext";
 
 export function LoginPage() {
-  const { user, loading, signIn } = useAuth();
+  const { user, authConfigured, loading, signIn } = useAuth();
   const [signingIn, setSigningIn] = useState(false);
   const isLocalhost =
     typeof window !== "undefined" &&
     ["127.0.0.1", "localhost"].includes(window.location.hostname);
+  const authError =
+    typeof window !== "undefined"
+      ? new URLSearchParams(window.location.search).get("error")
+      : null;
+  const needsDeploymentConfig = !isLocalhost && !authConfigured;
 
   if (!loading && user) {
     return <Navigate to="/admin" replace />;
@@ -44,22 +49,35 @@ export function LoginPage() {
           <p className="mt-1 text-sm text-muted-foreground">
             {isLocalhost
               ? "Local dev mode is active. Continue to edit project order, images, and content on this machine."
-              : "Sign in with GitHub to edit project order, images, and content."}
+              : needsDeploymentConfig
+                ? "GitHub admin auth is not configured on this deployment yet. Add the Vercel env vars and redeploy."
+                : "Sign in with GitHub to edit project order, images, and content."}
           </p>
+          {authError === "auth_config" ? (
+            <p className="mt-2 text-xs text-destructive">
+              The deployed admin API is reachable now, but GitHub auth secrets are still missing in Vercel.
+            </p>
+          ) : null}
         </div>
 
         <Button
           type="button"
           className="w-full gap-2"
           onClick={handleSignIn}
-          disabled={signingIn}
+          disabled={signingIn || needsDeploymentConfig}
         >
           {signingIn ? (
             <LoaderCircle className="size-4 animate-spin" />
           ) : (
             <GitBranch className="size-4" />
           )}
-          {signingIn ? "Redirecting…" : isLocalhost ? "Continue Locally" : "Continue with GitHub"}
+          {signingIn
+            ? "Redirecting…"
+            : isLocalhost
+              ? "Continue Locally"
+              : needsDeploymentConfig
+                ? "Configure GitHub Auth"
+                : "Continue with GitHub"}
         </Button>
 
         <a

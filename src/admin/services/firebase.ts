@@ -99,7 +99,7 @@ export async function getSession(): Promise<AdminSessionResponse> {
   try {
     return await apiRequest<AdminSessionResponse>("/api/admin/session");
   } catch {
-    return { authenticated: false };
+    return { authenticated: false, authConfigured: false };
   }
 }
 

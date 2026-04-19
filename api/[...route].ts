@@ -598,6 +598,7 @@ export default async function handler(request: Request) {
   const url = new URL(request.url);
   const secure = secureCookieFor(request);
   const pathname = url.pathname;
+  const authConfigured = hasGitHubConfig();
 
   try {
     if (isLocalDevMode(request)) {
@@ -605,6 +606,9 @@ export default async function handler(request: Request) {
     }
 
     if (request.method === "GET" && pathname === "/api/auth/github/start") {
+      if (!authConfigured) {
+        return redirect("/admin/login?error=auth_config");
+      }
       const secret = getRequiredEnv("SESSION_SECRET");
       const clientId = getRequiredEnv("GITHUB_APP_CLIENT_ID");
       const nonce = crypto.randomUUID();
@@ -625,6 +629,9 @@ export default async function handler(request: Request) {
     }
 
     if (request.method === "GET" && pathname === "/api/auth/github/callback") {
+      if (!authConfigured) {
+        return redirect("/admin/login?error=auth_config");
+      }
       const secret = getRequiredEnv("SESSION_SECRET");
       const storedState = readStateCookie(request);
       const nextState = url.searchParams.get("state") ?? "";
@@ -692,9 +699,13 @@ export default async function handler(request: Request) {
 
     if (request.method === "GET" && pathname === "/api/admin/session") {
       const session = await readSession(request);
-      if (!session) return json({ authenticated: false });
+      if (!session) {
+        return json({ authenticated: false, authConfigured, mode: "github" });
+      }
       return json({
         authenticated: true,
+        authConfigured,
+        mode: "github",
         user: {
           login: session.login,
           avatarUrl: session.avatarUrl,
