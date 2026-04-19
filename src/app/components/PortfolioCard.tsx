@@ -38,6 +38,7 @@ function PortfolioCardImpl({ project, onOpen, skipAnimation, index = 0 }: Portfo
       role="button"
       tabIndex={0}
       className="absolute cursor-pointer"
+      data-canvas-card="true"
       style={{
         left: project.x,
         top: project.y,

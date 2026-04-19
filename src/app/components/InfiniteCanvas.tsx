@@ -38,6 +38,7 @@ const SETTLE_THRESHOLD = 0.05;        // Tighter settle → less visible snap at
 const ZOOM_SETTLE_THRESHOLD = 0.0003; // Tighter zoom settle
 const ZOOM_DISPLAY_THROTTLE = 60;     // More responsive zoom display (was 80)
 const BASELINE_DT = 16.667;           // 60fps reference frame time
+const DRAG_START_THRESHOLD = 4;
 
 // ── Grid cell size (shared with BackgroundRippleEffect) ──
 const GRID_CELL = 40;
@@ -62,6 +63,25 @@ function detectTrackpad(e: WheelEvent): boolean {
     (ay > 0 && ay < 40) ||
     (ax > 0 && ax < 40) ||
     (!Number.isInteger(e.deltaX) || !Number.isInteger(e.deltaY))
+  );
+}
+
+function isInteractiveCanvasTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false;
+
+  return Boolean(
+    target.closest(
+      [
+        "[data-canvas-card='true']",
+        "button",
+        "a",
+        "input",
+        "textarea",
+        "select",
+        "[role='button']",
+        "[contenteditable='true']",
+      ].join(",")
+    )
   );
 }
 
@@ -105,6 +125,7 @@ export function InfiniteCanvas({
   const dragStart = useRef({ x: 0, y: 0 });
   const cameraStart = useRef({ x: 0, y: 0 });
   const hasDragged = useRef(false);
+  const dragVisualsActive = useRef(false);
 
   // ── Touch state ──
   const lastTouchDist = useRef(0);
@@ -358,6 +379,7 @@ export function InfiniteCanvas({
     // Disable pointer-events on cards while dragging to avoid hover compositing
     const tg = transformGroupRef.current;
     if (tg) tg.style.pointerEvents = dragging ? "none" : "";
+    dragVisualsActive.current = dragging;
   }, []);
 
   // ── Dismiss hint ──
@@ -372,10 +394,10 @@ export function InfiniteCanvas({
   const handlePointerDown = useCallback(
     (e: React.PointerEvent) => {
       if (e.button !== 0) return;
+      if (isInteractiveCanvasTarget(e.target)) return;
       cancelMomentum();
       cancelWheelSmoothing();
       isDragging.current = true;
-      setDragVisuals(true);
       hasDragged.current = false;
       dragStart.current = { x: e.clientX, y: e.clientY };
       cameraStart.current = { ...camera.current };
@@ -385,7 +407,7 @@ export function InfiniteCanvas({
       (e.target as HTMLElement).setPointerCapture(e.pointerId);
       e.preventDefault();
     },
-    [cancelMomentum, cancelWheelSmoothing, setDragVisuals]
+    [cancelMomentum, cancelWheelSmoothing]
   );
 
   // Track whether tile sync is needed (set during drag, consumed by rAF)
@@ -398,8 +420,11 @@ export function InfiniteCanvas({
       const dx = (e.clientX - dragStart.current.x) / z;
       const dy = (e.clientY - dragStart.current.y) / z;
 
-      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+      if (Math.abs(dx) > DRAG_START_THRESHOLD || Math.abs(dy) > DRAG_START_THRESHOLD) {
         hasDragged.current = true;
+        if (!dragVisualsActive.current) {
+          setDragVisuals(true);
+        }
       }
 
       // Direct camera update — 1:1 tracking, no smoothing
@@ -436,7 +461,9 @@ export function InfiniteCanvas({
     const handlePointerUp = () => {
       if (!isDragging.current) return;
       isDragging.current = false;
-      setDragVisuals(false);
+      if (dragVisualsActive.current) {
+        setDragVisuals(false);
+      }
 
       // Flush any pending tile sync now that drag is over
       if (tileSyncPending.current) {
@@ -458,9 +485,11 @@ export function InfiniteCanvas({
 
     window.addEventListener("pointermove", handlePointerMove);
     window.addEventListener("pointerup", handlePointerUp);
+    window.addEventListener("pointercancel", handlePointerUp);
     return () => {
       window.removeEventListener("pointermove", handlePointerMove);
       window.removeEventListener("pointerup", handlePointerUp);
+      window.removeEventListener("pointercancel", handlePointerUp);
     };
   }, [markInteracted, ensureLoop, applyTransform, syncTiles, setDragVisuals]);
 
@@ -478,6 +507,28 @@ export function InfiniteCanvas({
     const tg = transformGroupRef.current;
     if (tg) tg.style.pointerEvents = active ? "none" : "";
   }, []);
+
+  const resetInteractionState = useCallback(() => {
+    isDragging.current = false;
+    hasDragged.current = false;
+    dragStart.current = { x: 0, y: 0 };
+    cameraStart.current = { ...camera.current };
+    velocity.current = { x: 0, y: 0 };
+    hasMomentum.current = false;
+    isWheelSmoothing.current = false;
+    targetCamera.current = { ...camera.current };
+    targetZoom.current = zoom.current;
+    if (scrollIdleTimer.current !== null) {
+      window.clearTimeout(scrollIdleTimer.current);
+      scrollIdleTimer.current = null;
+    }
+    setScrollActive(false);
+    if (dragVisualsActive.current) {
+      setDragVisuals(false);
+    } else if (transformGroupRef.current) {
+      transformGroupRef.current.style.pointerEvents = "";
+    }
+  }, [setDragVisuals, setScrollActive]);
 
   // ──────────── Wheel: Scroll = Pan, Ctrl/Cmd+Scroll = Zoom ────────────
   useEffect(() => {
@@ -607,8 +658,11 @@ export function InfiniteCanvas({
         const dx = (e.touches[0].clientX - dragStart.current.x) / z;
         const dy = (e.touches[0].clientY - dragStart.current.y) / z;
 
-        if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+        if (Math.abs(dx) > DRAG_START_THRESHOLD || Math.abs(dy) > DRAG_START_THRESHOLD) {
           hasDragged.current = true;
+          if (!dragVisualsActive.current) {
+            setDragVisuals(true);
+          }
         }
 
         camera.current.x = cameraStart.current.x - dx;
@@ -674,7 +728,9 @@ export function InfiniteCanvas({
     const handleTouchEnd = () => {
       if (isDragging.current) {
         isDragging.current = false;
-        setDragVisuals(false);
+        if (dragVisualsActive.current) {
+          setDragVisuals(false);
+        }
 
         // Flush pending tile sync
         if (tileSyncPending.current) {
@@ -701,6 +757,26 @@ export function InfiniteCanvas({
       el.removeEventListener("touchend", handleTouchEnd);
     };
   }, [markInteracted, cancelMomentum, cancelWheelSmoothing, ensureLoop, applyTransform, syncTiles, setDragVisuals]);
+
+  useEffect(() => {
+    const handleWindowFocus = () => {
+      resetInteractionState();
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        resetInteractionState();
+      }
+    };
+
+    window.addEventListener("focus", handleWindowFocus);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener("focus", handleWindowFocus);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [resetInteractionState]);
 
   // ──────────── Animated zoom (for buttons) ────────────
   const animateZoom = useCallback(
@@ -797,8 +873,9 @@ export function InfiniteCanvas({
     applyTransform();
     return () => {
       cancelAnimationFrame(loopRef.current);
+      resetInteractionState();
     };
-  }, [applyTransform]);
+  }, [applyTransform, resetInteractionState]);
 
   // Card click wrapper
   const handleCardOpen = useCallback(
