@@ -8,9 +8,9 @@
   "coverImageUrl": "/portfolio/projects/car-hmi-digital-instrument-cluster-dribbble-shot-24567439/cover.webp",
   "sortOrder": 0,
   "status": "published",
-  "description": "Hey Dribbble! Created a Car HMI - Instrument Cluster\n\nThis was my first time recreating and learning the process of making a HMI Digital Cluster. Inspired and recreated the work of Daniil Bondarenko.\n\nLink to his work HMI Digital Cluster.\n\nDo let me know 💬 what you think !\n\nPress\"L\" to Like ❤️ the Post.",
+  "description": "Overview\n\n\nHey, Created a Car HMI - Instrument Cluster\n\nThis was my first time recreating and learning the process of making a HMI Digital Cluster. \n\nInspired and recreated the work of Daniil Bondarenko.\n\n",
   "tags": [],
-  "updatedAt": "2026-04-19T08:04:17.342Z",
+  "updatedAt": "2026-04-19T11:19:09.818Z",
   "createdAt": "2026-04-19T06:28:07.907Z",
   "coverAssetId": "cover",
   "cardAssetId": "card",
@@ -38,7 +38,7 @@
     {
       "id": "text-description-24567439",
       "type": "text",
-      "html": "<h2>Overview</h2><p>Hey Dribbble! Created a Car HMI - Instrument Cluster</p><p>This was my first time recreating and learning the process of making a HMI Digital Cluster. Inspired and recreated the work of Daniil Bondarenko.</p><p>Link to his work HMI Digital Cluster.</p><p>Do let me know 💬 what you think !</p><p>Press&quot;L&quot; to Like ❤️ the Post.</p>"
+      "html": "<h2>Overview</h2><p><br>Hey, Created a Car HMI - Instrument Cluster</p><p>This was my first time recreating and learning the process of making a HMI Digital Cluster. <br><br>Inspired and recreated the work of Daniil Bondarenko.</p><p></p>"
     }
   ],
   "gallery": [
