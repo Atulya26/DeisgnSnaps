@@ -55,7 +55,7 @@ export function createNodeApiHandler() {
   return async function handler(req: IncomingMessage, res: ServerResponse) {
     try {
       const request = buildRequestFromNode(req);
-      const { default: adminApiHandler } = await import("../router.ts");
+      const { default: adminApiHandler } = await import("../router");
       const response = await adminApiHandler(request);
       await sendNodeResponse(res, response);
     } catch (error) {

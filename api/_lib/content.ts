@@ -4,15 +4,19 @@ import type {
   ProjectDocument,
   ProjectIndexFile,
   ProjectSearchIndexFile,
-} from "../../src/content/schema.ts";
-import { getJsonFile } from "./github.ts";
-import type { GitHubRepoConfig } from "./github.ts";
+} from "../../src/content/schema";
+import { getJsonFile } from "./github";
+import type { GitHubRepoConfig } from "./github";
 
 const ADMIN_INDEX_PATH = "content/admin/index.json";
 const ADMIN_PROJECTS_ROOT = "content/admin/projects";
 const PUBLIC_INDEX_PATH = "public/content/projects/index.json";
 const PUBLIC_PROJECTS_ROOT = "public/content/projects";
 const PUBLIC_SEARCH_INDEX_PATH = "public/content/projects/search-index.json";
+
+type RepoWrite =
+  | { path: string; content: string; encoding: "utf-8" }
+  | { path: string; delete: true };
 
 export function getRepoFilePathFromPublicUrl(publicUrl: string) {
   return `public/${publicUrl.replace(/^\/+/, "")}`;
@@ -242,7 +246,7 @@ export function buildProjectWriteSet(projects: AdminProjectDocument[]) {
     },
     ...projects.flatMap((project) => {
       const publicDoc = buildPublicProject(project);
-      const writes = [
+      const writes: RepoWrite[] = [
         {
           path: getAdminProjectPath(project.slug),
           content: toTextFile(project),
@@ -271,7 +275,7 @@ export function buildProjectWriteSet(projects: AdminProjectDocument[]) {
 export function buildSingleProjectWriteSet(
   allProjects: AdminProjectDocument[],
   project: AdminProjectDocument
-) {
+) : RepoWrite[] {
   return [
     {
       path: ADMIN_INDEX_PATH,

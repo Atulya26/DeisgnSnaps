@@ -1,4 +1,4 @@
-import type { AdminProjectDocument } from "../src/content/schema.ts";
+import type { AdminProjectDocument } from "../src/content/schema";
 import {
   buildSearchIndexFile,
   buildProjectWriteSet,
@@ -8,21 +8,21 @@ import {
   normalizeProjectForWrite,
   readAdminIndex,
   readAdminProjectBySlug,
-} from "./_lib/content.ts";
+} from "./_lib/content";
 import {
   commitFiles,
   getBinaryFileBase64,
   githubRequest,
   listDirectory,
   type GitHubRepoConfig,
-} from "./_lib/github.ts";
+} from "./_lib/github";
 import {
   listLocalDirectory,
   readLocalAdminIndex,
   readLocalAdminProjectBySlug,
   readLocalBinaryBase64,
   writeLocalRepoFiles,
-} from "./_lib/local.ts";
+} from "./_lib/local";
 import {
   buildSessionCookie,
   buildStateCookie,
@@ -32,7 +32,7 @@ import {
   readStateCookie,
   signToken,
   verifyToken,
-} from "./_lib/session.ts";
+} from "./_lib/session";
 
 interface SessionPayload {
   login: string;
@@ -45,6 +45,20 @@ interface SessionPayload {
 interface StatePayload {
   nonce: string;
   exp: number;
+}
+
+function unwrapProjectPayload(
+  body: { project?: AdminProjectDocument } | AdminProjectDocument
+): AdminProjectDocument | null {
+  if ("id" in body) {
+    return body;
+  }
+
+  if ("project" in body) {
+    return body.project ?? null;
+  }
+
+  return null;
 }
 
 const LOCAL_DEV_SECRET = "portfolio-local-dev-session";
@@ -499,7 +513,7 @@ async function handleLocalDevRequest(request: Request, secure: boolean, pathname
 
     if (request.method === "PUT") {
       const body = (await request.json()) as { project?: AdminProjectDocument } | AdminProjectDocument;
-      const incoming = "project" in body ? body.project : body;
+      const incoming = unwrapProjectPayload(body);
       if (!incoming || incoming.id !== projectId) {
         return json({ error: "Invalid project payload" }, { status: 400 });
       }
@@ -897,7 +911,7 @@ export default async function handler(request: Request) {
 
       if (request.method === "PUT") {
         const body = (await request.json()) as { project?: AdminProjectDocument } | AdminProjectDocument;
-        const incoming = "project" in body ? body.project : body;
+        const incoming = unwrapProjectPayload(body);
         if (!incoming || incoming.id !== projectId) {
           return json({ error: "Invalid project payload" }, { status: 400 });
         }

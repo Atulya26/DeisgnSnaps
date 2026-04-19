@@ -1,4 +1,4 @@
-import { createNodeApiHandler } from "../_lib/node-handler.ts";
+import { createNodeApiHandler } from "../_lib/node-handler";
 
 export const config = {
   runtime: "nodejs",
