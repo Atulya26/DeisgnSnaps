@@ -1,4 +1,4 @@
-import adminApiHandler from "./[...route]";
+import adminApiHandler from "./[...route].ts";
 
 function buildForwardedRequest(request: Request) {
   const currentUrl = new URL(request.url);

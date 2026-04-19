@@ -1,6 +1,6 @@
 import { mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
-import type { AdminProjectDocument, ProjectIndexFile } from "../../src/content/schema";
+import type { AdminProjectDocument, ProjectIndexFile } from "../../src/content/schema.ts";
 
 const REPO_ROOT = process.cwd();
 const ADMIN_INDEX_PATH = "content/admin/index.json";
