@@ -10,7 +10,7 @@
   "status": "published",
   "description": "Overview\n\n\nHey, Created a Car HMI - Instrument Cluster\n\nThis was my first time recreating and learning the process of making a HMI Digital Cluster. \n\nInspired and recreated the work of Daniil Bondarenko.\n\n",
   "tags": [],
-  "updatedAt": "2026-04-19T11:19:14.700Z",
+  "updatedAt": "2026-04-21T08:07:07.527Z",
   "createdAt": "2026-04-19T06:28:07.907Z",
   "coverAssetId": "cover",
   "cardAssetId": "card",
@@ -38,7 +38,7 @@
     {
       "id": "text-description-24567439",
       "type": "text",
-      "html": "<h2>Overview</h2><p><br>Hey, Created a Car HMI - Instrument Cluster</p><p>This was my first time recreating and learning the process of making a HMI Digital Cluster. <br><br>Inspired and recreated the work of Daniil Bondarenko.</p><p></p>"
+      "html": "<h2>Overview</h2><p><br>Hey, Created a Car HMI - Instrument Cluster</p><p>This was my first time recreating and learning the process of making a HMI Digital Cluster. <br><br></p><p></p>"
     }
   ],
   "gallery": [
