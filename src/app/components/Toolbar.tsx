@@ -15,9 +15,10 @@ interface ToolbarProps {
   projectCount?: number;
   onOpenSearch?: () => void;
   onPrefetchSearch?: () => void;
+  onOpenContact?: () => void;
 }
 
-export function Toolbar({ onOpenSearch, onPrefetchSearch }: ToolbarProps) {
+export function Toolbar({ onOpenSearch, onPrefetchSearch, onOpenContact }: ToolbarProps) {
   const { theme, colors, toggleTheme, dotGridConfig } = useTheme();
   const [editorOpen, setEditorOpen] = useState(false);
   const accentColor =
@@ -108,30 +109,28 @@ export function Toolbar({ onOpenSearch, onPrefetchSearch }: ToolbarProps) {
           </span>
         </motion.button>
 
-        {/* Nav links — uppercase editorial style */}
-        {["About", "Contact"].map((label, i) => (
-          <motion.button
-            key={label}
-            type="button"
-            className="relative rounded-full px-5 py-2 transition-colors"
-            style={{
-              fontSize: 14,
-              fontWeight: 500,
-              fontFamily: "'Inter', sans-serif",
-              color: colors.textSecondary,
-              letterSpacing: "-0.005em",
-            }}
-            whileHover={{
-              color: colors.text,
-              backgroundColor: theme === "light" ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.06)",
-            }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.5 + i * 0.08 }}
-          >
-            {label}
-          </motion.button>
-        ))}
+        <motion.button
+          type="button"
+          onClick={onOpenContact}
+          aria-label="Open about and contact page"
+          className="relative rounded-full px-5 py-2 transition-colors"
+          style={{
+            fontSize: 14,
+            fontWeight: 500,
+            fontFamily: "'Inter', sans-serif",
+            color: colors.textSecondary,
+            letterSpacing: 0,
+          }}
+          whileHover={{
+            color: colors.text,
+            backgroundColor: theme === "light" ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.06)",
+          }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+        >
+          About
+        </motion.button>
 
         <motion.button
           type="button"

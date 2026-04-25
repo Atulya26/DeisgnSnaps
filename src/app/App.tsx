@@ -42,6 +42,11 @@ const LazySearchDialog = lazy(async () => {
   return { default: mod.SearchDialog };
 });
 
+const LazyContactPage = lazy(async () => {
+  const mod = await import("./components/ContactPage");
+  return { default: mod.ContactPage };
+});
+
 function mapFallbackProjects(): ProjectIndexEntry[] {
   return hardcodedProjects.map(({ imageUrl, width, height, x, y, ...project }, index) => ({
     id: project.id,
@@ -68,6 +73,7 @@ function AppContent() {
   const [indexLoaded, setIndexLoaded] = useState(false);
   const [loadingProjectId, setLoadingProjectId] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
   const originRectRef = useRef<DOMRect | null>(null);
   const fallbackProjects = useMemo(() => mapFallbackProjects(), []);
 
@@ -216,6 +222,7 @@ function AppContent() {
           projectCount={projects.length}
           onOpenSearch={() => setSearchOpen(true)}
           onPrefetchSearch={prefetchPublicSearchIndex}
+          onOpenContact={() => setContactOpen(true)}
         />
       )}
 
@@ -248,6 +255,13 @@ function AppContent() {
           projects={projects}
           onClose={() => setSearchOpen(false)}
           onSelectProject={handleSelectProjectFromSearch}
+        />
+      </Suspense>
+
+      <Suspense fallback={null}>
+        <LazyContactPage
+          open={contactOpen}
+          onClose={() => setContactOpen(false)}
         />
       </Suspense>
     </div>
