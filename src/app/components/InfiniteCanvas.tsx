@@ -22,9 +22,11 @@ interface InfiniteCanvasProps {
   onOpenProject: (project: Project, rect: DOMRect) => void;
 }
 
-const MIN_ZOOM = 0.4;
+const MIN_ZOOM = 0.25;
 const MAX_ZOOM = 1.4;
-const DEFAULT_ZOOM = 0.60;
+const DESKTOP_DEFAULT_ZOOM = 0.60;
+const MOBILE_DEFAULT_ZOOM = 0.35;
+const MOBILE_BREAKPOINT = 768;
 const ZOOM_STEP = 0.08;
 const TILE_PADDING = 30;
 
@@ -43,6 +45,11 @@ const DRAG_START_THRESHOLD = 4;
 
 // ── Grid cell size (shared with BackgroundRippleEffect) ──
 const GRID_CELL = 40;
+
+function getDefaultCanvasZoom() {
+  if (typeof window === "undefined") return DESKTOP_DEFAULT_ZOOM;
+  return window.innerWidth < MOBILE_BREAKPOINT ? MOBILE_DEFAULT_ZOOM : DESKTOP_DEFAULT_ZOOM;
+}
 
 function normalizeWheelDelta(e: WheelEvent): { x: number; y: number } {
   // deltaMode: 0=pixel, 1=line, 2=page
@@ -93,6 +100,7 @@ export function InfiniteCanvas({
   const { colors } = useTheme();
   const containerRef = useRef<HTMLDivElement>(null);
   const transformGroupRef = useRef<HTMLDivElement>(null);
+  const defaultZoom = useMemo(() => getDefaultCanvasZoom(), []);
 
   // ── Initial camera: centered on the masonry bounds so ultrawide/4K screens
   //     don't leave a big empty band. Computed once from the first `projects`
@@ -105,7 +113,7 @@ export function InfiniteCanvas({
       return computeInitialCamera(
         projects,
         { width: window.innerWidth, height: window.innerHeight },
-        DEFAULT_ZOOM,
+        defaultZoom,
         TOOLBAR_OFFSET
       );
     },
@@ -115,11 +123,11 @@ export function InfiniteCanvas({
 
   // ── Camera & zoom live in refs (never trigger React re-renders) ──
   const camera = useRef({ ...initialCameraSeed });
-  const zoom = useRef(DEFAULT_ZOOM);
+  const zoom = useRef(defaultZoom);
 
   // Smooth targets — input handlers write here, render loop lerps toward them
   const targetCamera = useRef({ ...initialCameraSeed });
-  const targetZoom = useRef(DEFAULT_ZOOM);
+  const targetZoom = useRef(defaultZoom);
 
   // ── Drag state ──
   const isDragging = useRef(false);
@@ -144,8 +152,8 @@ export function InfiniteCanvas({
 
   // ── Animated zoom state (for zoom buttons) ──
   const isZoomAnimating = useRef(false);
-  const zoomAnimStart = useRef({ zoom: DEFAULT_ZOOM, camera: { x: 0, y: 0 }, time: 0 });
-  const zoomAnimTarget = useRef({ zoom: DEFAULT_ZOOM, camera: { x: 0, y: 0 } });
+  const zoomAnimStart = useRef({ zoom: defaultZoom, camera: { x: 0, y: 0 }, time: 0 });
+  const zoomAnimTarget = useRef({ zoom: defaultZoom, camera: { x: 0, y: 0 } });
   const ZOOM_ANIM_DURATION = 300;
 
   // ── Render loop ──
@@ -155,8 +163,8 @@ export function InfiniteCanvas({
 
   // ── React state: only for tile calculation & zoom display (updated sparingly) ──
   const [tileCamera, setTileCamera] = useState(initialCameraSeed);
-  const [tileZoom, setTileZoom] = useState(DEFAULT_ZOOM);
-  const [displayZoom, setDisplayZoom] = useState(DEFAULT_ZOOM);
+  const [tileZoom, setTileZoom] = useState(defaultZoom);
+  const [displayZoom, setDisplayZoom] = useState(defaultZoom);
   const lastDisplayZoomUpdate = useRef(0);
   const prevTileKey = useRef("");
 
@@ -839,11 +847,11 @@ export function InfiniteCanvas({
     const centerY = el.clientHeight / 2;
     const worldX = cam.x + centerX / z;
     const worldY = cam.y + centerY / z;
-    animateZoom(DEFAULT_ZOOM, {
-      x: worldX - centerX / DEFAULT_ZOOM,
-      y: worldY - centerY / DEFAULT_ZOOM,
+    animateZoom(defaultZoom, {
+      x: worldX - centerX / defaultZoom,
+      y: worldY - centerY / defaultZoom,
     });
-  }, [animateZoom]);
+  }, [animateZoom, defaultZoom]);
 
   // ──────────── Keyboard zoom ────────────
   useEffect(() => {
@@ -912,7 +920,7 @@ export function InfiniteCanvas({
         ref={transformGroupRef}
         className="absolute left-0 top-0 z-[1]"
         style={{
-          transform: `scale(${DEFAULT_ZOOM}) translate3d(${-initialCameraSeed.x}px, ${-initialCameraSeed.y}px, 0)`,
+          transform: `scale(${defaultZoom}) translate3d(${-initialCameraSeed.x}px, ${-initialCameraSeed.y}px, 0)`,
           transformOrigin: "0 0",
           willChange: "transform",
           contain: "layout style",

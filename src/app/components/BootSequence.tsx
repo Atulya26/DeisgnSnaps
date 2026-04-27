@@ -10,7 +10,9 @@ interface BootSequenceProps {
 }
 
 // Must match InfiniteCanvas constants exactly
-const DEFAULT_ZOOM = 0.60;
+const DESKTOP_DEFAULT_ZOOM = 0.60;
+const MOBILE_DEFAULT_ZOOM = 0.35;
+const MOBILE_BREAKPOINT = 768;
 const TOOLBAR_HEIGHT = 64;
 const TITLE_BAR_HEIGHT = 56;
 
@@ -30,6 +32,11 @@ function hexToRgba(hex: string, alpha: number) {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
+function getDefaultCanvasZoom() {
+  if (typeof window === "undefined") return DESKTOP_DEFAULT_ZOOM;
+  return window.innerWidth < MOBILE_BREAKPOINT ? MOBILE_DEFAULT_ZOOM : DESKTOP_DEFAULT_ZOOM;
+}
+
 /**
  * Boot Sequence — centered stack + ambient shader field → scatter
  *
@@ -39,6 +46,7 @@ function hexToRgba(hex: string, alpha: number) {
  */
 export function BootSequence({ projects, onComplete }: BootSequenceProps) {
   const { theme, colors, animationConfig, dotGridConfig } = useTheme();
+  const defaultZoom = useMemo(() => getDefaultCanvasZoom(), []);
   const overlayRef = useRef<HTMLDivElement>(null);
   const stackCardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const scatterCardRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -65,7 +73,7 @@ export function BootSequence({ projects, onComplete }: BootSequenceProps) {
   // Scatter screen positions — shared with InfiniteCanvas's initial camera so
   // the handoff is pixel-identical regardless of viewport size.
   const scatterPositions = useMemo(() => {
-    const z = DEFAULT_ZOOM;
+    const z = defaultZoom;
     const vw = typeof window !== "undefined" ? window.innerWidth : 1440;
     const vh = typeof window !== "undefined" ? window.innerHeight : 900;
     const cam = computeInitialCamera(projects, { width: vw, height: vh }, z, TOOLBAR_HEIGHT);
@@ -78,7 +86,7 @@ export function BootSequence({ projects, onComplete }: BootSequenceProps) {
       const titleH = TITLE_BAR_HEIGHT * z;
       return { x: sx, y: sy, w: sw, h: sh, titleH };
     });
-  }, [projects]);
+  }, [defaultZoom, projects]);
 
   useEffect(() => {
     const overlay = overlayRef.current;
@@ -511,7 +519,7 @@ export function BootSequence({ projects, onComplete }: BootSequenceProps) {
               className="absolute overflow-hidden"
               style={{
                 width: pos.w,
-                borderRadius: 14 * DEFAULT_ZOOM,
+                borderRadius: 14 * defaultZoom,
                 backgroundColor: cardBg,
                 border: `1px solid ${cardBorder}`,
                 boxShadow: cardShadow,
@@ -540,14 +548,14 @@ export function BootSequence({ projects, onComplete }: BootSequenceProps) {
                 className="flex items-center justify-between gap-2 overflow-hidden"
                 style={{
                   backgroundColor: cardBg,
-                  padding: `${18 * DEFAULT_ZOOM}px ${24 * DEFAULT_ZOOM}px`,
+                  padding: `${18 * defaultZoom}px ${24 * defaultZoom}px`,
                   height: pos.titleH,
                 }}
               >
                 <span
                   className="truncate"
                   style={{
-                    fontSize: 20 * DEFAULT_ZOOM,
+                    fontSize: 20 * defaultZoom,
                     color: colors.text,
                     fontWeight: 600,
                     letterSpacing: "-0.02em",
@@ -561,7 +569,7 @@ export function BootSequence({ projects, onComplete }: BootSequenceProps) {
                   <span
                     className="shrink-0"
                     style={{
-                      fontSize: 13 * DEFAULT_ZOOM,
+                      fontSize: 13 * defaultZoom,
                       color: colors.textMuted,
                       fontWeight: 500,
                       letterSpacing: "-0.005em",
